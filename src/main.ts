@@ -2,6 +2,7 @@ import { Keybinds, MovementKey } from "./KeybindingsTypes";
 import Sprite from "./Objects/Sprite";
 import "./style.css";
 import img from "./Assets/mageSprite(1).png";
+import img2 from "./Assets/map.png";
 
 const root = document.querySelector<HTMLDivElement>("#app");
 const canvas = document.createElement("canvas");
@@ -25,13 +26,26 @@ const keybinds: Keybinds = {
 
 const playerPic = new Image();
 playerPic.src = img;
+const mapPic = new Image();
+mapPic.src = img2;
+
+let mapX = -530,
+  mapY = -90;
 
 const player = new Sprite({
   name: "player",
-  position: { x: 75, y: 75 },
+  position: { x: 225, y: 145 },
   ctx: ctx,
   bindings: keybinds,
   spritePNG: playerPic,
+});
+
+//need a better more generic sprite class
+const map = new Sprite({
+  name: "map",
+  ctx: ctx,
+  position: { x: 150, y: 150 },
+  spritePNG: mapPic,
 });
 
 function stopMovement(e: KeyboardEvent) {
@@ -58,7 +72,14 @@ function handleSpriteMovement(e: KeyboardEvent) {
 function animate() {
   if (keybinds.terminate.pressed === true) return;
   window.requestAnimationFrame(animate);
+  ctx.scale(3, 3);
+  ctx.drawImage(mapPic, mapX, mapY);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   player.draw();
+  if (keybinds.w.pressed) mapY += 2;
+  if (keybinds.s.pressed) mapY -= 2;
+  if (keybinds.a.pressed) mapX += 2;
+  if (keybinds.d.pressed) mapX -= 2;
 }
 
 animate();

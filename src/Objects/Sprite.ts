@@ -35,14 +35,6 @@ class Sprite {
   }
   draw() {
     this.image = this.src;
-    console.log(this.position.y);
-    // this should clear the previous square before rendering the next one
-    this.ctx.clearRect(
-      this.position.x,
-      this.position.y,
-      this.width,
-      this.height
-    );
     console.log(this.image);
     this.ctx.drawImage(
       this.image,
@@ -55,27 +47,13 @@ class Sprite {
       this.width / 2,
       this.height
     );
-    // this.ctx.fillStyle = "green";s
-    // this.ctx.fillRect(
-    //   this.position.x,
-    //   this.position.y,
-    //   this.width,
-    //   this.height
-    // );
 
-    if (this.keybinds) {
-      if (this.keybinds.w.pressed) this.position.y -= this.speed;
-      if (this.keybinds.s.pressed) this.ctx.translate(0, 5);
-      if (this.keybinds.a.pressed) this.position.x -= this.speed;
-      if (this.keybinds.d.pressed) this.position.x += this.speed;
-    }
-    // this.ctx.fillStyle = "red";
-    // this.ctx.fillRect(
-    //   this.position.x,
-    //   this.position.y,
-    //   this.width,
-    //   this.height
-    // );
+    // if (this.keybinds) {
+    //   if (this.keybinds.w.pressed) this.position.y -= this.speed;
+    //   if (this.keybinds.s.pressed) this.position.y += this.speed;
+    //   if (this.keybinds.a.pressed) this.position.x -= this.speed;
+    //   if (this.keybinds.d.pressed) this.position.x += this.speed;
+    // }
   }
 }
 export default Sprite;
