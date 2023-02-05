@@ -1,6 +1,7 @@
 import { Keybinds, MovementKey } from "./KeybindingsTypes";
 import Sprite from "./Objects/Sprite";
 import "./style.css";
+import img from "./Assets/mageSprite(1).png";
 
 const root = document.querySelector<HTMLDivElement>("#app");
 const canvas = document.createElement("canvas");
@@ -22,11 +23,15 @@ const keybinds: Keybinds = {
   terminate: { pressed: false },
 };
 
+const playerPic = new Image();
+playerPic.src = img;
+
 const player = new Sprite({
   name: "player",
   position: { x: 75, y: 75 },
   ctx: ctx,
   bindings: keybinds,
+  spritePNG: playerPic,
 });
 
 function stopMovement(e: KeyboardEvent) {
@@ -55,6 +60,6 @@ function animate() {
   window.requestAnimationFrame(animate);
   player.draw();
 }
-animate();
 
+animate();
 root?.append(canvas);
