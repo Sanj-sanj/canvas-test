@@ -1,33 +1,33 @@
 import { Keybinds } from "../KeybindingsTypes";
 
 class Sprite {
-  name;
+  type;
   position;
   width = 612;
   height = 204;
-  speed = 6;
+  frames = 1;
   ctx;
   keybinds;
   src;
   image;
   constructor({
-    name,
+    type,
     position,
-    speed = 6,
+    frames,
     ctx,
     bindings,
     spritePNG,
   }: {
-    name: string;
+    type: "map" | "character";
     position: { x: number; y: number };
-    speed?: number;
+    frames?: number;
     ctx: CanvasRenderingContext2D;
     bindings?: Keybinds;
     spritePNG: HTMLImageElement;
   }) {
-    this.name = name;
+    this.type = type;
     this.position = position;
-    this.speed = speed;
+    this.frames = frames || 1;
     this.ctx = ctx;
     this.keybinds = bindings;
     this.src = spritePNG;
@@ -36,24 +36,23 @@ class Sprite {
   draw() {
     this.image = this.src;
     console.log(this.image);
-    this.ctx.drawImage(
-      this.image,
-      0,
-      0,
-      this.width / 3,
-      this.height,
-      this.position.x,
-      this.position.y,
-      this.width / 2,
-      this.height
-    );
-
-    // if (this.keybinds) {
-    //   if (this.keybinds.w.pressed) this.position.y -= this.speed;
-    //   if (this.keybinds.s.pressed) this.position.y += this.speed;
-    //   if (this.keybinds.a.pressed) this.position.x -= this.speed;
-    //   if (this.keybinds.d.pressed) this.position.x += this.speed;
-    // }
+    if (this.type === "character") {
+      this.ctx.drawImage(
+        this.image,
+        0,
+        0,
+        this.width / this.frames,
+        this.height,
+        this.position.x,
+        this.position.y,
+        this.width / 2,
+        this.height
+      );
+    } else if (this.type === "map") {
+      this.ctx.scale(3, 3);
+      this.ctx.drawImage(this.image, this.position.x, this.position.y);
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
   }
 }
 export default Sprite;

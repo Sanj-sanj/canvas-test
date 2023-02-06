@@ -9,7 +9,7 @@ const canvas = document.createElement("canvas");
 canvas.width = 796;
 canvas.height = 476;
 
-document.addEventListener("keypress", handleSpriteMovement);
+document.addEventListener("keypress", handleKeyActions);
 document.addEventListener("keyup", stopMovement);
 
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -29,22 +29,23 @@ playerPic.src = img;
 const mapPic = new Image();
 mapPic.src = img2;
 
-let mapX = -530,
-  mapY = -90;
+let currPlayerPostion = { x: 225, y: 145 };
+let currMapPosition = { x: -530, y: -90 };
 
 const player = new Sprite({
-  name: "player",
-  position: { x: 225, y: 145 },
+  type: "character",
+  position: currPlayerPostion,
   ctx: ctx,
   bindings: keybinds,
   spritePNG: playerPic,
+  frames: 3,
 });
 
-//need a better more generic sprite class
+//Sprite class distinguishes the type of 'sprite' to show, future, there will be multiple subtypes ex map: "inside building" | "outside"
 const map = new Sprite({
-  name: "map",
+  type: "map",
   ctx: ctx,
-  position: { x: 150, y: 150 },
+  position: currMapPosition,
   spritePNG: mapPic,
 });
 
@@ -56,7 +57,7 @@ function stopMovement(e: KeyboardEvent) {
   }
 }
 
-function handleSpriteMovement(e: KeyboardEvent) {
+function handleKeyActions(e: KeyboardEvent) {
   const mvKey = e.key as MovementKey;
   if (Object.keys(keybinds).includes(e.key)) {
     keybinds[mvKey].pressed = true;
@@ -72,14 +73,13 @@ function handleSpriteMovement(e: KeyboardEvent) {
 function animate() {
   if (keybinds.terminate.pressed === true) return;
   window.requestAnimationFrame(animate);
-  ctx.scale(3, 3);
-  ctx.drawImage(mapPic, mapX, mapY);
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  map.draw();
   player.draw();
-  if (keybinds.w.pressed) mapY += 2;
-  if (keybinds.s.pressed) mapY -= 2;
-  if (keybinds.a.pressed) mapX += 2;
-  if (keybinds.d.pressed) mapX -= 2;
+  // move this keybind stuff else where the movement should be based on what type of map the character is in, (outside move map, inside move char)
+  if (keybinds.w.pressed) currMapPosition.y += 2;
+  if (keybinds.s.pressed) currMapPosition.y -= 2;
+  if (keybinds.a.pressed) currMapPosition.x += 2;
+  if (keybinds.d.pressed) currMapPosition.x -= 2;
 }
 
 animate();
