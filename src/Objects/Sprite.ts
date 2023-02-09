@@ -18,7 +18,7 @@ class Sprite {
     bindings,
     spritePNG,
   }: {
-    type: "map" | "character";
+    type: "map" | "character" | "block";
     position: { x: number; y: number };
     frames?: number;
     ctx: CanvasRenderingContext2D;
@@ -35,7 +35,6 @@ class Sprite {
   }
   draw() {
     this.image = this.src;
-    console.log(this.image);
     if (this.type === "character") {
       this.ctx.drawImage(
         this.image,
@@ -49,8 +48,12 @@ class Sprite {
         this.height
       );
     } else if (this.type === "map") {
-      this.ctx.scale(3, 3);
+      // this.ctx.scale(3, 3);
       this.ctx.drawImage(this.image, this.position.x, this.position.y);
+      // this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    } else if (this.type === "block") {
+      // this.ctx.scale(-4, -4a=dd);
+      this.ctx.drawImage(this.image, 0, this.position.y);
       this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
   }

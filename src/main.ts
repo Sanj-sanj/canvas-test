@@ -3,7 +3,7 @@ import Sprite from "./Objects/Sprite";
 import "./style.css";
 import img from "./Assets/mageSprite(1).png";
 import img2 from "./Assets/map.png";
-
+import img3 from "./Assets/rock.png";
 const root = document.querySelector<HTMLDivElement>("#app");
 const canvas = document.createElement("canvas");
 canvas.width = 796;
@@ -24,13 +24,18 @@ const keybinds: Keybinds = {
   terminate: { pressed: false },
 };
 
+const offset = { x: 0, y: 0 };
+
 const playerPic = new Image();
 playerPic.src = img;
 const mapPic = new Image();
 mapPic.src = img2;
+const rockPic = new Image();
+rockPic.src = img3;
 
-let currPlayerPostion = { x: 225, y: 145 };
-let currMapPosition = { x: -530, y: -90 };
+const currPlayerPostion = { x: 225, y: 145 };
+const currMapPosition = { x: -530, y: -90 };
+const currRockPosition = { x: 345, y: 150 };
 
 const player = new Sprite({
   type: "character",
@@ -47,6 +52,12 @@ const map = new Sprite({
   ctx: ctx,
   position: currMapPosition,
   spritePNG: mapPic,
+});
+const rock = new Sprite({
+  type: "block",
+  ctx: ctx,
+  position: currRockPosition,
+  spritePNG: rockPic,
 });
 
 function stopMovement(e: KeyboardEvent) {
@@ -70,16 +81,29 @@ function handleKeyActions(e: KeyboardEvent) {
   }
 }
 
+function setOffset(pos: "x" | "y", operand: "+" | "-") {
+  if (operand === "+") {
+    currMapPosition[pos] += 2;
+    currRockPosition[pos] += 2;
+  }
+  if (operand === "-") {
+    currMapPosition[pos] -= 2;
+    currRockPosition[pos] -= 2;
+  }
+}
+
 function animate() {
   if (keybinds.terminate.pressed === true) return;
   window.requestAnimationFrame(animate);
   map.draw();
+  rock.draw();
   player.draw();
   // move this keybind stuff else where the movement should be based on what type of map the character is in, (outside move map, inside move char)
-  if (keybinds.w.pressed) currMapPosition.y += 2;
-  if (keybinds.s.pressed) currMapPosition.y -= 2;
-  if (keybinds.a.pressed) currMapPosition.x += 2;
-  if (keybinds.d.pressed) currMapPosition.x -= 2;
+  if (keybinds.w.pressed) setOffset("y", "+");
+  if (keybinds.s.pressed) setOffset("y", "-");
+  if (keybinds.a.pressed) setOffset("x", "+");
+  if (keybinds.d.pressed) setOffset("x", "-");
+  console.log(offset.y, offset.x);
 }
 
 animate();
