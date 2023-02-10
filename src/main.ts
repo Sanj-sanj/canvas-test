@@ -3,7 +3,7 @@ import Sprite from "./Objects/Sprite";
 import "./style.css";
 import img from "./Assets/mageSprite(1).png";
 import img2 from "./Assets/map.png";
-import img3 from "./Assets/rock.png";
+import img3 from "./Assets/waterTile.jpg";
 const root = document.querySelector<HTMLDivElement>("#app");
 const canvas = document.createElement("canvas");
 canvas.width = 796;
@@ -35,7 +35,7 @@ rockPic.src = img3;
 
 const currPlayerPostion = { x: 225, y: 145 };
 const currMapPosition = { x: -530, y: -90 };
-const currRockPosition = { x: 345, y: 150 };
+const currRockPosition = { x: 245, y: 150 };
 
 const player = new Sprite({
   type: "character",
@@ -44,6 +44,7 @@ const player = new Sprite({
   bindings: keybinds,
   spritePNG: playerPic,
   frames: 3,
+  size: { height: 204, width: 612 },
 });
 
 //Sprite class distinguishes the type of 'sprite' to show, future, there will be multiple subtypes ex map: "inside building" | "outside"
@@ -52,12 +53,14 @@ const map = new Sprite({
   ctx: ctx,
   position: currMapPosition,
   spritePNG: mapPic,
+  size: { height: 612, width: 204 }, //this should be an optional prop in this case
 });
 const rock = new Sprite({
   type: "block",
   ctx: ctx,
   position: currRockPosition,
   spritePNG: rockPic,
+  size: { height: 16, width: 16 },
 });
 
 function stopMovement(e: KeyboardEvent) {
@@ -76,6 +79,7 @@ function handleKeyActions(e: KeyboardEvent) {
   if (e.key === "]") {
     console.log("debug");
     console.log(player);
+    console.log(rock);
     keybinds.terminate.pressed = !keybinds.terminate.pressed;
     animate(); //force the loop to start again if debug has been toggled off -> on
   }
@@ -103,7 +107,6 @@ function animate() {
   if (keybinds.s.pressed) setOffset("y", "-");
   if (keybinds.a.pressed) setOffset("x", "+");
   if (keybinds.d.pressed) setOffset("x", "-");
-  console.log(offset.y, offset.x);
 }
 
 animate();

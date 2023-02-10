@@ -3,8 +3,8 @@ import { Keybinds } from "../KeybindingsTypes";
 class Sprite {
   type;
   position;
-  width = 612;
-  height = 204;
+  width;
+  height;
   frames = 1;
   ctx;
   keybinds;
@@ -17,13 +17,15 @@ class Sprite {
     ctx,
     bindings,
     spritePNG,
+    size,
   }: {
     type: "map" | "character" | "block";
     position: { x: number; y: number };
-    frames?: number;
     ctx: CanvasRenderingContext2D;
-    bindings?: Keybinds;
     spritePNG: HTMLImageElement;
+    frames?: number;
+    bindings?: Keybinds;
+    size: { height: number; width: number };
   }) {
     this.type = type;
     this.position = position;
@@ -32,6 +34,8 @@ class Sprite {
     this.keybinds = bindings;
     this.src = spritePNG;
     this.image = new Image();
+    this.height = size.height;
+    this.width = size.width;
   }
   draw() {
     this.image = this.src;
@@ -48,12 +52,18 @@ class Sprite {
         this.height
       );
     } else if (this.type === "map") {
-      // this.ctx.scale(3, 3);
+      this.ctx.scale(3, 3);
       this.ctx.drawImage(this.image, this.position.x, this.position.y);
-      // this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     } else if (this.type === "block") {
-      // this.ctx.scale(-4, -4a=dd);
-      this.ctx.drawImage(this.image, 0, this.position.y);
+      this.ctx.scale(3, 3);
+      this.ctx.drawImage(
+        this.image,
+        this.position.x,
+        this.position.y,
+        this.width,
+        this.height
+      );
       this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
   }
