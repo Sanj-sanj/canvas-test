@@ -24,8 +24,6 @@ const keybinds: Keybinds = {
   terminate: { pressed: false },
 };
 
-const offset = { x: 0, y: 0 };
-
 const playerPic = new Image();
 playerPic.src = img;
 const mapPic = new Image();
@@ -37,30 +35,28 @@ const currPlayerPostion = { x: 225, y: 145 };
 const currMapPosition = { x: -530, y: -90 };
 const currRockPosition = { x: 245, y: 150 };
 
-const player = new Sprite({
+const player = Sprite({
   type: "character",
   position: currPlayerPostion,
   ctx: ctx,
-  bindings: keybinds,
-  spritePNG: playerPic,
-  frames: 3,
-  size: { height: 204, width: 612 },
+  source: {
+    frames: { min: 0, max: 3 },
+    height: 214,
+    width: 612,
+    img: playerPic,
+  },
 });
-
-//Sprite class distinguishes the type of 'sprite' to show, future, there will be multiple subtypes ex map: "inside building" | "outside"
-const map = new Sprite({
+const map = Sprite({
   type: "map",
-  ctx: ctx,
   position: currMapPosition,
-  spritePNG: mapPic,
-  size: { height: 612, width: 204 }, //this should be an optional prop in this case
+  ctx: ctx,
+  source: { img: mapPic },
 });
-const rock = new Sprite({
+const rock = Sprite({
   type: "block",
   ctx: ctx,
   position: currRockPosition,
-  spritePNG: rockPic,
-  size: { height: 16, width: 16 },
+  source: { img: rockPic, width: 16, height: 16 },
 });
 
 function stopMovement(e: KeyboardEvent) {
