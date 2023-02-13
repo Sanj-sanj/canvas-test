@@ -17,6 +17,7 @@ type MapSprite = {
   };
   ctx: CanvasRenderingContext2D;
 };
+// obsolete for teh time being
 type ColisionSprite = {
   type: "block";
   position: { x: number; y: number };
@@ -28,12 +29,26 @@ type ColisionSprite = {
   ctx: CanvasRenderingContext2D;
 };
 
+type EnvironmentSpriteSheet = {
+  type: "mapSpriteSheet";
+  position: { x: number; y: number };
+  source: {
+    spriteSize: 16 | 32;
+    img: HTMLImageElement;
+    width: number;
+    height: number;
+    spriteX: number;
+    spriteY: number;
+  };
+  ctx: CanvasRenderingContext2D;
+};
+
 export default function Sprite({
   type,
   position,
   source,
   ctx,
-}: CharacterSprite | MapSprite | ColisionSprite) {
+}: CharacterSprite | MapSprite | ColisionSprite | EnvironmentSpriteSheet) {
   function draw() {
     switch (type) {
       case "character":
@@ -49,26 +64,34 @@ export default function Sprite({
           source.height
         );
         break;
+
       case "map":
         ctx.scale(3, 3);
         ctx.drawImage(source.img, position.x, position.y);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         break;
 
-      case "block":
-        ctx.scale(3, 3);
+      case "mapSpriteSheet":
         ctx.drawImage(
           source.img,
+          source.spriteSize * source.spriteX, // x on sprite sheet
+          source.spriteSize * source.spriteY, //y on sprite sheet
+          32,
+          32,
           position.x,
           position.y,
-          source.width,
-          source.height
+          32,
+          32
         );
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
         break;
+
       default:
         break;
     }
   }
-  return { draw };
+  function log() {
+    console.log(type, position, source);
+  }
+  return { draw, log };
 }
