@@ -37,10 +37,18 @@ type EnvironmentSpriteSheet = {
     img: HTMLImageElement;
     width: number;
     height: number;
-    spriteX: number;
-    spriteY: number;
+    metadata: {
+      type: string;
+      spritePath: Vector;
+      actors: [];
+    };
   };
   ctx: CanvasRenderingContext2D;
+};
+type Vector = { x: number; y: number };
+type Sprite = {
+  draw: (offset?: Vector) => void;
+  log: (offset?: Vector) => void;
 };
 
 export default function Sprite({
@@ -48,10 +56,15 @@ export default function Sprite({
   position,
   source,
   ctx,
-}: CharacterSprite | MapSprite | ColisionSprite | EnvironmentSpriteSheet) {
-  function draw() {
+}:
+  | CharacterSprite
+  | MapSprite
+  | ColisionSprite
+  | EnvironmentSpriteSheet): Sprite {
+  function draw(offset?: { x: number; y: number }) {
     switch (type) {
       case "character":
+        ctx.scale(3, 3);
         ctx.drawImage(
           source.img,
           0,
@@ -60,38 +73,39 @@ export default function Sprite({
           source.height,
           position.x,
           position.y,
-          source.width / 2,
-          source.height
+          source.width * 1,
+          source.height * 1
         );
-        break;
 
-      case "map":
-        ctx.scale(3, 3);
-        ctx.drawImage(source.img, position.x, position.y);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         break;
 
       case "mapSpriteSheet":
-        ctx.drawImage(
-          source.img,
-          source.spriteSize * source.spriteX, // x on sprite sheet
-          source.spriteSize * source.spriteY, //y on sprite sheet
-          32,
-          32,
-          position.x,
-          position.y,
-          32,
-          32
-        );
-
+        {
+          if (offset) {
+            ctx.scale(3, 3);
+            ctx.drawImage(
+              source.img,
+              source.spriteSize * source.metadata.spritePath.x, // x on sprite sheet
+              source.spriteSize * source.metadata.spritePath.y, //y on sprite sheet
+              32,
+              32,
+              position.x + offset.x,
+              position.y + offset.y,
+              32,
+              32
+            );
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+          }
+        }
         break;
 
       default:
         break;
     }
   }
-  function log() {
-    console.log(type, position, source);
+  function log(offset?: { x: number; y: number }) {
+    console.log({ type, position, source, offset });
   }
   return { draw, log };
 }
