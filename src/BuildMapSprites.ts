@@ -86,8 +86,47 @@ const legend: LegendEntry = {
     spritePath: { x: 0, y: 2 },
     actors: [],
   },
+  ">": {
+    collisionType: "pass",
+    type: "weed ground",
+    spritePath: { x: 1, y: 2 },
+    actors: [],
+  },
+  ":": {
+    collisionType: "pass",
+    type: "shallow water",
+    spritePath: { x: 2, y: 2 },
+    actors: [],
+  },
+  P: {
+    collisionType: "pass",
+    type: "ground plants",
+    spritePath: { x: 3, y: 2 },
+    actors: [],
+  },
+  "%": {
+    collisionType: "pass",
+    type: "cobble",
+    spritePath: { x: 4, y: 2 },
+    actors: [],
+  },
 };
-type MapTile = "*" | "{" | "[" | "^" | "=" | "W" | "-" | "V" | "X" | "_" | "~";
+type MapTile =
+  | "*"
+  | "{"
+  | "["
+  | "^"
+  | "="
+  | "W"
+  | "-"
+  | "V"
+  | "X"
+  | "_"
+  | "~"
+  | ">"
+  | ":"
+  | "P"
+  | "%";
 type LegendEntry = {
   [key in MapTile]: {
     collisionType: "pass" | "impede";
