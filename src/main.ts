@@ -1,5 +1,6 @@
 import { Keybinds, MovementKey } from "./KeybindingsTypes";
 import Sprite from "./Objects/Sprite";
+import gameState from "./utils/gameState";
 import "./style.css";
 
 import img from "./Assets/mage.png";
@@ -35,6 +36,17 @@ const testMap = `
 =**********WXVXXXXXW******=
 ===========================
 `;
+
+const tMap2 = `
+=***WWWWW*
+****WXXXW*
+****^^^^^*
+***^*====*
+**********
+*******{{*
+`;
+const SessionState = gameState();
+
 const keybinds: Keybinds = {
   w: { pressed: false },
   s: { pressed: false },
@@ -53,9 +65,9 @@ sheet.src = spirteSheet;
 // [canvas.width | canvas.height] / 2 - ( [PLAYER SPRITE WIDTH | HEIGHT] / 2 )
 const currPlayerPostion = {
   x: Math.floor(canvas.width / 2 / 3 - 16),
-  y: Math.floor(canvas.height / 2 / 3 - 16),
+  y: Math.floor(canvas.height / 2 / 3),
 };
-const offset = { x: 0, y: -8.5 };
+const offset = { x: 0, y: 0 };
 
 const player = Sprite({
   type: "character",
@@ -84,9 +96,13 @@ function handleKeyActions(e: KeyboardEvent) {
   }
   if (e.key === "]") {
     console.log("debug");
-    console.log(currPlayerPostion);
-    console.log(player.log(offset));
-    console.log(Map2dArray[2][4].log(offset));
+    // console.log(
+    //   (currPlayerPostion.y - offset.y) / 32,
+    //   (currPlayerPostion.x - offset.x) / 32
+    // );
+    player.log(offset);
+    // console.log(Map2dArray[4][4].log(offset));
+    SessionState.log();
     keybinds.terminate.pressed = !keybinds.terminate.pressed;
     animate(); //force the loop to start again if debug has been toggled off -> on
   }
@@ -94,26 +110,36 @@ function handleKeyActions(e: KeyboardEvent) {
 
 function setOffset(pos: "x" | "y", operand: "+" | "-") {
   if (operand === "+") {
-    offset[pos] += 2;
+    offset[pos] += 3;
   }
   if (operand === "-") {
-    offset[pos] -= 2;
+    offset[pos] -= 3;
   }
 }
 
-const Map2dArray = BuildMapSprite({
-  ctx,
-  mapString: testMap,
-  offset,
-  spriteSheet: sheet,
-  tileSize: 32,
-});
+const Map2dArray = BuildMapSprite(
+  {
+    ctx,
+    mapString: tMap2,
+    offset,
+    spriteSheet: sheet,
+    tileSize: 32,
+    scaling: 3,
+  },
+  SessionState.appendCollidable
+);
 function animate() {
   if (keybinds.terminate.pressed === true) return;
   window.requestAnimationFrame(animate);
+
   ctx.scale(3, 3);
   Map2dArray.forEach((row) => row.forEach((t) => t.draw(offset)));
   player.draw(offset);
+  const tempPCoords = {
+    x: (currPlayerPostion.x - offset.x) / 32,
+    y: (currPlayerPostion.y - offset.y) / 32,
+  };
+  SessionState.checkForCollision(tempPCoords, keybinds);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   // move this keybind stuff else where the movement should be bdased on what type of map the character is in, (outside move map, inside move char)
   if (keybinds.w.pressed) setOffset("y", "+");

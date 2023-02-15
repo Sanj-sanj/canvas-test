@@ -6,11 +6,12 @@ import Sprite from "./Objects/Sprite";
 // [ = tile 3
 // ^ = tile 4
 // = = tile 5
-type RenderParams = {
+type BuildMapParams = {
   mapString: string;
   ctx: CanvasRenderingContext2D;
   spriteSheet: HTMLImageElement;
   tileSize: 16 | 32;
+  scaling: number;
   offset: { x: number; y: number };
 };
 type Vec = { x: number; y: number };
@@ -18,38 +19,96 @@ type Vec = { x: number; y: number };
 // we will have to add in more params to the draw function inside renderer, it will porbably take actor data to display them later
 type Renderer = { draw: (offset: Vec) => void; log: (offset?: Vec) => void };
 
-const legend = {
-  "*": { type: "grass", spritePath: { x: 0, y: 0 }, actors: [] },
-  "{": { type: "water", spritePath: { x: 1, y: 0 }, actors: [] },
-  "[": { type: "gravel", spritePath: { x: 2, y: 0 }, actors: [] },
-  "^": { type: "ground", spritePath: { x: 3, y: 0 }, actors: [] },
-  "=": { type: "stone wall", spritePath: { x: 4, y: 0 }, actors: [] },
-  W: { type: "brick wall", spritePath: { x: 0, y: 1 }, actors: [] },
-  "-": { type: "cave entrance", spritePath: { x: 1, y: 1 }, actors: [] },
-  V: { type: "stairs down", spritePath: { x: 2, y: 1 }, actors: [] },
-  X: { type: "tile floor", spritePath: { x: 3, y: 1 }, actors: [] },
-  _: { type: "interior wall", spritePath: { x: 4, y: 1 }, actors: [] },
+const legend: LegendEntry = {
+  "*": {
+    collisionType: "pass",
+    type: "grass",
+    spritePath: { x: 0, y: 0 },
+    actors: [],
+  },
+  "{": {
+    collisionType: "impede",
+    type: "water",
+    spritePath: { x: 1, y: 0 },
+    actors: [],
+  },
+  "[": {
+    collisionType: "pass",
+    type: "gravel",
+    spritePath: { x: 2, y: 0 },
+    actors: [],
+  },
+  "^": {
+    collisionType: "pass",
+    type: "ground",
+    spritePath: { x: 3, y: 0 },
+    actors: [],
+  },
+  "=": {
+    collisionType: "impede",
+    type: "stone wall",
+    spritePath: { x: 4, y: 0 },
+    actors: [],
+  },
+  W: {
+    collisionType: "impede",
+    type: "brick wall",
+    spritePath: { x: 0, y: 1 },
+    actors: [],
+  },
+  "-": {
+    collisionType: "pass",
+    type: "cave entrance",
+    spritePath: { x: 1, y: 1 },
+    actors: [],
+  },
+  V: {
+    collisionType: "pass",
+    type: "stairs down",
+    spritePath: { x: 2, y: 1 },
+    actors: [],
+  },
+  X: {
+    collisionType: "pass",
+    type: "tile floor",
+    spritePath: { x: 3, y: 1 },
+    actors: [],
+  },
+  _: {
+    collisionType: "impede",
+    type: "interior wall",
+    spritePath: { x: 4, y: 1 },
+    actors: [],
+  },
 };
 type MapTile = "*" | "{" | "[" | "^" | "=" | "W" | "-" | "V" | "X" | "_";
-
+type LegendEntry = {
+  [key in MapTile]: {
+    collisionType: "pass" | "impede";
+    type: string;
+    spritePath: Vec;
+    actors: [];
+  };
+};
 //we need to build all colidable elements into a big list to  be checked on main files keyboard press check in animate
 
-function BuildMapSprite({
-  ctx,
-  mapString,
-  spriteSheet,
-  tileSize,
-  offset,
-}: RenderParams): Renderer[][] {
+function BuildMapSprite(
+  { ctx, mapString, spriteSheet, tileSize, scaling, offset }: BuildMapParams,
+  appendCollisionData: (boxData: { gridY: number; gridX: number }) => void
+): Renderer[][] {
   return mapString
     .trim()
     .split("\n")
     .reduce((acc, curr, y) => {
       const SpriteObjectsArray = curr.split("").map((tile, x) => {
-        return Sprite({
+        const thisPos = {
+          x: x * tileSize + offset.x,
+          y: y * tileSize + offset.y,
+        };
+        const thisSprite = Sprite({
           ctx,
           type: "mapSpriteSheet",
-          position: { x: x * tileSize + offset.x, y: y * tileSize + offset.y },
+          position: thisPos,
           source: {
             img: spriteSheet,
             width: 160,
@@ -61,7 +120,11 @@ function BuildMapSprite({
               type: legend[tile as MapTile].type,
             },
           },
-        }) as Renderer;
+        });
+        legend[tile as MapTile].collisionType === "impede"
+          ? appendCollisionData(thisSprite.buildCollisionData(thisPos, scaling))
+          : null;
+        return thisSprite;
       });
       return [...acc, SpriteObjectsArray];
     }, [] as Renderer[][]) as unknown as Renderer[][];
