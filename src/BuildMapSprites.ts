@@ -80,8 +80,14 @@ const legend: LegendEntry = {
     spritePath: { x: 4, y: 1 },
     actors: [],
   },
+  "~": {
+    collisionType: "pass",
+    type: "void",
+    spritePath: { x: 0, y: 2 },
+    actors: [],
+  },
 };
-type MapTile = "*" | "{" | "[" | "^" | "=" | "W" | "-" | "V" | "X" | "_";
+type MapTile = "*" | "{" | "[" | "^" | "=" | "W" | "-" | "V" | "X" | "_" | "~";
 type LegendEntry = {
   [key in MapTile]: {
     collisionType: "pass" | "impede";
@@ -90,11 +96,11 @@ type LegendEntry = {
     actors: [];
   };
 };
-//we need to build all colidable elements into a big list to  be checked on main files keyboard press check in animate
 
+//we need to build all colidable elements into a big list to  be checked on main files keyboard press check in animate
 function BuildMapSprite(
   { ctx, mapString, spriteSheet, tileSize, scaling, offset }: BuildMapParams,
-  appendCollisionData: (boxData: { gridY: number; gridX: number }) => void
+  appendCollisionData: (boxData: Vec) => void
 ): Renderer[][] {
   return mapString
     .trim()

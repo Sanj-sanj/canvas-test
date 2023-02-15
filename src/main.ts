@@ -1,6 +1,6 @@
 import { Keybinds, MovementKey } from "./KeybindingsTypes";
 import Sprite from "./Objects/Sprite";
-import gameState from "./utils/gameState";
+import Collisions from "./Collisions";
 import "./style.css";
 
 import img from "./Assets/mage.png";
@@ -20,21 +20,23 @@ ctx.fillStyle = "green";
 ctx?.fillRect(0, 0, canvas.width, canvas.height);
 
 const testMap = `
-==================-========
-=[[*[W___^^^[[[[**********=
-=***[WVXXXW^****[******[[[=
-=****[WWWWW^******^^^^^^**=
-=*****^***^^****^*^****^**=
-=*****^***^^^^^^^^^****^**=
-={{***^^^^^*{*{{**^^***^^*=
-={{***^^^^^{{{{{**^^***^^*=
-=*{*{{{{{{{{**************=
-=**{**[{****WWWWWW***{{{{*=
-=**{*******W______**^{{{{*=
-=**^*******WXXXXXXXW^^^^^*=
-=**********WXXXXXXXW******=
-=**********WXVXXXXXW******=
-===========================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~==================-========~
+~=[[*[W___^^^[[[[**********=~
+~=***[WVXXXW^****[******[[[=~
+~=****[WWWWW^******^^^^^^**=~
+~=*****^***^^****^*^****^**=~
+~=*****^***^^^^^^^^^****^**=~
+~={{***^^^^^*{*{{**^^***^^*=~
+~={{***{{{{{{{{{{**^^***^^*=~
+~{{{*{{{{{{{*********^^^^^^=~
+~{{{{{[[{****WWWWWW***{{{{{=~
+~=[[{[******W______**^{{{{{=~
+~=**^*******WXXXXXXXW^^^^^^=~
+~=**********WXXXXXXXW******=~
+~=**********WXVXXXXXW******=~
+~===========================~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 `;
 
 const tMap2 = `
@@ -45,7 +47,6 @@ const tMap2 = `
 **********
 *******{{*
 `;
-const SessionState = gameState();
 
 const keybinds: Keybinds = {
   w: { pressed: false },
@@ -80,6 +81,7 @@ const player = Sprite({
     img: playerPic,
   },
 });
+const collidables = Collisions();
 
 function stopMovement(e: KeyboardEvent) {
   //called on keyup to stop movement
@@ -96,56 +98,91 @@ function handleKeyActions(e: KeyboardEvent) {
   }
   if (e.key === "]") {
     console.log("debug");
-    // console.log(
-    //   (currPlayerPostion.y - offset.y) / 32,
-    //   (currPlayerPostion.x - offset.x) / 32
-    // );
+    // const tempPCoords = {
+    //   x: currPlayerPostion.x - offset.x,
+    //   y: currPlayerPostion.y - offset.y,
+    // };
+    // console.log(tempPCoords);
     player.log(offset);
-    // console.log(Map2dArray[4][4].log(offset));
-    SessionState.log();
+    collidables.log();
     keybinds.terminate.pressed = !keybinds.terminate.pressed;
     animate(); //force the loop to start again if debug has been toggled off -> on
   }
 }
 
-function setOffset(pos: "x" | "y", operand: "+" | "-") {
+function setOffset(pos: "x" | "y", operand: "+" | "-", speed = 3) {
   if (operand === "+") {
-    offset[pos] += 3;
+    offset[pos] += speed;
   }
   if (operand === "-") {
-    offset[pos] -= 3;
+    offset[pos] -= speed;
   }
 }
 
 const Map2dArray = BuildMapSprite(
   {
     ctx,
-    mapString: tMap2,
+    mapString: testMap,
     offset,
     spriteSheet: sheet,
     tileSize: 32,
     scaling: 3,
   },
-  SessionState.appendCollidable
+  collidables.appendCollidable
 );
+
+function keypressHandler() {
+  let lastPressedMovementKey: "w" | "a" | "s" | "d";
+  let lastOperand: "+" | "-";
+
+  function updateKeypress(coords: { x: number; y: number }) {
+    if (collidables.checkForCollision(coords)) {
+      setOffset(
+        lastPressedMovementKey === "w" || lastPressedMovementKey === "s"
+          ? "y"
+          : "x",
+        lastOperand === "+" ? "-" : "+",
+        6
+      );
+      keybinds[lastPressedMovementKey].pressed = false;
+    }
+    if (keybinds.w.pressed) {
+      setOffset("y", "+");
+      lastPressedMovementKey = "w";
+      lastOperand = "+";
+    }
+    if (keybinds.s.pressed) {
+      setOffset("y", "-");
+      lastPressedMovementKey = "s";
+      lastOperand = "-";
+    }
+    if (keybinds.a.pressed) {
+      setOffset("x", "+");
+      lastPressedMovementKey = "a";
+      lastOperand = "+";
+    }
+    if (keybinds.d.pressed) {
+      setOffset("x", "-");
+      lastPressedMovementKey = "d";
+      lastOperand = "-";
+    }
+  }
+  return { updateKeypress };
+}
+const keypress = keypressHandler();
+
 function animate() {
   if (keybinds.terminate.pressed === true) return;
   window.requestAnimationFrame(animate);
-
   ctx.scale(3, 3);
   Map2dArray.forEach((row) => row.forEach((t) => t.draw(offset)));
   player.draw(offset);
-  const tempPCoords = {
-    x: (currPlayerPostion.x - offset.x) / 32,
-    y: (currPlayerPostion.y - offset.y) / 32,
-  };
-  SessionState.checkForCollision(tempPCoords, keybinds);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  // move this keybind stuff else where the movement should be bdased on what type of map the character is in, (outside move map, inside move char)
-  if (keybinds.w.pressed) setOffset("y", "+");
-  if (keybinds.s.pressed) setOffset("y", "-");
-  if (keybinds.a.pressed) setOffset("x", "+");
-  if (keybinds.d.pressed) setOffset("x", "-");
+  const tempPCoords = {
+    x: currPlayerPostion.x - offset.x,
+    y: currPlayerPostion.y - offset.y,
+  };
+  keypress.updateKeypress(tempPCoords);
 }
 
 animate();

@@ -53,10 +53,8 @@ type Sprite = {
     position: Vector,
     scaling: number
   ) => {
-    // height: { start: number; end: number };
-    // width: { start: number; end: number };
-    gridY: number;
-    gridX: number;
+    x: number;
+    y: number;
   };
 };
 
@@ -112,28 +110,13 @@ export default function Sprite({
   function log(offset?: Vector) {
     console.log({ type, position, source, offset });
   }
-  //player
-  // ctx.fillStyle = "red";
-  // ctx.fillRect(128 * 3, 96 * 3, 32 * 3, 32 * 3);
 
   function buildCollisionData(pos: Vector, scaling: number) {
-    ctx.fillStyle = "red";
-    ctx.fillRect(pos.x * scaling, pos.y * scaling, 32 * scaling, 32 * scaling);
-    const gridX = pos.x / 32,
-      gridY = pos.y / 32;
+    // ctx.fillStyle = "red";
+    // ctx.fillRect(pos.x * scaling, pos.y * scaling, 32 * scaling, 32 * scaling);
+    // ctx.fillRect(pos.x * scaling, pos.y * scaling, 16 * scaling, 16 * scaling);
 
-    console.log(gridY, gridX);
-    // return {
-    //   width: {
-    //     start: pos.x * scaling,
-    //     end: pos.x * scaling + 32 * scaling,
-    //   },
-    //   height: {
-    //     start: pos.y * scaling - 48,
-    //     end: pos.y * scaling - 48 + 32 * scaling,
-    //   },
-    // };
-    return { gridY, gridX };
+    return { x: pos.x, y: pos.y };
   }
   return { draw, log, buildCollisionData };
 }
