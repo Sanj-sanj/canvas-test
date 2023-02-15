@@ -9,7 +9,7 @@ import BuildMapSprite from "./BuildMapSprites";
 const root = document.querySelector<HTMLDivElement>("#app");
 const canvas = document.createElement("canvas");
 canvas.width = 864;
-canvas.height = 512;
+canvas.height = 576;
 
 document.addEventListener("keypress", handleKeyActions);
 document.addEventListener("keyup", stopMovement);
@@ -53,9 +53,9 @@ sheet.src = spirteSheet;
 // [canvas.width | canvas.height] / 2 - ( [PLAYER SPRITE WIDTH | HEIGHT] / 2 )
 const currPlayerPostion = {
   x: Math.floor(canvas.width / 2 / 3 - 16),
-  y: Math.floor(canvas.height / 2 / 3 - 7),
+  y: Math.floor(canvas.height / 2 / 3 - 16),
 };
-const offset = { x: 0, y: 0 };
+const offset = { x: 0, y: -8.5 };
 
 const player = Sprite({
   type: "character",
@@ -111,8 +111,10 @@ const Map2dArray = BuildMapSprite({
 function animate() {
   if (keybinds.terminate.pressed === true) return;
   window.requestAnimationFrame(animate);
+  ctx.scale(3, 3);
   Map2dArray.forEach((row) => row.forEach((t) => t.draw(offset)));
   player.draw(offset);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   // move this keybind stuff else where the movement should be bdased on what type of map the character is in, (outside move map, inside move char)
   if (keybinds.w.pressed) setOffset("y", "+");
   if (keybinds.s.pressed) setOffset("y", "-");

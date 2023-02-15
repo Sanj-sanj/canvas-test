@@ -64,7 +64,6 @@ export default function Sprite({
   function draw(offset?: { x: number; y: number }) {
     switch (type) {
       case "character":
-        ctx.scale(3, 3);
         ctx.drawImage(
           source.img,
           0,
@@ -77,13 +76,11 @@ export default function Sprite({
           source.height * 1
         );
 
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
         break;
 
       case "mapSpriteSheet":
         {
           if (offset) {
-            ctx.scale(3, 3);
             ctx.drawImage(
               source.img,
               source.spriteSize * source.metadata.spritePath.x, // x on sprite sheet
@@ -95,7 +92,6 @@ export default function Sprite({
               32,
               32
             );
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
           }
         }
         break;
