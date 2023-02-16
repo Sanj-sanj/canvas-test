@@ -1,4 +1,3 @@
-import { Keybinds, MovementKey } from "./KeybindingsTypes";
 import Sprite from "./Objects/Sprite";
 import Collisions from "./Collisions";
 import "./style.css";
@@ -8,26 +7,16 @@ import spirteSheet from "./Assets/sprites.png";
 import BuildMapSprite from "./BuildMapSprites";
 
 import { Map1 } from "./utils/MapStrings";
+import KeybindState from "./KeybindState";
 
 const root = document.querySelector<HTMLDivElement>("#app");
 const canvas = document.createElement("canvas");
 canvas.width = 864;
 canvas.height = 576;
 
-document.addEventListener("keypress", handleKeyActions);
-document.addEventListener("keyup", stopMovement);
-
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 ctx.fillStyle = "green";
 ctx?.fillRect(0, 0, canvas.width, canvas.height);
-
-const keybinds: Keybinds = {
-  w: { pressed: false },
-  s: { pressed: false },
-  a: { pressed: false },
-  d: { pressed: false },
-  terminate: { pressed: false },
-};
 
 const playerPic = new Image();
 playerPic.src = img;
@@ -56,34 +45,7 @@ const player = Sprite({
 });
 const collidables = Collisions();
 
-function stopMovement(e: KeyboardEvent) {
-  //called on keyup to stop movement
-  const mvKey = e.key as MovementKey;
-  if (Object.keys(keybinds).includes(e.key)) {
-    keybinds[mvKey].pressed = false;
-  }
-}
-
-function handleKeyActions(e: KeyboardEvent) {
-  const mvKey = e.key as MovementKey;
-  if (Object.keys(keybinds).includes(e.key)) {
-    keybinds[mvKey].pressed = true;
-  }
-  if (e.key === "]") {
-    console.log("debug");
-    // const tempPCoords = {
-    //   x: currPlayerPostion.x - offset.x,
-    //   y: currPlayerPostion.y - offset.y,
-    // };
-    // console.log(tempPCoords);
-    player.log(offset);
-    collidables.log();
-    keybinds.terminate.pressed = !keybinds.terminate.pressed;
-    animate(); //force the loop to start again if debug has been toggled off -> on
-  }
-}
-
-function setOffset(pos: "x" | "y", operand: "+" | "-", speed = 3) {
+function updateOffset(pos: "x" | "y", operand: "+" | "-", speed = 3) {
   if (operand === "+") {
     offset[pos] += speed;
   }
@@ -104,48 +66,17 @@ const Map2dArray = BuildMapSprite(
   collidables.appendCollidable
 );
 
-function keypressHandler() {
-  let lastPressedMovementKey: "w" | "a" | "s" | "d";
-  let lastOperand: "+" | "-";
-
-  function updateKeypress(coords: { x: number; y: number }) {
-    if (collidables.checkForCollision(coords)) {
-      setOffset(
-        lastPressedMovementKey === "w" || lastPressedMovementKey === "s"
-          ? "y"
-          : "x",
-        lastOperand === "+" ? "-" : "+",
-        8
-      );
-      keybinds[lastPressedMovementKey].pressed = false;
-    }
-    if (keybinds.w.pressed) {
-      setOffset("y", "+");
-      lastPressedMovementKey = "w";
-      lastOperand = "+";
-    }
-    if (keybinds.s.pressed) {
-      setOffset("y", "-");
-      lastPressedMovementKey = "s";
-      lastOperand = "-";
-    }
-    if (keybinds.a.pressed) {
-      setOffset("x", "+");
-      lastPressedMovementKey = "a";
-      lastOperand = "+";
-    }
-    if (keybinds.d.pressed) {
-      setOffset("x", "-");
-      lastPressedMovementKey = "d";
-      lastOperand = "-";
-    }
-  }
-  return { updateKeypress };
-}
-const keypress = keypressHandler();
+const keypress = KeybindState({
+  animate,
+  collidables,
+  player,
+  updateOffset,
+  offset,
+});
 
 function animate() {
-  if (keybinds.terminate.pressed === true) return;
+  if (keypress.isKeyPressed("terminate")) return;
+
   window.requestAnimationFrame(animate);
   ctx.scale(3, 3);
   Map2dArray.forEach((row) => row.forEach((t) => t.draw(offset)));
@@ -158,5 +89,7 @@ function animate() {
   keypress.updateKeypress(tempPCoords);
 }
 
+document.addEventListener("keypress", keypress.handleKeyDown);
+document.addEventListener("keyup", keypress.handleKeyUp);
 animate();
 root?.append(canvas);

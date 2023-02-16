@@ -5,4 +5,5 @@ export type Keybinds = {
   d: { pressed: boolean };
   terminate: { pressed: boolean };
 };
-export type MovementKey = keyof Exclude<Keybinds, "terminate">;
+
+export type MovementKey = "w" | "a" | "s" | "d";

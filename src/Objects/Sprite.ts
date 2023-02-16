@@ -46,7 +46,8 @@ type EnvironmentSpriteSheet = {
   ctx: CanvasRenderingContext2D;
 };
 type Vector = { x: number; y: number };
-type Sprite = {
+
+export type Sprite = {
   draw: (offset?: Vector) => void;
   log: (offset?: Vector) => void;
   buildCollisionData: (
@@ -114,8 +115,14 @@ export default function Sprite({
   function buildCollisionData(pos: Vector, scaling: number) {
     // ctx.fillStyle = "red";
     // ctx.fillRect(pos.x * scaling, pos.y * scaling, 32 * scaling, 32 * scaling);
-    // ctx.fillRect(pos.x * scaling, pos.y * scaling, 16 * scaling, 16 * scaling);
-
+    // ctx.fillStyle = "blue";
+    // ctx.fillRect(
+    //   pos.x * scaling + 24,
+    //   pos.y * scaling + 24,
+    //   16 * scaling,
+    //   16 * scaling
+    // );
+    // console.log(pos.x);
     return { x: pos.x, y: pos.y };
   }
   return { draw, log, buildCollisionData };
