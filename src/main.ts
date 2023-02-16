@@ -7,6 +7,8 @@ import img from "./Assets/mage.png";
 import spirteSheet from "./Assets/sprites.png";
 import BuildMapSprite from "./BuildMapSprites";
 
+import { Map1 } from "./utils/MapStrings";
+
 const root = document.querySelector<HTMLDivElement>("#app");
 const canvas = document.createElement("canvas");
 canvas.width = 864;
@@ -18,35 +20,6 @@ document.addEventListener("keyup", stopMovement);
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 ctx.fillStyle = "green";
 ctx?.fillRect(0, 0, canvas.width, canvas.height);
-
-const testMap = `
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~==================-========~
-~=[[*[W___%%%[[[[**^P^*****=~
-~=***[WVXXXW%****[*^P^**[[[=~
-~=****[WWWWW%******^^^^^^**=~
-~=*****^***^%****^*^****^**=~
-~=*****^***^^^^^^^^^****^**=~
-~={^^^^^^^^^P{P{{**^^***^^P=~
-~={{PPP{{{{{{{{{{**^^%**^^P=~
-~{{{{P{{{{{{{********%^^^^^=~
-~{{{{{[[{**%%%%%%%%%%%{{{{{=~
-~=[[{[*****%W______%*^{{{{{=~
-~={{{PPP^**%WXXXXXXXW^^^^^^=~
-~=:::::PP^^%WXXXXXXXW******=~
-~=::>>>>>>^%WXVXXXXXW******=~
-~===========================~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-`;
-
-const tMap2 = `
-=***WWWWW*
-****WXXXW*
-****^^^^^*
-***^*====*
-**********
-*******{{*
-`;
 
 const keybinds: Keybinds = {
   w: { pressed: false },
@@ -122,7 +95,7 @@ function setOffset(pos: "x" | "y", operand: "+" | "-", speed = 3) {
 const Map2dArray = BuildMapSprite(
   {
     ctx,
-    mapString: testMap,
+    mapString: Map1,
     offset,
     spriteSheet: sheet,
     tileSize: 32,
@@ -142,7 +115,7 @@ function keypressHandler() {
           ? "y"
           : "x",
         lastOperand === "+" ? "-" : "+",
-        6
+        8
       );
       keybinds[lastPressedMovementKey].pressed = false;
     }
