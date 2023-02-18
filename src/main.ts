@@ -1,13 +1,12 @@
 import Sprite from "./Objects/Sprite";
 import Collisions from "./Collisions";
-import "./style.css";
+import BuildMapSprite from "./BuildMapSprites";
+import KeybindHandler from "./KeybindHandler";
+import { Map1, Map2 } from "./utils/MapStrings";
 
 import img from "./Assets/mage.png";
 import spirteSheet from "./Assets/sprites.png";
-import BuildMapSprite from "./BuildMapSprites";
-
-import { Map1 } from "./utils/MapStrings";
-import KeybindState from "./KeybindState";
+import "./style.css";
 
 const root = document.querySelector<HTMLDivElement>("#app");
 const canvas = document.createElement("canvas");
@@ -15,7 +14,7 @@ canvas.width = 864;
 canvas.height = 576;
 
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-ctx.fillStyle = "green";
+ctx.fillStyle = "black";
 ctx?.fillRect(0, 0, canvas.width, canvas.height);
 
 const playerPic = new Image();
@@ -25,12 +24,12 @@ const sheet = new Image();
 sheet.src = spirteSheet;
 
 // our plyer's center position relative to the screen size will be by the formula:
-// [canvas.width | canvas.height] / 2 - ( [PLAYER SPRITE WIDTH | HEIGHT] / 2 )
+// [canvas.width | canvas.height] / 2 { / scaling } { - SPRITE SIZE / 2 for x})
 const currPlayerPostion = {
-  x: Math.floor(canvas.width / 2 / 3 - 16),
-  y: Math.floor(canvas.height / 2 / 3),
+  x: Math.floor(canvas.width / 2 - 16),
+  y: Math.floor(canvas.height / 2),
 };
-const offset = { x: 0, y: 0 };
+const offset = { x: 48, y: 16 };
 
 const player = Sprite({
   type: "character",
@@ -45,7 +44,7 @@ const player = Sprite({
 });
 const collidables = Collisions();
 
-function updateOffset(pos: "x" | "y", operand: "+" | "-", speed = 3) {
+function updateOffset(pos: "x" | "y", operand: "+" | "-", speed = 6) {
   if (operand === "+") {
     offset[pos] += speed;
   }
@@ -54,19 +53,18 @@ function updateOffset(pos: "x" | "y", operand: "+" | "-", speed = 3) {
   }
 }
 
-const Map2dArray = BuildMapSprite(
+const mapTiles = BuildMapSprite(
   {
     ctx,
     mapString: Map1,
     offset,
     spriteSheet: sheet,
     tileSize: 32,
-    scaling: 3,
   },
   collidables.appendCollidable
 );
 
-const keypress = KeybindState({
+const Control = KeybindHandler({
   animate,
   collidables,
   player,
@@ -75,21 +73,19 @@ const keypress = KeybindState({
 });
 
 function animate() {
-  if (keypress.isKeyPressed("terminate")) return;
-
+  if (Control.isKeyPressed("terminate")) return;
   window.requestAnimationFrame(animate);
-  ctx.scale(3, 3);
-  Map2dArray.forEach((row) => row.forEach((t) => t.draw(offset)));
+  // ctx.scale(3, 3);
+  mapTiles.forEach((tile) => tile.draw(offset));
   player.draw(offset);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const tempPCoords = {
     x: currPlayerPostion.x - offset.x,
     y: currPlayerPostion.y - offset.y,
   };
-  keypress.updateKeypress(tempPCoords);
+  Control.updateKeypress(tempPCoords, 6);
 }
 
-document.addEventListener("keypress", keypress.handleKeyDown);
-document.addEventListener("keyup", keypress.handleKeyUp);
+Control.initControls();
 animate();
 root?.append(canvas);

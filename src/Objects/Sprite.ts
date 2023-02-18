@@ -47,13 +47,10 @@ type EnvironmentSpriteSheet = {
 };
 type Vector = { x: number; y: number };
 
-export type Sprite = {
-  draw: (offset?: Vector) => void;
+export type SpriteType = {
+  draw: (offset: Vector) => void;
   log: (offset?: Vector) => void;
-  buildCollisionData: (
-    position: Vector,
-    scaling: number
-  ) => {
+  buildCollisionData: (position: Vector) => {
     x: number;
     y: number;
   };
@@ -68,10 +65,12 @@ export default function Sprite({
   | CharacterSprite
   | MapSprite
   | ColisionSprite
-  | EnvironmentSpriteSheet): Sprite {
-  function draw(offset?: { x: number; y: number }) {
+  | EnvironmentSpriteSheet): SpriteType {
+  function draw(offset: { x: number; y: number }) {
     switch (type) {
       case "character":
+        ctx.fillStyle = "red";
+        ctx.fillRect(position.x, position.y, 32, 32);
         ctx.drawImage(
           source.img,
           0,
@@ -83,24 +82,21 @@ export default function Sprite({
           source.width * 1,
           source.height * 1
         );
-
         break;
 
       case "mapSpriteSheet":
-        {
-          if (offset) {
-            ctx.drawImage(
-              source.img,
-              source.spriteSize * source.metadata.spritePath.x, // x on sprite sheet
-              source.spriteSize * source.metadata.spritePath.y, //y on sprite sheet
-              32,
-              32,
-              position.x + offset.x,
-              position.y + offset.y,
-              32,
-              32
-            );
-          }
+        if (offset) {
+          ctx.drawImage(
+            source.img,
+            source.spriteSize * source.metadata.spritePath.x, // x on sprite sheet
+            source.spriteSize * source.metadata.spritePath.y, //y on sprite sheet
+            32,
+            32,
+            position.x + offset.x,
+            position.y + offset.y,
+            32,
+            32
+          );
         }
         break;
 
@@ -112,7 +108,7 @@ export default function Sprite({
     console.log({ type, position, source, offset });
   }
 
-  function buildCollisionData(pos: Vector, scaling: number) {
+  function buildCollisionData(pos: Vector) {
     // ctx.fillStyle = "red";
     // ctx.fillRect(pos.x * scaling, pos.y * scaling, 32 * scaling, 32 * scaling);
     // ctx.fillStyle = "blue";

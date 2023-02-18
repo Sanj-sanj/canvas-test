@@ -1,24 +1,22 @@
 import { CollisionState } from "./Collisions";
 import { Keybinds, MovementKey } from "./KeybindingsTypes";
-import { Sprite } from "./Objects/Sprite";
+import { SpriteType } from "./Objects/Sprite";
 
 type KeybindParams = {
   animate: () => void;
-  player: Sprite;
+  player: SpriteType;
   collidables: CollisionState;
   updateOffset: (pos: "x" | "y", operand: "-" | "+", speed?: number) => void;
   offset: { x: number; y: number };
 };
 
-function KeybindState({
+function KeybindHandler({
   animate,
   player,
   collidables,
   updateOffset,
   offset,
 }: KeybindParams) {
-  let lastPressedMovementKey: "w" | "a" | "s" | "d";
-
   const keybinds: Keybinds = {
     w: { pressed: false },
     s: { pressed: false },
@@ -31,6 +29,11 @@ function KeybindState({
     keybinds[key].pressed = bool;
   }
 
+  function initControls() {
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+  }
+
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === "]") {
       player.log(offset);
@@ -38,9 +41,7 @@ function KeybindState({
       keybinds.terminate.pressed = !keybinds.terminate.pressed;
       animate(); //force the loop to start again if debug has been toggled off -> on
     }
-
     const mvKey = e.key as MovementKey;
-    lastPressedMovementKey = mvKey;
     if (mvKey in keybinds) return toggleKeyPressed(mvKey, true);
   }
 
@@ -50,33 +51,30 @@ function KeybindState({
     if (mvKey in keybinds) toggleKeyPressed(mvKey, false);
   }
 
-  function handleCollision(coords: { x: number; y: number }) {
-    if (collidables.checkForCollision(coords, lastPressedMovementKey)) {
-      return true;
+  function updateKeypress(coords: { x: number; y: number }, speed = 3) {
+    if (
+      isKeyPressed("w") &&
+      !collidables.checkForCollision({ x: coords.x, y: coords.y }, speed, "w")
+    ) {
+      updateOffset("y", "+", speed);
     }
-    return false;
-  }
-
-  function updateKeypress(coords: { x: number; y: number }) {
-    if (collidables.checkForCollision(coords, lastPressedMovementKey)) {
-      keybinds[lastPressedMovementKey].pressed = false;
-      return;
+    if (
+      isKeyPressed("s") &&
+      !collidables.checkForCollision({ x: coords.x, y: coords.y }, speed, "s")
+    ) {
+      updateOffset("y", "-", speed);
     }
-    if (isKeyPressed("w")) {
-      updateOffset("y", "+");
-      lastPressedMovementKey = "w";
+    if (
+      isKeyPressed("a") &&
+      !collidables.checkForCollision({ x: coords.x, y: coords.y }, speed, "a")
+    ) {
+      updateOffset("x", "+", speed);
     }
-    if (isKeyPressed("s")) {
-      updateOffset("y", "-");
-      lastPressedMovementKey = "s";
-    }
-    if (isKeyPressed("a")) {
-      updateOffset("x", "+");
-      lastPressedMovementKey = "a";
-    }
-    if (isKeyPressed("d")) {
-      updateOffset("x", "-");
-      lastPressedMovementKey = "d";
+    if (
+      isKeyPressed("d") &&
+      !collidables.checkForCollision({ x: coords.x, y: coords.y }, speed, "d")
+    ) {
+      updateOffset("x", "-", speed);
     }
   }
 
@@ -86,10 +84,8 @@ function KeybindState({
 
   return {
     updateKeypress,
-    handleCollision,
     isKeyPressed,
-    handleKeyDown,
-    handleKeyUp,
+    initControls,
   };
 }
-export default KeybindState;
+export default KeybindHandler;
