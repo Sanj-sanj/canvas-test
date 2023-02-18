@@ -9,6 +9,17 @@ type CharacterSprite = {
   };
   ctx: CanvasRenderingContext2D;
 };
+type EntitySprite = {
+  type: "entity";
+  position: { x: number; y: number };
+  source: {
+    img: HTMLImageElement;
+    width: number;
+    height: number;
+    frames: { min: number; max: number };
+  };
+  ctx: CanvasRenderingContext2D;
+};
 type MapSprite = {
   type: "map";
   position: { x: number; y: number };
@@ -47,26 +58,37 @@ type EnvironmentSpriteSheet = {
 };
 type Vector = { x: number; y: number };
 
-export type SpriteType = {
-  draw: (offset: Vector) => void;
+export interface SpriteType {
+  // draw: (playersPosition: Vector) => void;
+  draw: (offset: Vector, playersPosition: Vector) => void;
   log: (offset?: Vector) => void;
   buildCollisionData: (position: Vector) => {
     x: number;
     y: number;
   };
-};
+  getPosition: () => Vector;
+}
+type SpriteParams =
+  | CharacterSprite
+  | EntitySprite
+  | MapSprite
+  | ColisionSprite
+  | EnvironmentSpriteSheet;
 
 export default function Sprite({
   type,
   position,
   source,
   ctx,
-}:
-  | CharacterSprite
-  | MapSprite
-  | ColisionSprite
-  | EnvironmentSpriteSheet): SpriteType {
-  function draw(offset: { x: number; y: number }) {
+}: SpriteParams): SpriteType {
+  let ticks = 0;
+  let id: null | number = null;
+
+  // relativePosition exists to handle respositioning player sprite on Zoom action.
+  function draw(
+    offset: { x: number; y: number },
+    relativePosition: { x: number; y: number }
+  ) {
     switch (type) {
       case "character":
         ctx.fillStyle = "red";
@@ -77,27 +99,43 @@ export default function Sprite({
           0,
           source.width / source.frames.max,
           source.height,
-          position.x,
-          position.y,
+          relativePosition.x,
+          relativePosition.y,
           source.width * 1,
           source.height * 1
         );
         break;
+      case "entity":
+        // ctx.fillStyle = "blue";
+        // ctx.fillRect(position.x + offset.x, position.y + offset.y, 32, 32);
+        ctx.drawImage(
+          source.img,
+          32 * ticks,
+          0,
+          source.width / source.frames.max,
+          source.height,
+          position.x + offset.x,
+          position.y + offset.y,
+          source.width / source.frames.max,
+          source.height * 1
+        );
+        if (id !== null) return;
+        id = setTimeout(() => tickTock(), 300);
+        break;
 
       case "mapSpriteSheet":
-        if (offset) {
-          ctx.drawImage(
-            source.img,
-            source.spriteSize * source.metadata.spritePath.x, // x on sprite sheet
-            source.spriteSize * source.metadata.spritePath.y, //y on sprite sheet
-            32,
-            32,
-            position.x + offset.x,
-            position.y + offset.y,
-            32,
-            32
-          );
-        }
+        ctx.drawImage(
+          source.img,
+          source.spriteSize * source.metadata.spritePath.x, // x on sprite sheet
+          source.spriteSize * source.metadata.spritePath.y, //y on sprite sheet
+          32,
+          32,
+          position.x + offset.x,
+          position.y + offset.y,
+          32,
+          32
+        );
+
         break;
 
       default:
@@ -108,18 +146,18 @@ export default function Sprite({
     console.log({ type, position, source, offset });
   }
 
+  function getPosition() {
+    return position;
+  }
+
+  function tickTock() {
+    ticks === 3 ? (ticks = 0) : (ticks += 1);
+    console.log(ticks);
+    id = null;
+  }
+
   function buildCollisionData(pos: Vector) {
-    // ctx.fillStyle = "red";
-    // ctx.fillRect(pos.x * scaling, pos.y * scaling, 32 * scaling, 32 * scaling);
-    // ctx.fillStyle = "blue";
-    // ctx.fillRect(
-    //   pos.x * scaling + 24,
-    //   pos.y * scaling + 24,
-    //   16 * scaling,
-    //   16 * scaling
-    // );
-    // console.log(pos.x);
     return { x: pos.x, y: pos.y };
   }
-  return { draw, log, buildCollisionData };
+  return { draw, log, buildCollisionData, getPosition };
 }

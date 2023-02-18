@@ -23,6 +23,7 @@ function KeybindHandler({
     a: { pressed: false },
     d: { pressed: false },
     terminate: { pressed: false },
+    zoom: { pressed: false },
   };
 
   function toggleKeyPressed(key: MovementKey, bool: boolean) {
@@ -40,6 +41,16 @@ function KeybindHandler({
       collidables.log();
       keybinds.terminate.pressed = !keybinds.terminate.pressed;
       animate(); //force the loop to start again if debug has been toggled off -> on
+    }
+    if (e.key === "z") {
+      keybinds.zoom.pressed = !keybinds.zoom.pressed;
+      if (keybinds.zoom.pressed) {
+        updateOffset("y", "-", 144);
+        updateOffset("x", "-", 208);
+      } else {
+        updateOffset("y", "+", 144);
+        updateOffset("x", "+", 208);
+      }
     }
     const mvKey = e.key as MovementKey;
     if (mvKey in keybinds) return toggleKeyPressed(mvKey, true);

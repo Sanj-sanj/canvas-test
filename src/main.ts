@@ -5,6 +5,7 @@ import KeybindHandler from "./KeybindHandler";
 import { Map1, Map2 } from "./utils/MapStrings";
 
 import img from "./Assets/mage.png";
+import monImg from "./Assets/monsprite.png";
 import spirteSheet from "./Assets/sprites.png";
 import "./style.css";
 
@@ -20,6 +21,8 @@ ctx?.fillRect(0, 0, canvas.width, canvas.height);
 const playerPic = new Image();
 playerPic.src = img;
 
+const monsterPic = new Image();
+monsterPic.src = monImg;
 const sheet = new Image();
 sheet.src = spirteSheet;
 
@@ -29,6 +32,22 @@ const currPlayerPostion = {
   x: Math.floor(canvas.width / 2 - 16),
   y: Math.floor(canvas.height / 2),
 };
+
+let zoomOn = false;
+
+function getScreenCenter() {
+  if (zoomOn) {
+    return {
+      x: Math.floor(canvas.width / 2 / 2 - 8),
+      y: Math.floor(canvas.height / 2 / 2),
+    };
+  }
+  return {
+    x: Math.floor(canvas.width / 2 - 16),
+    y: Math.floor(canvas.height / 2),
+  };
+}
+
 const offset = { x: 48, y: 16 };
 
 const player = Sprite({
@@ -40,6 +59,17 @@ const player = Sprite({
     height: 32,
     width: 32,
     img: playerPic,
+  },
+});
+const monster = Sprite({
+  type: "entity",
+  position: { x: 246, y: 150 },
+  ctx: ctx,
+  source: {
+    frames: { min: 0, max: 5 },
+    height: 32,
+    width: 160,
+    img: monsterPic,
   },
 });
 const collidables = Collisions();
@@ -72,16 +102,40 @@ const Control = KeybindHandler({
   offset,
 });
 
+function properOffset(position: { x: number; y: number }) {
+  if (zoomOn) {
+    return {
+      x: offset.x + position.x,
+      y: offset.y + position.y,
+    };
+  }
+  return {
+    x: position.x,
+    y: position.y,
+  };
+}
+
 function animate() {
   if (Control.isKeyPressed("terminate")) return;
+  if (Control.isKeyPressed("zoom")) {
+    ctx.scale(2, 2);
+    zoomOn = true;
+  } else {
+    zoomOn = false;
+  }
+
   window.requestAnimationFrame(animate);
-  // ctx.scale(3, 3);
-  mapTiles.forEach((tile) => tile.draw(offset));
-  player.draw(offset);
+  ctx.fillStyle = "black";
+  ctx?.fillRect(0, 0, canvas.width, canvas.height);
+
+  mapTiles.forEach((tile) => tile.draw(offset, tile.getPosition()));
+  monster.draw(offset, properOffset(monster.getPosition()));
+  player.draw(offset, getScreenCenter());
+
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const tempPCoords = {
-    x: currPlayerPostion.x - offset.x,
-    y: currPlayerPostion.y - offset.y,
+    x: getScreenCenter().x - offset.x,
+    y: getScreenCenter().y - offset.y,
   };
   Control.updateKeypress(tempPCoords, 6);
 }

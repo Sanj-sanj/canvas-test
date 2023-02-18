@@ -52,6 +52,9 @@ function BuildMapSprite(
             },
           },
         });
+
+        // this collision check needs to be performed on Sprite instanstiation
+
         collisionType === "impede"
           ? appendCollisionData(thisSprite.buildCollisionData(thisPos))
           : null;
