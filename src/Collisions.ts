@@ -35,10 +35,10 @@ function Collisions(): CollisionState {
     //takes coord start of {x, y} then adds the width of the sprite, subtracting the speed of char / 2 to handle collision
     return collisions.some((rect) => {
       return (
-        topX + 32 - speed / 2 >= rect.x &&
-        topX <= rect.x + 32 - speed / 2 &&
-        topY <= rect.y + 32 - speed / 2 &&
-        topY + 32 - speed / 2 >= rect.y
+        topX + 2 + 30 - speed / 2 >= rect.x &&
+        topX + 2 <= rect.x + 30 - speed / 2 &&
+        topY + 2 <= rect.y + 30 - speed / 2 &&
+        topY + 2 + 30 - speed / 2 >= rect.y
       );
     });
   }

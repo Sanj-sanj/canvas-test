@@ -1,0 +1,26 @@
+entity component system
+
+  |
+  | CONTROLS
+  |
+  | COLLISIONS
+  |
+  | SPRITE_GENERATOR
+  | | Build 
+  | | GENERATE USE SPECIFC TILE  
+  |   |render functions 
+  |   |  > Vector dependant + offset
+  |   |  > need collision checking per tile >
+  |   |  > entitys have different needs than environment and simlarities
+  |   |  > states need to be accounted for on an "as needed" basis
+  |   | 
+  |   | TRACKS for COLLISION state 
+  |   | > environment 
+  |   | > attackable 
+  |   | > interactable
+  |   | > Tile depth?
+  |   | > inventory items 
+  |   | > equiped gear ^ extends
+  |    
+  | TILESET ACCESSOR AND MANIPULATOR
+  |

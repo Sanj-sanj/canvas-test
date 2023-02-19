@@ -92,7 +92,7 @@ export default function Sprite({
     switch (type) {
       case "character":
         ctx.fillStyle = "red";
-        ctx.fillRect(position.x, position.y, 32, 32);
+        ctx.fillRect(relativePosition.x, relativePosition.y, 32, 32);
         ctx.drawImage(
           source.img,
           0,

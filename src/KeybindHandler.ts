@@ -44,13 +44,13 @@ function KeybindHandler({
     }
     if (e.key === "z") {
       keybinds.zoom.pressed = !keybinds.zoom.pressed;
-      if (keybinds.zoom.pressed) {
-        updateOffset("y", "-", 144);
-        updateOffset("x", "-", 208);
-      } else {
-        updateOffset("y", "+", 144);
-        updateOffset("x", "+", 208);
-      }
+      // if (keybinds.zoom.pressed) {
+      //   updateOffset("y", "-", 144);
+      //   updateOffset("x", "-", 208);
+      // } else {
+      //   updateOffset("y", "+", 144);
+      //   updateOffset("x", "+", 208);
+      // }
     }
     const mvKey = e.key as MovementKey;
     if (mvKey in keybinds) return toggleKeyPressed(mvKey, true);

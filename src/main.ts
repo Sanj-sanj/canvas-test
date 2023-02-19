@@ -26,14 +26,16 @@ monsterPic.src = monImg;
 const sheet = new Image();
 sheet.src = spirteSheet;
 
+const collidables = Collisions();
+collidables;
+let zoomOn = false;
+
 // our plyer's center position relative to the screen size will be by the formula:
 // [canvas.width | canvas.height] / 2 { / scaling } { - SPRITE SIZE / 2 for x})
 const currPlayerPostion = {
   x: Math.floor(canvas.width / 2 - 16),
   y: Math.floor(canvas.height / 2),
 };
-
-let zoomOn = false;
 
 function getScreenCenter() {
   if (zoomOn) {
@@ -49,6 +51,14 @@ function getScreenCenter() {
 }
 
 const offset = { x: 48, y: 16 };
+function updateOffset(pos: "x" | "y", operand: "+" | "-", speed = 6) {
+  if (operand === "+") {
+    offset[pos] += speed;
+  }
+  if (operand === "-") {
+    offset[pos] -= speed;
+  }
+}
 
 const player = Sprite({
   type: "character",
@@ -72,17 +82,6 @@ const monster = Sprite({
     img: monsterPic,
   },
 });
-const collidables = Collisions();
-
-function updateOffset(pos: "x" | "y", operand: "+" | "-", speed = 6) {
-  if (operand === "+") {
-    offset[pos] += speed;
-  }
-  if (operand === "-") {
-    offset[pos] -= speed;
-  }
-}
-
 const mapTiles = BuildMapSprite(
   {
     ctx,
@@ -102,7 +101,8 @@ const Control = KeybindHandler({
   offset,
 });
 
-function properOffset(position: { x: number; y: number }) {
+function adjustOffset(position: { x: number; y: number }) {
+  //adjusts the offset values of the Other entities like monsters
   if (zoomOn) {
     return {
       x: offset.x + position.x,
@@ -114,14 +114,37 @@ function properOffset(position: { x: number; y: number }) {
     y: position.y,
   };
 }
+let scale = 1;
+const ids: number[] = [];
+function toggleZoom() {
+  if (zoomOn && scale < 2 && ids.length < 20) {
+    ids.push(
+      setTimeout(() => {
+        updateOffset("y", "-", 7.2);
+        updateOffset("x", "-", 10.4);
+
+        scale += 0.05;
+      }, ids.length * 0.1)
+    );
+  } else if (!zoomOn && scale > 1) {
+    ids.forEach(() => {
+      updateOffset("y", "+", 7.2);
+      updateOffset("x", "+", 10.4);
+      clearTimeout(ids.shift());
+      setTimeout(() => (scale -= 0.05));
+    });
+  }
+}
 
 function animate() {
+  ctx.scale(scale, scale);
   if (Control.isKeyPressed("terminate")) return;
   if (Control.isKeyPressed("zoom")) {
-    ctx.scale(2, 2);
     zoomOn = true;
+    toggleZoom();
   } else {
     zoomOn = false;
+    toggleZoom();
   }
 
   window.requestAnimationFrame(animate);
@@ -129,7 +152,7 @@ function animate() {
   ctx?.fillRect(0, 0, canvas.width, canvas.height);
 
   mapTiles.forEach((tile) => tile.draw(offset, tile.getPosition()));
-  monster.draw(offset, properOffset(monster.getPosition()));
+  monster.draw(offset, adjustOffset(monster.getPosition()));
   player.draw(offset, getScreenCenter());
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
