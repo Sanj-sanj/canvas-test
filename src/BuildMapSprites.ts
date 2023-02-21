@@ -1,4 +1,5 @@
-import Sprite, { SpriteType } from "./Objects/Sprite";
+import { MapTypeSprite, SpriteMap } from "./Objects/Sprite";
+import { Vector } from "./Objects/SpriteTypes";
 import Legend, { MapTile } from "./utils/MapTiles";
 
 type BuildMapParams = {
@@ -6,19 +7,16 @@ type BuildMapParams = {
   ctx: CanvasRenderingContext2D;
   spriteSheet: HTMLImageElement;
   tileSize: 16 | 32;
-
   offset: { x: number; y: number };
 };
-type Vec = { x: number; y: number };
-
 // we will have to add in more params to the draw function inside renderer, it will porbably take actor data to display them later
 // type Renderer = { draw: (offset: Vec) => void; log: (offset?: Vec) => void };
 
 //we need to build all colidable elements into a big list to  be checked on main files keyboard press check in animate
 function BuildMapSprite(
   { ctx, mapString, spriteSheet, tileSize, offset }: BuildMapParams,
-  appendCollisionData: (boxData: Vec) => void
-): SpriteType[] {
+  appendCollisionData: (boxData: Vector) => void
+): MapTypeSprite[] {
   return mapString
     .trim()
     .split("\n")
@@ -34,9 +32,9 @@ function BuildMapSprite(
         if (spritePath.length > 1) {
           spriteImgToUse = spritePath[
             Math.floor(Math.random() * spritePath.length)
-          ] as Vec;
+          ] as Vector;
         }
-        const thisSprite = Sprite({
+        const thisSprite = SpriteMap({
           ctx,
           type: "mapSpriteSheet",
           position: thisPos,
@@ -47,7 +45,7 @@ function BuildMapSprite(
             spriteSize: 32,
             metadata: {
               actors: [],
-              spritePath: spriteImgToUse as Vec,
+              spritePath: spriteImgToUse as Vector,
               type: type,
             },
           },
@@ -61,7 +59,7 @@ function BuildMapSprite(
         return thisSprite;
       });
       return [...acc, ...SpritesArray];
-    }, [] as SpriteType[]);
+    }, [] as MapTypeSprite[]);
 }
 
 export default BuildMapSprite;

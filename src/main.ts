@@ -1,4 +1,9 @@
-import Sprite from "./Objects/Sprite";
+import {
+  SpriteEntity,
+  SpriteCharacter,
+  MapTypeSprite,
+  EntityTypeSprite,
+} from "./Objects/Sprite";
 import Collisions from "./Collisions";
 import BuildMapSprite from "./BuildMapSprites";
 import KeybindHandler from "./KeybindHandler";
@@ -36,6 +41,7 @@ const currPlayerPostion = {
   x: Math.floor(canvas.width / 2 - 16),
   y: Math.floor(canvas.height / 2),
 };
+const offset = { x: 48, y: 0 };
 
 function getScreenCenter() {
   if (zoomOn) {
@@ -50,7 +56,6 @@ function getScreenCenter() {
   };
 }
 
-const offset = { x: 48, y: 16 };
 function updateOffset(pos: "x" | "y", operand: "+" | "-", speed = 6) {
   if (operand === "+") {
     offset[pos] += speed;
@@ -60,7 +65,7 @@ function updateOffset(pos: "x" | "y", operand: "+" | "-", speed = 6) {
   }
 }
 
-const player = Sprite({
+const player = SpriteCharacter({
   type: "character",
   position: currPlayerPostion,
   ctx: ctx,
@@ -71,7 +76,7 @@ const player = Sprite({
     img: playerPic,
   },
 });
-const monster = Sprite({
+const monster = SpriteEntity({
   type: "entity",
   position: { x: 246, y: 150 },
   ctx: ctx,
@@ -85,7 +90,7 @@ const monster = Sprite({
 const mapTiles = BuildMapSprite(
   {
     ctx,
-    mapString: Map1,
+    mapString: Map2,
     offset,
     spriteSheet: sheet,
     tileSize: 32,
@@ -96,26 +101,12 @@ const mapTiles = BuildMapSprite(
 const Control = KeybindHandler({
   animate,
   collidables,
-  player,
   updateOffset,
-  offset,
 });
 
-function adjustOffset(position: { x: number; y: number }) {
-  //adjusts the offset values of the Other entities like monsters
-  if (zoomOn) {
-    return {
-      x: offset.x + position.x,
-      y: offset.y + position.y,
-    };
-  }
-  return {
-    x: position.x,
-    y: position.y,
-  };
-}
 let scale = 1;
 const ids: number[] = [];
+
 function toggleZoom() {
   if (zoomOn && scale < 2 && ids.length < 20) {
     ids.push(
@@ -124,7 +115,7 @@ function toggleZoom() {
         updateOffset("x", "-", 10.4);
 
         scale += 0.05;
-      }, ids.length * 0.1)
+      })
     );
   } else if (!zoomOn && scale > 1) {
     ids.forEach(() => {
@@ -135,6 +126,8 @@ function toggleZoom() {
     });
   }
 }
+
+const moveables: MapTypeSprite[] | EntityTypeSprite[] = [...mapTiles, monster];
 
 function animate() {
   ctx.scale(scale, scale);
@@ -148,19 +141,23 @@ function animate() {
   }
 
   window.requestAnimationFrame(animate);
-  ctx.fillStyle = "black";
-  ctx?.fillRect(0, 0, canvas.width, canvas.height);
+  // ctx.fillStyle = "black";
+  // ctx?.fillRect(0, 0, canvas.width, canvas.height);
 
-  mapTiles.forEach((tile) => tile.draw(offset, tile.getPosition()));
-  monster.draw(offset, adjustOffset(monster.getPosition()));
-  player.draw(offset, getScreenCenter());
+  moveables.forEach((moveable) => {
+    moveable.updateOffset(offset);
+    moveable.draw();
+  });
 
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  player.draw(getScreenCenter());
+
   const tempPCoords = {
     x: getScreenCenter().x - offset.x,
     y: getScreenCenter().y - offset.y,
   };
-  Control.updateKeypress(tempPCoords, 6);
+
+  Control.keypressEventEmitter(tempPCoords, 6);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
 Control.initControls();
