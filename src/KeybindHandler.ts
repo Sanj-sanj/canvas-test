@@ -16,6 +16,9 @@ function KeybindHandler({ animate, collidables, updateOffset }: KeybindParams) {
     terminate: { pressed: false },
     zoom: { pressed: false },
   };
+  let haltMovement = false;
+  let zoomOnCooldown = false;
+
   function toggleKeyPressed(key: MovementKey, bool: boolean) {
     Keybinds[key].pressed = bool;
   }
@@ -33,7 +36,12 @@ function KeybindHandler({ animate, collidables, updateOffset }: KeybindParams) {
       animate(); //force the loop to start again if debug has been toggled off -> on
     }
     if (e.key === "z") {
+      if (zoomOnCooldown) return;
       Keybinds.zoom.pressed = !Keybinds.zoom.pressed;
+      haltMovement = true;
+      zoomOnCooldown = true;
+      setTimeout(() => (haltMovement = false), 100);
+      setTimeout(() => (zoomOnCooldown = false), 200);
     }
     const mvKey = e.key as MovementKey;
     if (mvKey in Keybinds) {
@@ -48,6 +56,7 @@ function KeybindHandler({ animate, collidables, updateOffset }: KeybindParams) {
   }
 
   function keypressEventEmitter(coords: { x: number; y: number }, speed = 3) {
+    if (haltMovement) return;
     if (
       isKeyPressed("w") &&
       !collidables.checkForCollision({ x: coords.x, y: coords.y }, speed, "w")

@@ -5,15 +5,11 @@ import {
   Vector,
 } from "./SpriteTypes";
 
-export interface MapTypeSprite {
-  draw: () => void;
-  log: (offset?: Vector) => void;
+export interface MapTypeSprite extends EntityTypeSprite {
   buildCollisionData: (position: Vector) => {
     x: number;
     y: number;
   };
-  getPosition: () => Vector;
-  updateOffset: (offset: Vector) => void;
 }
 export interface EntityTypeSprite {
   draw: () => void;

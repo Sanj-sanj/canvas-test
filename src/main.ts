@@ -108,21 +108,22 @@ let scale = 1;
 const ids: number[] = [];
 
 function toggleZoom() {
-  if (zoomOn && scale < 2 && ids.length < 20) {
+  if (zoomOn && scale < 2 && ids.length < 5) {
     ids.push(
       setTimeout(() => {
-        updateOffset("y", "-", 7.2);
-        updateOffset("x", "-", 10.4);
-
-        scale += 0.05;
+        updateOffset("y", "-", 28.8);
+        updateOffset("x", "-", 42);
+        scale += 0.2;
       })
     );
-  } else if (!zoomOn && scale > 1) {
+  } else if (!zoomOn && scale > 1 && ids.length >= 1) {
     ids.forEach(() => {
-      updateOffset("y", "+", 7.2);
-      updateOffset("x", "+", 10.4);
+      setTimeout(() => {
+        updateOffset("y", "+", 28.8);
+        updateOffset("x", "+", 42);
+        scale -= 0.2;
+      });
       clearTimeout(ids.shift());
-      setTimeout(() => (scale -= 0.05));
     });
   }
 }
