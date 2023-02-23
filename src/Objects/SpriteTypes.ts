@@ -1,8 +1,21 @@
 type CharacterSprite = {
   type: "character";
   position: { x: number; y: number };
+  stats: {
+    health: number;
+    damage: number;
+  };
+  attack: {
+    width: number;
+    height: number;
+    startX: number;
+    startY: number;
+  };
   source: {
-    img: HTMLImageElement;
+    img: {
+      right: HTMLImageElement;
+      left: HTMLImageElement;
+    };
     width: number;
     height: number;
     frames: { min: number; max: number };
@@ -13,6 +26,16 @@ type CharacterSprite = {
 type EntitySprite = {
   type: "entity";
   position: { x: number; y: number };
+  stats: {
+    health: number;
+    damage: number;
+  };
+  attack: {
+    width: number;
+    height: number;
+    startX: number;
+    startY: number;
+  };
   source: {
     img: HTMLImageElement;
     width: number;

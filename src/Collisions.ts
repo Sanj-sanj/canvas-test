@@ -2,10 +2,14 @@ import { MovementKey } from "./KeybindingsTypes";
 export type CollisionState = {
   log: () => void;
   appendCollidable: ({ x, y }: Vector) => void;
-  checkForCollision: (
+  checkForCollisionEnvironment: (
     playerPos: Vector,
     speed: number,
     direction: MovementKey
+  ) => boolean;
+  checkForCollisionCharacter: (
+    rect0: { x: number; y: number; width: number; height: number },
+    rect1: { x: number; y: number; width: number; height: number }
   ) => boolean;
 };
 type Vector = {
@@ -19,7 +23,7 @@ function Collisions(): CollisionState {
     collisions.push({ x, y });
   }
 
-  function checkForCollision(
+  function checkForCollisionEnvironment(
     playerPos: { x: number; y: number },
     speed: number,
     direction: MovementKey
@@ -43,9 +47,25 @@ function Collisions(): CollisionState {
     });
   }
 
+  function checkForCollisionCharacter(
+    rect0: { x: number; y: number; width: number; height: number },
+    rect1: { x: number; y: number; width: number; height: number }
+  ) {
+    return (
+      rect0.x + rect0.width >= rect1.x &&
+      rect0.x <= rect1.x + rect1.width &&
+      rect0.y <= rect1.y + rect1.height &&
+      rect0.y + rect0.width >= rect1.y
+    );
+  }
   function log() {
     console.log(collisions);
   }
-  return { appendCollidable, log, checkForCollision };
+  return {
+    appendCollidable,
+    log,
+    checkForCollisionEnvironment,
+    checkForCollisionCharacter,
+  };
 }
 export default Collisions;

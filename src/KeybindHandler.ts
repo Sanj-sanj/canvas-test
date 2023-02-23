@@ -1,23 +1,32 @@
 import { CollisionState } from "./Collisions";
 import { Keybinds, MovementKey } from "./KeybindingsTypes";
+import { CharacterTypeSprite } from "./Objects/Sprite";
 
 type KeybindParams = {
   animate: () => void;
   collidables: CollisionState;
   updateOffset: (pos: "x" | "y", operand: "-" | "+", speed?: number) => void;
+  player: CharacterTypeSprite;
 };
 
-function KeybindHandler({ animate, collidables, updateOffset }: KeybindParams) {
+function KeybindHandler({
+  animate,
+  collidables,
+  updateOffset,
+  player,
+}: KeybindParams) {
   const Keybinds: Keybinds = {
     w: { pressed: false },
     s: { pressed: false },
     a: { pressed: false },
     d: { pressed: false },
-    terminate: { pressed: false },
+    attack: { pressed: false },
+    pause: { pressed: false },
     zoom: { pressed: false },
   };
   let haltMovement = false;
   let zoomOnCooldown = false;
+  let attackCooldown = false;
 
   function toggleKeyPressed(key: MovementKey, bool: boolean) {
     Keybinds[key].pressed = bool;
@@ -32,7 +41,7 @@ function KeybindHandler({ animate, collidables, updateOffset }: KeybindParams) {
     if (e.key === "]") {
       // player.log(offset);
       collidables.log();
-      Keybinds.terminate.pressed = !Keybinds.terminate.pressed;
+      Keybinds.pause.pressed = !Keybinds.pause.pressed;
       animate(); //force the loop to start again if debug has been toggled off -> on
     }
     if (e.key === "z") {
@@ -43,8 +52,18 @@ function KeybindHandler({ animate, collidables, updateOffset }: KeybindParams) {
       setTimeout(() => (haltMovement = false), 100);
       setTimeout(() => (zoomOnCooldown = false), 200);
     }
+    if (e.key === "p") {
+      if (attackCooldown) return;
+      const attackLingerDur = 300;
+      if (Keybinds.attack.pressed) return;
+      attackCooldown = true;
+      Keybinds.attack.pressed = true;
+      setTimeout(() => (Keybinds.attack.pressed = false), attackLingerDur);
+      setTimeout(() => (attackCooldown = false), 500);
+    }
     const mvKey = e.key as MovementKey;
     if (mvKey in Keybinds) {
+      player.changeDirection(mvKey);
       return toggleKeyPressed(mvKey, true);
     }
   }
@@ -59,25 +78,41 @@ function KeybindHandler({ animate, collidables, updateOffset }: KeybindParams) {
     if (haltMovement) return;
     if (
       isKeyPressed("w") &&
-      !collidables.checkForCollision({ x: coords.x, y: coords.y }, speed, "w")
+      !collidables.checkForCollisionEnvironment(
+        { x: coords.x, y: coords.y },
+        speed,
+        "w"
+      )
     ) {
       updateOffset("y", "+", speed);
     }
     if (
       isKeyPressed("s") &&
-      !collidables.checkForCollision({ x: coords.x, y: coords.y }, speed, "s")
+      !collidables.checkForCollisionEnvironment(
+        { x: coords.x, y: coords.y },
+        speed,
+        "s"
+      )
     ) {
       updateOffset("y", "-", speed);
     }
     if (
       isKeyPressed("a") &&
-      !collidables.checkForCollision({ x: coords.x, y: coords.y }, speed, "a")
+      !collidables.checkForCollisionEnvironment(
+        { x: coords.x, y: coords.y },
+        speed,
+        "a"
+      )
     ) {
       updateOffset("x", "+", speed);
     }
     if (
       isKeyPressed("d") &&
-      !collidables.checkForCollision({ x: coords.x, y: coords.y }, speed, "d")
+      !collidables.checkForCollisionEnvironment(
+        { x: coords.x, y: coords.y },
+        speed,
+        "d"
+      )
     ) {
       updateOffset("x", "-", speed);
     }

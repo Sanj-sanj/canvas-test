@@ -9,7 +9,8 @@ import BuildMapSprite from "./BuildMapSprites";
 import KeybindHandler from "./KeybindHandler";
 import { Map1, Map2 } from "./utils/MapStrings";
 
-import img from "./Assets/mage.png";
+import mageRight from "./Assets/mageRight.png";
+import mageLeft from "./Assets/mageLeft.png";
 import monImg from "./Assets/monsprite.png";
 import spirteSheet from "./Assets/sprites.png";
 import "./style.css";
@@ -23,8 +24,10 @@ const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 ctx.fillStyle = "black";
 ctx?.fillRect(0, 0, canvas.width, canvas.height);
 
-const playerPic = new Image();
-playerPic.src = img;
+const playerPicR = new Image();
+playerPicR.src = mageRight;
+const playerPicL = new Image();
+playerPicL.src = mageLeft;
 
 const monsterPic = new Image();
 monsterPic.src = monImg;
@@ -69,17 +72,40 @@ const player = SpriteCharacter({
   type: "character",
   position: currPlayerPostion,
   ctx: ctx,
+  stats: {
+    health: 100,
+    damage: 10,
+  },
+  attack: {
+    width: 68,
+    height: 32,
+    startX: 0,
+    startY: 0,
+  },
   source: {
     frames: { min: 0, max: 1 },
     height: 32,
     width: 32,
-    img: playerPic,
+    img: {
+      left: playerPicL,
+      right: playerPicR,
+    },
   },
 });
 const monster = SpriteEntity({
   type: "entity",
-  position: { x: 246, y: 150 },
+  position: { x: 468, y: 450 },
   ctx: ctx,
+  stats: {
+    health: 100,
+    damage: 5,
+  },
+  attack: {
+    width: 150,
+    height: 12,
+    startX: 0,
+    startY: 0,
+  },
   source: {
     frames: { min: 0, max: 5 },
     height: 32,
@@ -90,7 +116,7 @@ const monster = SpriteEntity({
 const mapTiles = BuildMapSprite(
   {
     ctx,
-    mapString: Map2,
+    mapString: Map1,
     offset,
     spriteSheet: sheet,
     tileSize: 32,
@@ -102,6 +128,7 @@ const Control = KeybindHandler({
   animate,
   collidables,
   updateOffset,
+  player,
 });
 
 let scale = 1;
@@ -131,8 +158,9 @@ function toggleZoom() {
 const moveables: MapTypeSprite[] | EntityTypeSprite[] = [...mapTiles, monster];
 
 function animate() {
+  if (Control.isKeyPressed("pause")) return;
   ctx.scale(scale, scale);
-  if (Control.isKeyPressed("terminate")) return;
+  window.requestAnimationFrame(animate);
   if (Control.isKeyPressed("zoom")) {
     zoomOn = true;
     toggleZoom();
@@ -141,7 +169,6 @@ function animate() {
     toggleZoom();
   }
 
-  window.requestAnimationFrame(animate);
   // ctx.fillStyle = "black";
   // ctx?.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -152,6 +179,13 @@ function animate() {
 
   player.draw(getScreenCenter());
 
+  if (Control.isKeyPressed("attack")) {
+    player.attack(
+      getScreenCenter(),
+      collidables.checkForCollisionCharacter,
+      monster.getRect()
+    );
+  }
   const tempPCoords = {
     x: getScreenCenter().x - offset.x,
     y: getScreenCenter().y - offset.y,

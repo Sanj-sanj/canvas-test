@@ -3,8 +3,9 @@ export type Keybinds = {
   s: { pressed: boolean };
   a: { pressed: boolean };
   d: { pressed: boolean };
-  terminate: { pressed: boolean };
+  pause: { pressed: boolean };
   zoom: { pressed: boolean };
+  attack: { pressed: boolean };
 };
 
 export type MovementKey = "w" | "a" | "s" | "d";

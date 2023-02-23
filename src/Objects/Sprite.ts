@@ -1,3 +1,4 @@
+import { MovementKey } from "../KeybindingsTypes";
 import {
   CharacterSprite,
   EntitySprite,
@@ -14,13 +15,26 @@ export interface MapTypeSprite extends EntityTypeSprite {
 export interface EntityTypeSprite {
   draw: () => void;
   log: (offset?: Vector) => void;
-  getPosition: () => Vector;
+  getRect: () => Rect;
   updateOffset: (offset: Vector) => void;
 }
-type CharacterTypeSprite = {
+type Rect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type CharacterTypeSprite = {
   draw: (relativePostion: Vector) => void;
   log: () => void;
   getPosition: () => Vector;
+  changeDirection: (key: MovementKey) => void;
+  attack: (
+    relativePosition: Vector,
+    checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
+    monsterRect: Rect
+  ) => void;
 };
 
 function SpriteEntity({
@@ -57,14 +71,20 @@ function SpriteEntity({
     offset.x = offsetNew.x;
     offset.y = offsetNew.y;
   }
-  function getPosition(): Vector {
-    return position;
+  function getRect() {
+    const rect = {
+      x: position.x + offset.x,
+      y: position.y + offset.y,
+      width: source.width / source.frames.max,
+      height: source.height,
+    };
+    return rect;
   }
   function tickTock() {
     ticks === 3 ? (ticks = 0) : (ticks += 1);
     id = null;
   }
-  return { draw, log, getPosition, updateOffset };
+  return { draw, log, getRect, updateOffset };
 }
 
 function SpriteCharacter({
@@ -72,15 +92,20 @@ function SpriteCharacter({
   position,
   source,
   ctx,
+  stats,
+  attack,
 }: CharacterSprite): CharacterTypeSprite {
   let idTimeout: number | null = null;
   let ticks = 0;
   const helper = { log, draw, getPosition };
+  let direction: MovementKey = "d";
+
+  let spriteCorrelatedToDirection = source.img.right;
 
   function draw(relativePosition: Vector) {
     // relativePdosition exists to handle respositioning player sprite on Zoom action.
     ctx.drawImage(
-      source.img,
+      spriteCorrelatedToDirection,
       source.width * ticks,
       0,
       source.width / source.frames.max,
@@ -95,6 +120,61 @@ function SpriteCharacter({
     return helper;
   }
 
+  function changeDirection(key: MovementKey) {
+    direction = key;
+    switch (key) {
+      case "d":
+        spriteCorrelatedToDirection = source.img.right;
+        break;
+      case "a":
+        spriteCorrelatedToDirection = source.img.left;
+        break;
+
+      default:
+        break;
+    }
+  }
+  function attackNow(
+    relativePosition: Vector,
+    checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
+    monsterRect: Rect
+  ) {
+    let x = relativePosition.x,
+      y = relativePosition.y,
+      attW = attack.width,
+      attH = attack.height;
+    if (direction === "d") {
+      x += source.height; // 32
+    }
+    if (direction === "a") {
+      x -= source.height * 2; //64
+    }
+    if (direction === "w") {
+      const temp = attW;
+      attW = attH;
+      attH = temp;
+      y -= source.height * 2; //64
+    }
+    if (direction === "s") {
+      const temp = attH;
+      attH = attW;
+      attW = temp;
+      y += source.height; // 32
+    }
+    if (
+      checkForCollisionCharacter(monsterRect, {
+        x: x,
+        y: y,
+        height: attH,
+        width: attW,
+      })
+    ) {
+      console.log("hit");
+    }
+
+    ctx.fillStyle = "red";
+    ctx.fillRect(x, y, attW, attH);
+  }
   function log(offset?: Vector) {
     console.log({ type, position, source, offset });
   }
@@ -105,7 +185,7 @@ function SpriteCharacter({
     ticks === 3 ? (ticks = 0) : (ticks += 1);
     idTimeout = null;
   }
-  return { log, getPosition, draw };
+  return { log, getPosition, draw, attack: attackNow, changeDirection };
 }
 function SpriteMap({
   type,
@@ -131,8 +211,14 @@ function SpriteMap({
   function log(offset?: Vector) {
     console.log({ type, position, source, offset });
   }
-  function getPosition(): Vector {
-    return position;
+  function getRect() {
+    const rect = {
+      x: position.x,
+      y: position.y,
+      width: source.width,
+      height: source.height,
+    };
+    return rect;
   }
   function buildCollisionData(pos: Vector) {
     return { x: pos.x, y: pos.y };
@@ -141,7 +227,7 @@ function SpriteMap({
     offset.x = offsetNew.x;
     offset.y = offsetNew.y;
   }
-  return { log, getPosition, draw, buildCollisionData, updateOffset };
+  return { log, draw, getRect, buildCollisionData, updateOffset };
 }
 
 export { SpriteEntity, SpriteCharacter, SpriteMap };
