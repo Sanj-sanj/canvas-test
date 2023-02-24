@@ -54,12 +54,12 @@ function KeybindHandler({
     }
     if (e.key === "p") {
       if (attackCooldown) return;
-      const attackLingerDur = 300;
+      const attackLingerDur = 124;
       if (Keybinds.attack.pressed) return;
       attackCooldown = true;
       Keybinds.attack.pressed = true;
       setTimeout(() => (Keybinds.attack.pressed = false), attackLingerDur);
-      setTimeout(() => (attackCooldown = false), 500);
+      setTimeout(() => (attackCooldown = false), 300);
     }
     const mvKey = e.key as MovementKey;
     if (mvKey in Keybinds) {

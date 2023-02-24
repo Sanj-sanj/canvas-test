@@ -8,8 +8,6 @@ type CharacterSprite = {
   attack: {
     width: number;
     height: number;
-    startX: number;
-    startY: number;
   };
   source: {
     img: {

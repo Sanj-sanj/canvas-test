@@ -77,10 +77,8 @@ const player = SpriteCharacter({
     damage: 10,
   },
   attack: {
-    width: 68,
+    width: 32,
     height: 32,
-    startX: 0,
-    startY: 0,
   },
   source: {
     frames: { min: 0, max: 1 },
@@ -183,7 +181,7 @@ function animate() {
     player.attack(
       getScreenCenter(),
       collidables.checkForCollisionCharacter,
-      monster.getRect()
+      monster
     );
   }
   const tempPCoords = {
@@ -191,7 +189,7 @@ function animate() {
     y: getScreenCenter().y - offset.y,
   };
 
-  Control.keypressEventEmitter(tempPCoords, 6);
+  Control.keypressEventEmitter(tempPCoords, 4);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 

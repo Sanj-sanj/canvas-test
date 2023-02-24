@@ -17,6 +17,7 @@ export interface EntityTypeSprite {
   log: (offset?: Vector) => void;
   getRect: () => Rect;
   updateOffset: (offset: Vector) => void;
+  knockBackSprite: ({ x, y }: Vector) => void;
 }
 type Rect = {
   x: number;
@@ -33,7 +34,7 @@ export type CharacterTypeSprite = {
   attack: (
     relativePosition: Vector,
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
-    monsterRect: Rect
+    monster: EntityTypeSprite
   ) => void;
 };
 
@@ -64,12 +65,16 @@ function SpriteEntity({
     if (id !== null || source.frames.max === 1) return;
     id = setTimeout(() => tickTock(), 300);
   }
-  function log(offset?: Vector) {
+  function log() {
     console.log({ type, position, source, offset });
   }
   function updateOffset(offsetNew: Vector) {
     offset.x = offsetNew.x;
     offset.y = offsetNew.y;
+  }
+  function knockBackSprite({ x, y }: Vector) {
+    position.x += x;
+    position.y += y;
   }
   function getRect() {
     const rect = {
@@ -84,7 +89,7 @@ function SpriteEntity({
     ticks === 3 ? (ticks = 0) : (ticks += 1);
     id = null;
   }
-  return { draw, log, getRect, updateOffset };
+  return { draw, log, getRect, updateOffset, knockBackSprite: knockBackSprite };
 }
 
 function SpriteCharacter({
@@ -134,42 +139,48 @@ function SpriteCharacter({
         break;
     }
   }
-  function attackNow(
+  function attackHandler(
     relativePosition: Vector,
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
-    monsterRect: Rect
+    monster: EntityTypeSprite
   ) {
     let x = relativePosition.x,
       y = relativePosition.y,
       attW = attack.width,
       attH = attack.height;
+    const knockBackOffset = { x: 0, y: 0 };
     if (direction === "d") {
-      x += source.height; // 32
+      x += source.width / source.frames.max;
+      knockBackOffset.x += 8;
     }
     if (direction === "a") {
-      x -= source.height * 2; //64
+      x -= attack.width;
+      knockBackOffset.x -= 8;
     }
     if (direction === "w") {
       const temp = attW;
       attW = attH;
       attH = temp;
-      y -= source.height * 2; //64
+      y -= attack.width / source.frames.max;
+      knockBackOffset.y -= 8;
     }
     if (direction === "s") {
       const temp = attH;
       attH = attW;
       attW = temp;
-      y += source.height; // 32
+      y += attack.height;
+      knockBackOffset.y += 8;
     }
     if (
-      checkForCollisionCharacter(monsterRect, {
+      checkForCollisionCharacter(monster.getRect(), {
         x: x,
         y: y,
         height: attH,
         width: attW,
       })
     ) {
-      console.log("hit");
+      monster.knockBackSprite(knockBackOffset);
+      monster.log();
     }
 
     ctx.fillStyle = "red";
@@ -185,7 +196,7 @@ function SpriteCharacter({
     ticks === 3 ? (ticks = 0) : (ticks += 1);
     idTimeout = null;
   }
-  return { log, getPosition, draw, attack: attackNow, changeDirection };
+  return { log, getPosition, draw, attack: attackHandler, changeDirection };
 }
 function SpriteMap({
   type,
@@ -227,7 +238,19 @@ function SpriteMap({
     offset.x = offsetNew.x;
     offset.y = offsetNew.y;
   }
-  return { log, draw, getRect, buildCollisionData, updateOffset };
+
+  function knockBackSprite(offsetNew: Vector) {
+    offset.x += offsetNew.x;
+    offset.y += offsetNew.y;
+  }
+  return {
+    log,
+    draw,
+    getRect,
+    buildCollisionData,
+    updateOffset,
+    knockBackSprite,
+  };
 }
 
 export { SpriteEntity, SpriteCharacter, SpriteMap };
