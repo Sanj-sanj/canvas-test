@@ -34,9 +34,23 @@ monsterPic.src = monImg;
 const sheet = new Image();
 sheet.src = spirteSheet;
 
-const collidables = Collisions();
-collidables;
+const collisionState = Collisions();
 let zoomOn = false;
+let scale = 1;
+
+function toggleZoom(zoomState: boolean) {
+  if (zoomState) {
+    updateOffset("y", "-", 28.8 * 5);
+    updateOffset("x", "-", 210);
+    scale = 2;
+    zoomOn = zoomState;
+  } else if (!zoomState) {
+    updateOffset("y", "+", 28.8 * 5);
+    updateOffset("x", "+", 42 * 5);
+    scale = 1;
+    zoomOn = zoomState;
+  }
+}
 
 // our plyer's center position relative to the screen size will be by the formula:
 // [canvas.width | canvas.height] / 2 { / scaling } { - SPRITE SIZE / 2 for x})
@@ -119,56 +133,29 @@ const mapTiles = BuildMapSprite(
     spriteSheet: sheet,
     tileSize: 32,
   },
-  collidables.appendCollidable
+  collisionState.appendCollidable
 );
 
 const Control = KeybindHandler({
   animate,
-  collidables,
-  updateOffset,
+  collidables: collisionState,
+  keypressActions: {
+    updateOffset,
+    toggleZoom,
+  },
   player,
 });
 
-let scale = 1;
-const ids: number[] = [];
-
-function toggleZoom() {
-  if (zoomOn && scale < 2 && ids.length < 5) {
-    ids.push(
-      setTimeout(() => {
-        updateOffset("y", "-", 28.8);
-        updateOffset("x", "-", 42);
-        scale += 0.2;
-      })
-    );
-  } else if (!zoomOn && scale > 1 && ids.length >= 1) {
-    ids.forEach(() => {
-      setTimeout(() => {
-        updateOffset("y", "+", 28.8);
-        updateOffset("x", "+", 42);
-        scale -= 0.2;
-      });
-      clearTimeout(ids.shift());
-    });
-  }
-}
-
-const moveables: MapTypeSprite[] | EntityTypeSprite[] = [...mapTiles, monster];
+const moveables: (MapTypeSprite | EntityTypeSprite)[] = [...mapTiles, monster];
 
 function animate() {
   if (Control.isKeyPressed("pause")) return;
   ctx.scale(scale, scale);
   window.requestAnimationFrame(animate);
-  if (Control.isKeyPressed("zoom")) {
-    zoomOn = true;
-    toggleZoom();
-  } else {
-    zoomOn = false;
-    toggleZoom();
-  }
-
-  // ctx.fillStyle = "black";
-  // ctx?.fillRect(0, 0, canvas.width, canvas.height);
+  // this canvas edit fills everything in black before redrawing other sprites
+  // needed when zooming in and out, otherwise artefacts of previous renders exist outside of drawn sprite boundaries.
+  ctx.fillStyle = "black";
+  ctx?.fillRect(0, 0, canvas.width, canvas.height);
 
   moveables.forEach((moveable) => {
     moveable.updateOffset(offset);
@@ -180,7 +167,7 @@ function animate() {
   if (Control.isKeyPressed("attack")) {
     player.attack(
       getScreenCenter(),
-      collidables.checkForCollisionCharacter,
+      collisionState.checkForCollisionCharacter,
       monster
     );
   }

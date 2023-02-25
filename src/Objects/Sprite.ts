@@ -6,19 +6,23 @@ import {
   Vector,
 } from "./SpriteTypes";
 
-export interface MapTypeSprite extends EntityTypeSprite {
+export type MapTypeSprite = {
   buildCollisionData: (position: Vector) => {
     x: number;
     y: number;
   };
-}
-export interface EntityTypeSprite {
+  log: (offset?: Vector) => void;
+  draw: () => void;
+  updateOffset: (newOffset: Vector) => void;
+};
+export type EntityTypeSprite = {
   draw: () => void;
   log: (offset?: Vector) => void;
   getRect: () => Rect;
   updateOffset: (offset: Vector) => void;
   knockBackSprite: ({ x, y }: Vector) => void;
-}
+  alterHp: (damage: number, modifier: "+" | "-") => void;
+};
 type Rect = {
   x: number;
   y: number;
@@ -43,32 +47,40 @@ function SpriteEntity({
   position,
   source,
   ctx,
+  stats,
 }: EntitySprite): EntityTypeSprite {
   let ticks = 0;
-  let id: null | number = null;
+  let spriteFrameIntervalID: null | number = null;
+  let invulnerabilityID: number | null = null;
   const offset = { x: 0, y: 0 };
-
+  console.log("inside entity");
   function draw() {
     // ctx.fillStyle = "blue";
     // ctx.fillRect(position.x + offset.x, position.y + offset.y, 32, 32);
-    ctx.drawImage(
-      source.img,
-      (source.width / source.frames.max) * ticks,
-      0,
-      source.width / source.frames.max, // maximum number of frames in total of the provided sprite
-      source.height,
-      position.x + offset.x,
-      position.y + offset.y,
-      source.width / source.frames.max,
-      source.height * 1
-    );
-    if (id !== null || source.frames.max === 1) return;
-    id = setTimeout(() => tickTock(), 300);
+    if (stats.health > 0) {
+      ctx.drawImage(
+        source.img,
+        (source.width / source.frames.max) * ticks,
+        0,
+        source.width / source.frames.max, // maximum number of frames in total of the provided sprite
+        source.height,
+        position.x + offset.x,
+        position.y + offset.y,
+        source.width / source.frames.max,
+        source.height * 1
+      );
+      if (spriteFrameIntervalID !== null || source.frames.max === 1) return;
+      spriteFrameIntervalID = setTimeout(() => tickTock(), 300);
+    }
   }
   function log() {
     console.log({ type, position, source, offset });
+    console.log(stats.health);
   }
   function updateOffset(offsetNew: Vector) {
+    /*update offset is used to reset the offset value according to the value provided by main
+     *which is responsible for offsetting camera position as the character moves around the map
+     */
     offset.x = offsetNew.x;
     offset.y = offsetNew.y;
   }
@@ -76,6 +88,15 @@ function SpriteEntity({
     position.x += x;
     position.y += y;
   }
+  function alterHp(damage: number, modifier: "+" | "-") {
+    if (invulnerabilityID) return;
+    invulnerabilityID = setTimeout(() => {
+      if (modifier === "+") stats.health += damage;
+      else stats.health -= damage;
+      invulnerabilityID = null;
+    }, 300);
+  }
+
   function getRect() {
     const rect = {
       x: position.x + offset.x,
@@ -86,10 +107,19 @@ function SpriteEntity({
     return rect;
   }
   function tickTock() {
-    ticks === 3 ? (ticks = 0) : (ticks += 1);
-    id = null;
+    const max = 3, //max ammount of frames to cycle through the sprite
+      min = 0; // reset index
+    ticks === max ? (ticks = min) : (ticks += 1);
+    spriteFrameIntervalID = null;
   }
-  return { draw, log, getRect, updateOffset, knockBackSprite: knockBackSprite };
+  return {
+    draw,
+    log,
+    getRect,
+    updateOffset,
+    knockBackSprite: knockBackSprite,
+    alterHp,
+  };
 }
 
 function SpriteCharacter({
@@ -144,6 +174,7 @@ function SpriteCharacter({
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
     monster: EntityTypeSprite
   ) {
+    const knockbackValue = 3;
     let x = relativePosition.x,
       y = relativePosition.y,
       attW = attack.width,
@@ -151,25 +182,25 @@ function SpriteCharacter({
     const knockBackOffset = { x: 0, y: 0 };
     if (direction === "d") {
       x += source.width / source.frames.max;
-      knockBackOffset.x += 8;
+      knockBackOffset.x += knockbackValue;
     }
     if (direction === "a") {
       x -= attack.width;
-      knockBackOffset.x -= 8;
+      knockBackOffset.x -= knockbackValue;
     }
     if (direction === "w") {
       const temp = attW;
       attW = attH;
       attH = temp;
       y -= attack.width / source.frames.max;
-      knockBackOffset.y -= 8;
+      knockBackOffset.y -= knockbackValue;
     }
     if (direction === "s") {
       const temp = attH;
       attH = attW;
       attW = temp;
       y += attack.height;
-      knockBackOffset.y += 8;
+      knockBackOffset.y += knockbackValue;
     }
     if (
       checkForCollisionCharacter(monster.getRect(), {
@@ -180,6 +211,7 @@ function SpriteCharacter({
       })
     ) {
       monster.knockBackSprite(knockBackOffset);
+      monster.alterHp(stats.damage, "-");
       monster.log();
     }
 
@@ -222,15 +254,15 @@ function SpriteMap({
   function log(offset?: Vector) {
     console.log({ type, position, source, offset });
   }
-  function getRect() {
-    const rect = {
-      x: position.x,
-      y: position.y,
-      width: source.width,
-      height: source.height,
-    };
-    return rect;
-  }
+  // function getRect() {
+  //   const rect = {
+  //     x: position.x,
+  //     y: position.y,
+  //     width: source.width,
+  //     height: source.height,
+  //   };
+  //   return rect;
+  // }
   function buildCollisionData(pos: Vector) {
     return { x: pos.x, y: pos.y };
   }
@@ -238,18 +270,21 @@ function SpriteMap({
     offset.x = offsetNew.x;
     offset.y = offsetNew.y;
   }
-
-  function knockBackSprite(offsetNew: Vector) {
-    offset.x += offsetNew.x;
-    offset.y += offsetNew.y;
-  }
+  // function alterHp(damage: number, modifier: "+" | "-") {
+  //   return;
+  // }
+  // function knockBackSprite(offsetNew: Vector) {
+  //   offset.x += offsetNew.x;
+  //   offset.y += offsetNew.y;
+  // }
   return {
     log,
     draw,
-    getRect,
+    // getRect,
     buildCollisionData,
     updateOffset,
-    knockBackSprite,
+    // knockBackSprite,
+    // alterHp,
   };
 }
 

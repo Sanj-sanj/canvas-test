@@ -5,14 +5,17 @@ import { CharacterTypeSprite } from "./Objects/Sprite";
 type KeybindParams = {
   animate: () => void;
   collidables: CollisionState;
-  updateOffset: (pos: "x" | "y", operand: "-" | "+", speed?: number) => void;
   player: CharacterTypeSprite;
+  keypressActions: {
+    toggleZoom: (zoomOn: boolean) => void;
+    updateOffset: (pos: "x" | "y", operand: "-" | "+", speed?: number) => void;
+  };
 };
 
 function KeybindHandler({
   animate,
   collidables,
-  updateOffset,
+  keypressActions: { toggleZoom, updateOffset },
   player,
 }: KeybindParams) {
   const Keybinds: Keybinds = {
@@ -24,7 +27,7 @@ function KeybindHandler({
     pause: { pressed: false },
     zoom: { pressed: false },
   };
-  let haltMovement = false;
+  // let haltMovement = false;
   let zoomOnCooldown = false;
   let attackCooldown = false;
 
@@ -47,10 +50,9 @@ function KeybindHandler({
     if (e.key === "z") {
       if (zoomOnCooldown) return;
       Keybinds.zoom.pressed = !Keybinds.zoom.pressed;
-      haltMovement = true;
       zoomOnCooldown = true;
-      setTimeout(() => (haltMovement = false), 100);
       setTimeout(() => (zoomOnCooldown = false), 200);
+      toggleZoom(Keybinds.zoom.pressed);
     }
     if (e.key === "p") {
       if (attackCooldown) return;
@@ -75,7 +77,7 @@ function KeybindHandler({
   }
 
   function keypressEventEmitter(coords: { x: number; y: number }, speed = 3) {
-    if (haltMovement) return;
+    // if (haltMovement) return;
     if (
       isKeyPressed("w") &&
       !collidables.checkForCollisionEnvironment(
