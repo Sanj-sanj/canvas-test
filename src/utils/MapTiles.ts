@@ -16,7 +16,14 @@ export type MapTile =
   | "!"
   | "P"
   | "%"
-  | "#";
+  | "#"
+  | "b"
+  | "c"
+  | "B"
+  | "r"
+  | "R"
+  | "A"
+  | "Q";
 
 type LegendEntry = {
   [key in MapTile]: {
@@ -68,6 +75,12 @@ const Legend: LegendEntry = {
     collisionType: "pass",
     type: "cobble road",
     spritePath: [{ x: 6, y: 0 }],
+    actors: [],
+  },
+  c: {
+    collisionType: "pass",
+    type: "cobble road with grass",
+    spritePath: [{ x: 6, y: 1 }],
     actors: [],
   },
   "/": {
@@ -131,6 +144,42 @@ const Legend: LegendEntry = {
     collisionType: "pass",
     type: "ground plants",
     spritePath: [{ x: 0, y: 1 }],
+    actors: [],
+  },
+  b: {
+    collisionType: "pass",
+    type: "small horizontal bride ",
+    spritePath: [{ x: 5, y: 2 }],
+    actors: [],
+  },
+  r: {
+    collisionType: "pass",
+    type: "small vertical bride ",
+    spritePath: [{ x: 6, y: 2 }],
+    actors: [],
+  },
+  B: {
+    collisionType: "pass",
+    type: "large horizontal bridge bottom",
+    spritePath: [{ x: 3, y: 3 }],
+    actors: [],
+  },
+  R: {
+    collisionType: "pass",
+    type: "large horizontal bridge top",
+    spritePath: [{ x: 4, y: 3 }],
+    actors: [],
+  },
+  A: {
+    collisionType: "pass",
+    type: "large vertical bridge  right",
+    spritePath: [{ x: 5, y: 3 }],
+    actors: [],
+  },
+  Q: {
+    collisionType: "pass",
+    type: "large vertical bridge left",
+    spritePath: [{ x: 6, y: 3 }],
     actors: [],
   },
 };
