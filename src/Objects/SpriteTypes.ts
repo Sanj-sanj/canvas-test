@@ -1,4 +1,4 @@
-type CharacterSprite = {
+type CharacterSpriteParams = {
   type: "character";
   position: { x: number; y: number };
   stats: {
@@ -21,7 +21,7 @@ type CharacterSprite = {
   ctx: CanvasRenderingContext2D;
 };
 
-type EntitySprite = {
+type EntitySpriteParams = {
   type: "entity";
   position: { x: number; y: number };
   stats: {
@@ -31,8 +31,6 @@ type EntitySprite = {
   attack: {
     width: number;
     height: number;
-    startX: number;
-    startY: number;
   };
   source: {
     img: HTMLImageElement;
@@ -43,11 +41,11 @@ type EntitySprite = {
   ctx: CanvasRenderingContext2D;
 };
 
-type EnvironmentSpriteSheet = {
+type EnvironmentSpriteSheetParams = {
   type: "mapSpriteSheet";
   position: { x: number; y: number };
   source: {
-    spriteSize: 16 | 32;
+    spriteSize: 32;
     img: HTMLImageElement;
     width: number;
     height: number;
@@ -61,12 +59,12 @@ type EnvironmentSpriteSheet = {
 };
 type Vector = { x: number; y: number };
 
-type SpriteParams = EntitySprite | EnvironmentSpriteSheet;
+type SpriteParams = EntitySpriteParams | EnvironmentSpriteSheetParams;
 
 export type {
-  CharacterSprite,
-  EntitySprite,
-  EnvironmentSpriteSheet,
+  CharacterSpriteParams,
+  EntitySpriteParams,
+  EnvironmentSpriteSheetParams,
   Vector,
   SpriteParams,
 };

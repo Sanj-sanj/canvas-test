@@ -1,8 +1,8 @@
 import { MovementKey } from "../KeybindingsTypes";
 import {
-  CharacterSprite,
-  EntitySprite,
-  EnvironmentSpriteSheet,
+  CharacterSpriteParams,
+  EntitySpriteParams,
+  EnvironmentSpriteSheetParams,
   Vector,
 } from "./SpriteTypes";
 
@@ -21,7 +21,15 @@ export type EntityTypeSprite = {
   getRect: () => Rect;
   updateOffset: (offset: Vector) => void;
   knockBackSprite: ({ x, y }: Vector) => void;
-  alterHp: (damage: number, modifier: "+" | "-") => void;
+  alterHp: (damage: number, modifier: "+" | "-") => number | undefined;
+  killThisSprite: (
+    index: number,
+    moveable: (EntityTypeSprite | MapTypeSprite)[],
+    removedSprites: EntityTypeSprite[]
+  ) => Promise<{
+    removed: EntityTypeSprite[];
+    moveable: (EntityTypeSprite | MapTypeSprite)[];
+  }>;
 };
 type Rect = {
   x: number;
@@ -39,7 +47,7 @@ export type CharacterTypeSprite = {
     relativePosition: Vector,
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
     monster: EntityTypeSprite
-  ) => void;
+  ) => boolean;
 };
 
 function SpriteEntity({
@@ -48,7 +56,7 @@ function SpriteEntity({
   source,
   ctx,
   stats,
-}: EntitySprite): EntityTypeSprite {
+}: EntitySpriteParams): EntityTypeSprite {
   let ticks = 0;
   let spriteFrameIntervalID: null | number = null;
   let invulnerabilityID: number | null = null;
@@ -88,13 +96,32 @@ function SpriteEntity({
     position.x += x;
     position.y += y;
   }
-  function alterHp(damage: number, modifier: "+" | "-") {
+  function alterHp(damage: number, modifier: "+" | "-"): number | undefined {
     if (invulnerabilityID) return;
+    if (modifier === "+") stats.health += damage;
+    else stats.health -= damage;
     invulnerabilityID = setTimeout(() => {
-      if (modifier === "+") stats.health += damage;
-      else stats.health -= damage;
       invulnerabilityID = null;
     }, 300);
+    return stats.health;
+  }
+  function killThisSprite(
+    index: number,
+    moveable: (EntityTypeSprite | MapTypeSprite)[],
+    removedSprites: EntityTypeSprite[]
+  ) {
+    // return a promise to only get called once
+    return new Promise<{
+      removed: EntityTypeSprite[];
+      moveable: (EntityTypeSprite | MapTypeSprite)[];
+    }>((res) => {
+      const a = moveable.slice(0, index).concat(...moveable.slice(index + 1));
+      const b = moveable.slice(
+        index,
+        index + 1
+      ) as unknown as EntityTypeSprite[];
+      res({ moveable: a, removed: [...removedSprites, ...b] });
+    });
   }
 
   function getRect() {
@@ -119,6 +146,7 @@ function SpriteEntity({
     updateOffset,
     knockBackSprite: knockBackSprite,
     alterHp,
+    killThisSprite,
   };
 }
 
@@ -129,7 +157,7 @@ function SpriteCharacter({
   ctx,
   stats,
   attack,
-}: CharacterSprite): CharacterTypeSprite {
+}: CharacterSpriteParams): CharacterTypeSprite {
   let idTimeout: number | null = null;
   let ticks = 0;
   const helper = { log, draw, getPosition };
@@ -202,6 +230,8 @@ function SpriteCharacter({
       y += attack.height;
       knockBackOffset.y += knockbackValue;
     }
+    ctx.fillStyle = "red";
+    ctx.fillRect(x, y, attW, attH);
     if (
       checkForCollisionCharacter(monster.getRect(), {
         x: x,
@@ -211,12 +241,13 @@ function SpriteCharacter({
       })
     ) {
       monster.knockBackSprite(knockBackOffset);
-      monster.alterHp(stats.damage, "-");
-      monster.log();
+      const hp = monster.alterHp(stats.damage, "-");
+      // monster.log();
+      if (typeof hp === "number" && hp <= 0) {
+        return true;
+      }
     }
-
-    ctx.fillStyle = "red";
-    ctx.fillRect(x, y, attW, attH);
+    return false;
   }
   function log(offset?: Vector) {
     console.log({ type, position, source, offset });
@@ -235,7 +266,7 @@ function SpriteMap({
   position,
   source,
   ctx,
-}: EnvironmentSpriteSheet): MapTypeSprite {
+}: EnvironmentSpriteSheetParams): MapTypeSprite {
   const offset = { x: 0, y: 0 };
   function draw() {
     //  "mapSpriteSheet"
@@ -254,15 +285,6 @@ function SpriteMap({
   function log(offset?: Vector) {
     console.log({ type, position, source, offset });
   }
-  // function getRect() {
-  //   const rect = {
-  //     x: position.x,
-  //     y: position.y,
-  //     width: source.width,
-  //     height: source.height,
-  //   };
-  //   return rect;
-  // }
   function buildCollisionData(pos: Vector) {
     return { x: pos.x, y: pos.y };
   }
@@ -270,21 +292,11 @@ function SpriteMap({
     offset.x = offsetNew.x;
     offset.y = offsetNew.y;
   }
-  // function alterHp(damage: number, modifier: "+" | "-") {
-  //   return;
-  // }
-  // function knockBackSprite(offsetNew: Vector) {
-  //   offset.x += offsetNew.x;
-  //   offset.y += offsetNew.y;
-  // }
   return {
     log,
     draw,
-    // getRect,
     buildCollisionData,
     updateOffset,
-    // knockBackSprite,
-    // alterHp,
   };
 }
 

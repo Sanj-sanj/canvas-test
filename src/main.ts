@@ -88,7 +88,7 @@ const player = SpriteCharacter({
   ctx: ctx,
   stats: {
     health: 100,
-    damage: 10,
+    damage: 50,
   },
   attack: {
     width: 32,
@@ -115,8 +115,6 @@ const monster = SpriteEntity({
   attack: {
     width: 150,
     height: 12,
-    startX: 0,
-    startY: 0,
   },
   source: {
     frames: { min: 0, max: 5 },
@@ -146,7 +144,8 @@ const Control = KeybindHandler({
   player,
 });
 
-const moveables: (MapTypeSprite | EntityTypeSprite)[] = [...mapTiles, monster];
+let moveables: (MapTypeSprite | EntityTypeSprite)[] = [...mapTiles, monster];
+let removedSprites: EntityTypeSprite[] = [];
 
 function animate() {
   if (Control.isKeyPressed("pause")) return;
@@ -164,12 +163,24 @@ function animate() {
 
   player.draw(getScreenCenter());
 
+  if (removedSprites.length) {
+    console.log(removedSprites);
+  }
   if (Control.isKeyPressed("attack")) {
-    player.attack(
+    const finishingBlow = player.attack(
       getScreenCenter(),
       collisionState.checkForCollisionCharacter,
       monster
     );
+    if (finishingBlow) {
+      monster
+        .killThisSprite(moveables.length - 1, moveables, removedSprites)
+        .then((v) => {
+          moveables = v.moveable;
+          removedSprites = v.removed;
+        });
+      // to be fleshed outt
+    }
   }
   const tempPCoords = {
     x: getScreenCenter().x - offset.x,
