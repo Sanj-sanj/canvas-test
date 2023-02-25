@@ -163,9 +163,6 @@ function animate() {
 
   player.draw(getScreenCenter());
 
-  if (removedSprites.length) {
-    console.log(removedSprites);
-  }
   if (Control.isKeyPressed("attack")) {
     const finishingBlow = player.attack(
       getScreenCenter(),
