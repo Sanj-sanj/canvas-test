@@ -30,9 +30,8 @@ function BuildMapSprite(
         //some tiles have more than one tile available for drawing to spice things up
         let spriteImgToUse = spritePath[0];
         if (spritePath.length > 1) {
-          spriteImgToUse = spritePath[
-            Math.floor(Math.random() * spritePath.length)
-          ] as Vector;
+          const mod = Math.floor(Math.random() * 5);
+          spriteImgToUse = spritePath[mod === 0 ? 1 : 0] as Vector;
         }
         const thisSprite = SpriteMap({
           ctx,

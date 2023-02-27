@@ -22,14 +22,7 @@ export type EntityTypeSprite = {
   updateOffset: (offset: Vector) => void;
   knockBackSprite: ({ x, y }: Vector) => void;
   alterHp: (damage: number, modifier: "+" | "-") => number | undefined;
-  killThisSprite: (
-    index: number,
-    moveable: (EntityTypeSprite | MapTypeSprite)[],
-    removedSprites: EntityTypeSprite[]
-  ) => Promise<{
-    removed: EntityTypeSprite[];
-    moveable: (EntityTypeSprite | MapTypeSprite)[];
-  }>;
+  killThisSprite: () => void;
 };
 type Rect = {
   x: number;
@@ -46,7 +39,7 @@ export type CharacterTypeSprite = {
   attack: (
     relativePosition: Vector,
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
-    monster: EntityTypeSprite
+    monster?: EntityTypeSprite
   ) => boolean;
 };
 
@@ -105,23 +98,9 @@ function SpriteEntity({
     }, 300);
     return stats.health;
   }
-  function killThisSprite(
-    index: number,
-    moveable: (EntityTypeSprite | MapTypeSprite)[],
-    removedSprites: EntityTypeSprite[]
-  ) {
-    // return a promise to only get called once
-    return new Promise<{
-      removed: EntityTypeSprite[];
-      moveable: (EntityTypeSprite | MapTypeSprite)[];
-    }>((res) => {
-      const a = moveable.slice(0, index).concat(...moveable.slice(index + 1));
-      const b = moveable.slice(
-        index,
-        index + 1
-      ) as unknown as EntityTypeSprite[];
-      res({ moveable: a, removed: [...removedSprites, ...b] });
-    });
+  function killThisSprite() {
+    //this function will probably play out a death animation?
+    console.log("im ded!");
   }
 
   function getRect() {
@@ -200,7 +179,7 @@ function SpriteCharacter({
   function attackHandler(
     relativePosition: Vector,
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
-    monster: EntityTypeSprite
+    monster?: EntityTypeSprite
   ) {
     const knockbackValue = 3;
     let x = relativePosition.x,
@@ -233,6 +212,7 @@ function SpriteCharacter({
     ctx.fillStyle = "red";
     ctx.fillRect(x, y, attW, attH);
     if (
+      monster &&
       checkForCollisionCharacter(monster.getRect(), {
         x: x,
         y: y,
@@ -247,6 +227,7 @@ function SpriteCharacter({
         return true;
       }
     }
+
     return false;
   }
   function log(offset?: Vector) {

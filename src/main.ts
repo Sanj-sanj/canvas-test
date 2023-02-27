@@ -104,9 +104,104 @@ const player = SpriteCharacter({
     },
   },
 });
-const monster = SpriteEntity({
+const monster1 = SpriteEntity({
   type: "entity",
   position: { x: 468, y: 450 },
+  ctx: ctx,
+  stats: {
+    health: 100,
+    damage: 5,
+  },
+  attack: {
+    width: 150,
+    height: 12,
+  },
+  source: {
+    frames: { min: 0, max: 5 },
+    height: 32,
+    width: 160,
+    img: monsterPic,
+  },
+});
+const monster2 = SpriteEntity({
+  type: "entity",
+  position: { x: 368, y: 650 },
+  ctx: ctx,
+  stats: {
+    health: 100,
+    damage: 5,
+  },
+  attack: {
+    width: 150,
+    height: 12,
+  },
+  source: {
+    frames: { min: 0, max: 5 },
+    height: 32,
+    width: 160,
+    img: monsterPic,
+  },
+});
+const monster3 = SpriteEntity({
+  type: "entity",
+  position: { x: 368, y: 550 },
+  ctx: ctx,
+  stats: {
+    health: 100,
+    damage: 5,
+  },
+  attack: {
+    width: 150,
+    height: 12,
+  },
+  source: {
+    frames: { min: 0, max: 5 },
+    height: 32,
+    width: 160,
+    img: monsterPic,
+  },
+});
+const monster4 = SpriteEntity({
+  type: "entity",
+  position: { x: 398, y: 550 },
+  ctx: ctx,
+  stats: {
+    health: 100,
+    damage: 5,
+  },
+  attack: {
+    width: 150,
+    height: 12,
+  },
+  source: {
+    frames: { min: 0, max: 5 },
+    height: 32,
+    width: 160,
+    img: monsterPic,
+  },
+});
+const monster5 = SpriteEntity({
+  type: "entity",
+  position: { x: 398, y: 590 },
+  ctx: ctx,
+  stats: {
+    health: 100,
+    damage: 5,
+  },
+  attack: {
+    width: 150,
+    height: 12,
+  },
+  source: {
+    frames: { min: 0, max: 5 },
+    height: 32,
+    width: 160,
+    img: monsterPic,
+  },
+});
+const monster6 = SpriteEntity({
+  type: "entity",
+  position: { x: 298, y: 530 },
   ctx: ctx,
   stats: {
     health: 100,
@@ -144,7 +239,15 @@ const Control = KeybindHandler({
   player,
 });
 
-let moveables: (MapTypeSprite | EntityTypeSprite)[] = [...mapTiles, monster];
+let monsters: EntityTypeSprite[] = [
+  monster1,
+  monster2,
+  monster3,
+  monster4,
+  monster5,
+  monster6,
+];
+const moveables: MapTypeSprite[] = [...mapTiles];
 let removedSprites: EntityTypeSprite[] = [];
 
 function animate() {
@@ -160,24 +263,45 @@ function animate() {
     moveable.updateOffset(offset);
     moveable.draw();
   });
-
+  monsters.forEach((mon) => {
+    mon.updateOffset(offset);
+    mon.draw();
+  });
   player.draw(getScreenCenter());
 
+  const deleteEntitysIndex: number[] = [];
   if (Control.isKeyPressed("attack")) {
-    const finishingBlow = player.attack(
-      getScreenCenter(),
-      collisionState.checkForCollisionCharacter,
-      monster
-    );
-    if (finishingBlow) {
-      monster
-        .killThisSprite(moveables.length - 1, moveables, removedSprites)
-        .then((v) => {
-          moveables = v.moveable;
-          removedSprites = v.removed;
-        });
-      // to be fleshed outt
+    if (monsters.length) {
+      monsters.forEach((monster, i) => {
+        const finishingBlow = player.attack(
+          getScreenCenter(),
+          collisionState.checkForCollisionCharacter,
+          monster
+        );
+
+        if (finishingBlow) {
+          removedSprites = [...removedSprites, monster];
+          deleteEntitysIndex.push(i);
+          monster.killThisSprite();
+          // to be fleshed outt
+        }
+      });
     }
+    player.attack(getScreenCenter(), collisionState.checkForCollisionCharacter);
+  }
+  if (deleteEntitysIndex.length) {
+    /* we use a temporary array to store a collection of monster's which are still going
+    to be rendered, but we assign it after the monster have been removed from their original
+    location, otherwise monster's which should be unaffected get deleted by accident if 
+    deleteing multiple monsters on the same game tick.
+    */
+    let tempMon: EntityTypeSprite[] = [];
+    deleteEntitysIndex.forEach((i) => {
+      const a = monsters.slice(0, i),
+        b = monsters.slice(i + 1);
+      tempMon = [...a, ...b];
+    });
+    monsters = tempMon;
   }
   const tempPCoords = {
     x: getScreenCenter().x - offset.x,
