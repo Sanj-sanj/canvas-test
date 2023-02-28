@@ -3,6 +3,7 @@ type Vec = { x: number; y: number };
 export type MapTile =
   | "."
   | "~"
+  | ":"
   | "["
   | "*"
   | "/"
@@ -94,14 +95,20 @@ const Legend: LegendEntry = {
   },
   "[": {
     collisionType: "pass",
-    type: "gravel",
+    type: "lava",
     spritePath: [{ x: 4, y: 2 }],
     actors: [],
   },
   "=": {
     collisionType: "impede",
-    type: "stone wall",
+    type: "horizontal stone wall",
     spritePath: [{ x: 3, y: 2 }],
+    actors: [],
+  },
+  ":": {
+    collisionType: "impede",
+    type: "vertical stone wall",
+    spritePath: [{ x: 1, y: 2 }],
     actors: [],
   },
   W: {
