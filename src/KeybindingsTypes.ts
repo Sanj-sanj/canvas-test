@@ -6,6 +6,7 @@ export type Keybinds = {
   pause: { pressed: boolean };
   zoom: { pressed: boolean };
   attack: { pressed: boolean };
+  secondaryAttack: { pressed: boolean; coords: { x: number; y: number } };
 };
 
 export type MovementKey = "w" | "a" | "s" | "d";

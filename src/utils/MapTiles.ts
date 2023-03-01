@@ -142,7 +142,7 @@ const Legend: LegendEntry = {
   _: {
     collisionType: "impede",
     type: "building wall horizontal",
-    spritePath: [{ x: 2, y: 1 }],
+    spritePath: [{ x: 1, y: 1 }],
     actors: [],
   },
   "|": {

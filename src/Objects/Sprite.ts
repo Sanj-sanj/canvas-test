@@ -41,6 +41,7 @@ export type CharacterTypeSprite = {
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
     monster?: EntityTypeSprite
   ) => boolean;
+  secondaryAttack: (start: Vector, destination: Vector) => void;
 };
 
 function SpriteEntity({
@@ -209,6 +210,41 @@ function SpriteCharacter({
         break;
     }
   }
+  const secondaryAttPhysiscs = {
+    currX: 0,
+    currY: 0,
+    offsetX: 1,
+    offsetY: 1,
+    baseSpeed: 6,
+  };
+  // let once = false;
+  let secAttTimeout: null | number = null;
+  function secondaryAttackHandler(start: Vector, destination: Vector) {
+    if (typeof secAttTimeout === "number") secAttTimeout = null;
+    function aoo() {
+      secondaryAttPhysiscs.currX = start.x + secondaryAttPhysiscs.offsetX;
+      secondaryAttPhysiscs.currY = start.y; //+ secondaryAttPhysiscs.speed;
+      secondaryAttPhysiscs.offsetX += secondaryAttPhysiscs.baseSpeed;
+      // once = true;
+      secAttTimeout = setTimeout(() => {
+        secondaryAttPhysiscs.offsetX = 1;
+        // secondaryAttPhysiscs.baseSpeed
+      }, 1000);
+    }
+    // if (once === false) aoo();
+    aoo();
+    ctx.fillStyle = "purple";
+    const { currX, currY } = secondaryAttPhysiscs;
+
+    ctx.fillRect(currX, currY, attack.secondary.width, attack.secondary.height);
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(
+      destination.x - 8,
+      destination.y - 8,
+      attack.secondary.width,
+      attack.secondary.height
+    );
+  }
   function attackHandler(
     relativePosition: Vector,
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
@@ -272,7 +308,14 @@ function SpriteCharacter({
     ticks === 3 ? (ticks = 0) : (ticks += 1);
     idTimeout = null;
   }
-  return { log, getPosition, draw, attack: attackHandler, changeDirection };
+  return {
+    log,
+    getPosition,
+    draw,
+    attack: attackHandler,
+    changeDirection,
+    secondaryAttack: secondaryAttackHandler,
+  };
 }
 function SpriteMap({
   type,

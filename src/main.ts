@@ -14,9 +14,11 @@ import mageLeft from "./Assets/mageLeft.png";
 import monImg from "./Assets/monsprite.png";
 import spirteSheet from "./Assets/sprites.png";
 import "./style.css";
+import { Vector } from "./Objects/SpriteTypes";
 
 const root = document.querySelector<HTMLDivElement>("#app");
-const canvas = document.createElement("canvas");
+// const canvas = document.createElement("canvas");
+const canvas = document.querySelector("canvas") as HTMLCanvasElement;
 canvas.width = 864;
 canvas.height = 576;
 
@@ -59,6 +61,30 @@ const currPlayerPostion = {
   y: Math.floor(canvas.height / 2),
 };
 const offset = { x: 48, y: 0 };
+const lastClickPosition = { x: 0, y: 0 };
+
+function getLastClickPosition() {
+  // updateLastClickPosition(lastClickPosition);
+  if (zoomOn) {
+    return {
+      x: lastClickPosition.x / 2,
+      y: lastClickPosition.y / 2,
+    };
+  }
+
+  return lastClickPosition;
+}
+
+function updateLastClickPosition(newPos: Vector) {
+  // if (zoomOn) {
+  //   lastClickPosition.x = newPos.x / 2;
+  //   lastClickPosition.y = newPos.y / 2;
+  // } else {
+  //   lastClickPosition.x = newPos.x;
+  // }
+  lastClickPosition.x = newPos.x;
+  lastClickPosition.y = newPos.y;
+}
 
 function getScreenCenter() {
   if (zoomOn) {
@@ -93,7 +119,12 @@ const player = SpriteCharacter({
   attack: {
     width: 32,
     height: 32,
+    secondary: {
+      width: 16,
+      height: 16,
+    },
   },
+
   source: {
     frames: { min: 0, max: 1 },
     height: 32,
@@ -235,6 +266,7 @@ const Control = KeybindHandler({
   keypressActions: {
     updateOffset,
     toggleZoom,
+    updateLastClickPosition,
   },
   player,
 });
@@ -270,6 +302,10 @@ function animate() {
   player.draw(getScreenCenter());
 
   const deleteEntitysIndex: number[] = [];
+
+  if (Control.isKeyPressed("secondaryAttack")) {
+    player.secondaryAttack(getScreenCenter(), getLastClickPosition());
+  }
   if (Control.isKeyPressed("attack")) {
     if (monsters.length) {
       monsters.forEach((monster, i) => {

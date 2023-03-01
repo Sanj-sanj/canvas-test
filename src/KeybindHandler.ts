@@ -1,6 +1,7 @@
 import { CollisionState } from "./Collisions";
 import { Keybinds, MovementKey } from "./KeybindingsTypes";
 import { CharacterTypeSprite } from "./Objects/Sprite";
+import { Vector } from "./Objects/SpriteTypes";
 
 type KeybindParams = {
   animate: () => void;
@@ -9,13 +10,14 @@ type KeybindParams = {
   keypressActions: {
     toggleZoom: (zoomOn: boolean) => void;
     updateOffset: (pos: "x" | "y", operand: "-" | "+", speed?: number) => void;
+    updateLastClickPosition: (newPos: Vector) => void;
   };
 };
 
 function KeybindHandler({
   animate,
   collidables,
-  keypressActions: { toggleZoom, updateOffset },
+  keypressActions: { toggleZoom, updateOffset, updateLastClickPosition },
   player,
 }: KeybindParams) {
   const Keybinds: Keybinds = {
@@ -24,6 +26,7 @@ function KeybindHandler({
     a: { pressed: false },
     d: { pressed: false },
     attack: { pressed: false },
+    secondaryAttack: { pressed: false, coords: { x: 0, y: 0 } },
     pause: { pressed: false },
     zoom: { pressed: false },
   };
@@ -36,8 +39,22 @@ function KeybindHandler({
   }
 
   function initControls() {
+    const canvas = document.querySelector("canvas") as HTMLCanvasElement;
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
+    canvas.addEventListener("mousedown", handleMouseClick);
+  }
+
+  function handleMouseClick(e: MouseEvent) {
+    if (Keybinds.secondaryAttack.pressed) return;
+
+    Keybinds.secondaryAttack.pressed = true;
+    const targ = e.target as HTMLCanvasElement;
+    const rect = targ.getBoundingClientRect();
+    const x = e.clientX - rect.left,
+      y = e.clientY - rect.top;
+    updateLastClickPosition({ x, y });
+    setTimeout(() => (Keybinds.secondaryAttack.pressed = false), 1000); // this number is the duration of animation
   }
 
   function handleKeyDown(e: KeyboardEvent) {
