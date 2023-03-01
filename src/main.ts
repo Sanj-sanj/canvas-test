@@ -88,7 +88,7 @@ const player = SpriteCharacter({
   ctx: ctx,
   stats: {
     health: 100,
-    damage: 50,
+    damage: 25,
   },
   attack: {
     width: 32,
@@ -182,7 +182,7 @@ const monster4 = SpriteEntity({
 });
 const monster5 = SpriteEntity({
   type: "entity",
-  position: { x: 398, y: 590 },
+  position: { x: 398, y: 560 },
   ctx: ctx,
   stats: {
     health: 100,
@@ -201,7 +201,7 @@ const monster5 = SpriteEntity({
 });
 const monster6 = SpriteEntity({
   type: "entity",
-  position: { x: 298, y: 530 },
+  position: { x: 398, y: 530 },
   ctx: ctx,
   stats: {
     health: 100,
@@ -295,13 +295,13 @@ function animate() {
     location, otherwise monster's which should be unaffected get deleted by accident if 
     deleteing multiple monsters on the same game tick.
     */
-    let tempMon: EntityTypeSprite[] = [];
-    deleteEntitysIndex.forEach((i) => {
-      const a = monsters.slice(0, i),
-        b = monsters.slice(i + 1);
-      tempMon = [...a, ...b];
+    const tempMon: (EntityTypeSprite | null)[] = [...monsters];
+    deleteEntitysIndex.forEach((n) => {
+      tempMon[n] = null;
     });
-    monsters = tempMon;
+    setTimeout(() => {
+      monsters = tempMon.filter((m) => m !== null) as EntityTypeSprite[];
+    }, 250);
   }
   const tempPCoords = {
     x: getScreenCenter().x - offset.x,

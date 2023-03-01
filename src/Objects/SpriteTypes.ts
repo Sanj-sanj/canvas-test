@@ -8,6 +8,10 @@ type CharacterSpriteParams = {
   attack: {
     width: number;
     height: number;
+    secondary: {
+      width: number;
+      height: number;
+    };
   };
   source: {
     img: {

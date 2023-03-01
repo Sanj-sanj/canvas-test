@@ -6,6 +6,7 @@ export type MapTile =
   | ":"
   | "["
   | "*"
+  | "$"
   | "/"
   | "="
   | "W"
@@ -63,13 +64,16 @@ const Legend: LegendEntry = {
     spritePath: [{ x: 1, y: 3 }],
     actors: [],
   },
+  $: {
+    collisionType: "pass",
+    type: "grassy dirt road",
+    spritePath: [{ x: 3, y: 0 }],
+    actors: [],
+  },
   "*": {
     collisionType: "pass",
     type: "dirt road",
-    spritePath: [
-      { x: 2, y: 0 },
-      { x: 3, y: 0 },
-    ],
+    spritePath: [{ x: 2, y: 0 }],
     actors: [],
   },
   "#": {

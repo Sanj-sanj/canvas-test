@@ -51,14 +51,36 @@ function SpriteEntity({
   stats,
 }: EntitySpriteParams): EntityTypeSprite {
   let ticks = 0;
+  const maxHp = stats.health;
   let spriteFrameIntervalID: null | number = null;
   let invulnerabilityID: number | null = null;
+  let isUnderAttack = false;
+  let statusDisplayCooldown: null | number = null;
+  let lastDamageTaken = "";
   const offset = { x: 0, y: 0 };
-  console.log("inside entity");
+
   function draw() {
-    // ctx.fillStyle = "blue";
-    // ctx.fillRect(position.x + offset.x, position.y + offset.y, 32, 32);
-    if (stats.health > 0) {
+    if (stats.health >= 0) {
+      if (isUnderAttack) {
+        ctx.fillStyle = "red";
+        ctx.fillRect(position.x + offset.x, position.y + offset.y - 16, 32, 8);
+        ctx.fillStyle = "green";
+        ctx.fillRect(
+          position.x + offset.x,
+          position.y + offset.y - 16,
+          (stats.health / maxHp) * 32,
+          8
+        );
+        if (typeof invulnerabilityID === "number") {
+          ctx.fillStyle = "red";
+          ctx.font = "bold 24px sans-serif";
+          ctx.fillText(
+            lastDamageTaken,
+            position.x + offset.x - 8,
+            position.y + offset.y - 32
+          );
+        }
+      }
       ctx.drawImage(
         source.img,
         (source.width / source.frames.max) * ticks,
@@ -89,13 +111,24 @@ function SpriteEntity({
     position.x += x;
     position.y += y;
   }
-  function alterHp(damage: number, modifier: "+" | "-"): number | undefined {
+  function alterHp(
+    incomingDamage: number,
+    modifier: "+" | "-"
+  ): number | undefined {
+    isUnderAttack = true;
     if (invulnerabilityID) return;
-    if (modifier === "+") stats.health += damage;
-    else stats.health -= damage;
+    if (modifier === "+") stats.health += incomingDamage;
+    else stats.health -= incomingDamage;
+    lastDamageTaken = `${modifier}${incomingDamage}`;
     invulnerabilityID = setTimeout(() => {
       invulnerabilityID = null;
     }, 300);
+    if (typeof statusDisplayCooldown === "number")
+      clearTimeout(statusDisplayCooldown);
+    statusDisplayCooldown = setTimeout(() => {
+      isUnderAttack = false;
+      statusDisplayCooldown = null;
+    }, 2000);
     return stats.health;
   }
   function killThisSprite() {
@@ -123,7 +156,7 @@ function SpriteEntity({
     log,
     getRect,
     updateOffset,
-    knockBackSprite: knockBackSprite,
+    knockBackSprite,
     alterHp,
     killThisSprite,
   };
@@ -227,7 +260,6 @@ function SpriteCharacter({
         return true;
       }
     }
-
     return false;
   }
   function log(offset?: Vector) {
