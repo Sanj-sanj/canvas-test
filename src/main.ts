@@ -3,6 +3,7 @@ import {
   SpriteCharacter,
   MapTypeSprite,
   EntityTypeSprite,
+  SpriteProjectile,
 } from "./Objects/Sprite";
 import Collisions from "./Collisions";
 import BuildMapSprite from "./BuildMapSprites";
@@ -14,7 +15,7 @@ import mageLeft from "./Assets/mageLeft.png";
 import monImg from "./Assets/monsprite.png";
 import spirteSheet from "./Assets/sprites.png";
 import "./style.css";
-import { Vector } from "./Objects/SpriteTypes";
+import { ProjectileTypeSprite, Vector } from "./Objects/SpriteTypes";
 
 const root = document.querySelector<HTMLDivElement>("#app");
 // const canvas = document.createElement("canvas");
@@ -64,7 +65,6 @@ const offset = { x: 48, y: 0 };
 const lastClickPosition = { x: 0, y: 0 };
 
 function getLastClickPosition() {
-  // updateLastClickPosition(lastClickPosition);
   if (zoomOn) {
     return {
       x: lastClickPosition.x / 2,
@@ -76,12 +76,6 @@ function getLastClickPosition() {
 }
 
 function updateLastClickPosition(newPos: Vector) {
-  // if (zoomOn) {
-  //   lastClickPosition.x = newPos.x / 2;
-  //   lastClickPosition.y = newPos.y / 2;
-  // } else {
-  //   lastClickPosition.x = newPos.x;
-  // }
   lastClickPosition.x = newPos.x;
   lastClickPosition.y = newPos.y;
 }
@@ -279,9 +273,10 @@ let monsters: EntityTypeSprite[] = [
   monster5,
   monster6,
 ];
+let projectiles: ProjectileTypeSprite[] = [];
 const moveables: MapTypeSprite[] = [...mapTiles];
 let removedSprites: EntityTypeSprite[] = [];
-
+let renderingProjectile = false;
 function animate() {
   if (Control.isKeyPressed("pause")) return;
   ctx.scale(scale, scale);
@@ -304,7 +299,24 @@ function animate() {
   const deleteEntitysIndex: number[] = [];
 
   if (Control.isKeyPressed("secondaryAttack")) {
-    player.secondaryAttack(getScreenCenter(), getLastClickPosition());
+    renderingProjectile = true;
+
+    const newProjectile = SpriteProjectile(
+      ctx,
+      { width: 16, height: 16 },
+      zoomOn
+    );
+    newProjectile.setValues(getScreenCenter(), getLastClickPosition(), {
+      ...offset,
+    });
+    projectiles.push(newProjectile);
+  }
+  if (renderingProjectile) {
+    const animationOngoing = projectiles.filter((projectile) =>
+      projectile.draw(offset)
+    );
+    projectiles = animationOngoing;
+    if (!projectiles.length) renderingProjectile = false;
   }
   if (Control.isKeyPressed("attack")) {
     if (monsters.length) {

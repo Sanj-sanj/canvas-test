@@ -3,6 +3,7 @@ import {
   CharacterSpriteParams,
   EntitySpriteParams,
   EnvironmentSpriteSheetParams,
+  ProjectileTypeSprite,
   Vector,
 } from "./SpriteTypes";
 
@@ -41,7 +42,6 @@ export type CharacterTypeSprite = {
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
     monster?: EntityTypeSprite
   ) => boolean;
-  secondaryAttack: (start: Vector, destination: Vector) => void;
 };
 
 function SpriteEntity({
@@ -175,10 +175,11 @@ function SpriteCharacter({
   let ticks = 0;
   const helper = { log, draw, getPosition };
   let direction: MovementKey = "d";
-
+  let truePosition = { x: 0, y: 0 };
   let spriteCorrelatedToDirection = source.img.right;
 
   function draw(relativePosition: Vector) {
+    truePosition = relativePosition;
     // relativePdosition exists to handle respositioning player sprite on Zoom action.
     ctx.drawImage(
       spriteCorrelatedToDirection,
@@ -210,41 +211,7 @@ function SpriteCharacter({
         break;
     }
   }
-  const secondaryAttPhysiscs = {
-    currX: 0,
-    currY: 0,
-    offsetX: 1,
-    offsetY: 1,
-    baseSpeed: 6,
-  };
-  // let once = false;
-  let secAttTimeout: null | number = null;
-  function secondaryAttackHandler(start: Vector, destination: Vector) {
-    if (typeof secAttTimeout === "number") secAttTimeout = null;
-    function aoo() {
-      secondaryAttPhysiscs.currX = start.x + secondaryAttPhysiscs.offsetX;
-      secondaryAttPhysiscs.currY = start.y; //+ secondaryAttPhysiscs.speed;
-      secondaryAttPhysiscs.offsetX += secondaryAttPhysiscs.baseSpeed;
-      // once = true;
-      secAttTimeout = setTimeout(() => {
-        secondaryAttPhysiscs.offsetX = 1;
-        // secondaryAttPhysiscs.baseSpeed
-      }, 1000);
-    }
-    // if (once === false) aoo();
-    aoo();
-    ctx.fillStyle = "purple";
-    const { currX, currY } = secondaryAttPhysiscs;
 
-    ctx.fillRect(currX, currY, attack.secondary.width, attack.secondary.height);
-    ctx.fillStyle = "yellow";
-    ctx.fillRect(
-      destination.x - 8,
-      destination.y - 8,
-      attack.secondary.width,
-      attack.secondary.height
-    );
-  }
   function attackHandler(
     relativePosition: Vector,
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
@@ -314,7 +281,6 @@ function SpriteCharacter({
     draw,
     attack: attackHandler,
     changeDirection,
-    secondaryAttack: secondaryAttackHandler,
   };
 }
 function SpriteMap({
@@ -355,5 +321,72 @@ function SpriteMap({
     updateOffset,
   };
 }
+function SpriteProjectile(
+  ctx: CanvasRenderingContext2D,
+  secondaryAtt: { width: number; height: number },
+  zoomState: boolean
+): ProjectileTypeSprite {
+  let iOffset: Vector;
+  const attPhysiscs = {
+    currX: 0,
+    currY: 0,
+    clickX: 0,
+    clickY: 0,
+    baseSp5eed: 6,
+    duration: {
+      current: 60,
+      total: 60,
+    },
+  };
 
-export { SpriteEntity, SpriteCharacter, SpriteMap };
+
+  function setValues(
+    start: Vector,
+    destination: Vector,
+    initialOffset: Vector
+  ) {
+    iOffset = initialOffset;
+    attPhysiscs.clickX = destination.x;
+    attPhysiscs.clickY = destination.y;
+    attPhysiscs.currX = start.x;
+    attPhysiscs.currY = start.y;
+  }
+
+  function moveProjectile() {
+    const distX = attPhysiscs.clickX - (attPhysiscs.currX + 16),
+      distY = attPhysiscs.clickY - (attPhysiscs.currY + 16);
+    attPhysiscs.currX += (distX / attPhysiscs.duration.total) * 4;
+    attPhysiscs.currY += (distY / attPhysiscs.duration.total) * 4;
+  }
+
+  function draw( offset: Vector) {
+    if (attPhysiscs.duration.current >= 1) {
+      const newOfset = {
+        x: iOffset.x - offset.x,
+        y: iOffset.y - offset.y,
+      };
+      ctx.fillStyle = "purple";
+      ctx.fillRect(
+        attPhysiscs.currX + 8 - newOfset.x,
+        attPhysiscs.currY + 8 - newOfset.y,
+        secondaryAtt.width,
+        secondaryAtt.height
+      );
+      moveProjectile();
+      ctx.fillStyle = "yellow";
+      ctx.fillRect(
+        attPhysiscs.clickX - 8,
+        attPhysiscs.clickY - 8,
+        secondaryAtt.width,
+        secondaryAtt.height
+      );
+      attPhysiscs.duration.current--;
+      return true;
+    }
+    return false;
+  }
+
+  return { draw, setValues };
+}
+
+export { SpriteEntity, SpriteCharacter, SpriteMap, SpriteProjectile };

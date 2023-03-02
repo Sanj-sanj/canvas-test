@@ -61,6 +61,15 @@ type EnvironmentSpriteSheetParams = {
   };
   ctx: CanvasRenderingContext2D;
 };
+
+type ProjectileTypeSprite = {
+  draw: (offset: Vector) => boolean;
+  setValues: (
+    start: Vector,
+    destination: Vector,
+    initialOffset: Vector
+  ) => void;
+};
 type Vector = { x: number; y: number };
 
 type SpriteParams = EntitySpriteParams | EnvironmentSpriteSheetParams;
@@ -69,6 +78,7 @@ export type {
   CharacterSpriteParams,
   EntitySpriteParams,
   EnvironmentSpriteSheetParams,
+  ProjectileTypeSprite,
   Vector,
   SpriteParams,
 };

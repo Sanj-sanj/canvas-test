@@ -33,6 +33,7 @@ function KeybindHandler({
   // let haltMovement = false;
   let zoomOnCooldown = false;
   let attackCooldown = false;
+  let secondaryAttackCooldown = false;
 
   function toggleKeyPressed(key: MovementKey, bool: boolean) {
     Keybinds[key].pressed = bool;
@@ -46,15 +47,19 @@ function KeybindHandler({
   }
 
   function handleMouseClick(e: MouseEvent) {
+    if (secondaryAttackCooldown) return;
     if (Keybinds.secondaryAttack.pressed) return;
-
+    secondaryAttackCooldown = true;
     Keybinds.secondaryAttack.pressed = true;
     const targ = e.target as HTMLCanvasElement;
     const rect = targ.getBoundingClientRect();
     const x = e.clientX - rect.left,
       y = e.clientY - rect.top;
     updateLastClickPosition({ x, y });
-    setTimeout(() => (Keybinds.secondaryAttack.pressed = false), 1000); // this number is the duration of animation
+    // this timeout's duration number is the cooldown between new attacks
+    setTimeout(() => (secondaryAttackCooldown = false), 500);
+    // this number is to limit the number of times this function gets called in animation (calls only once per frame)
+    setTimeout(() => (Keybinds.secondaryAttack.pressed = false), 10);
   }
 
   function handleKeyDown(e: KeyboardEvent) {
