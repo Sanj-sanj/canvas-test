@@ -63,12 +63,13 @@ type EnvironmentSpriteSheetParams = {
 };
 
 type ProjectileTypeSprite = {
-  draw: (offset: Vector) => boolean;
   setValues: (
     start: Vector,
     destination: Vector,
     initialOffset: Vector
   ) => void;
+  draw: (offset: Vector) => boolean;
+  getRect: () => { x: number; y: number; width: number; height: number };
 };
 type Vector = { x: number; y: number };
 

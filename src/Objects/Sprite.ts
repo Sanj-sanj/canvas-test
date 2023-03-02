@@ -35,12 +35,13 @@ type Rect = {
 export type CharacterTypeSprite = {
   draw: (relativePostion: Vector) => void;
   log: () => void;
-  getPosition: () => Vector;
+  getRect: () => Rect;
   changeDirection: (key: MovementKey) => void;
   attack: (
-    relativePosition: Vector,
+    type: "primary" | "secondary",
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
-    monster?: EntityTypeSprite
+    monster?: EntityTypeSprite,
+    rect?: Rect
   ) => boolean;
 };
 
@@ -173,7 +174,7 @@ function SpriteCharacter({
 }: CharacterSpriteParams): CharacterTypeSprite {
   let idTimeout: number | null = null;
   let ticks = 0;
-  const helper = { log, draw, getPosition };
+  // const helper = { log, draw, getPosition };
   let direction: MovementKey = "d";
   let truePosition = { x: 0, y: 0 };
   let spriteCorrelatedToDirection = source.img.right;
@@ -192,9 +193,9 @@ function SpriteCharacter({
       source.width / source.frames.max,
       source.height * 1
     );
-    if (idTimeout !== null || source.frames.max === 1) return helper;
+    if (idTimeout !== null || source.frames.max === 1) return;
     idTimeout = setTimeout(() => tickTock(), 300);
-    return helper;
+    return;
   }
 
   function changeDirection(key: MovementKey) {
@@ -213,15 +214,27 @@ function SpriteCharacter({
   }
 
   function attackHandler(
-    relativePosition: Vector,
+    type: "primary" | "secondary",
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
-    monster?: EntityTypeSprite
+    monster?: EntityTypeSprite,
+    rect?: Rect
   ) {
     const knockbackValue = 3;
-    let x = relativePosition.x,
-      y = relativePosition.y,
-      attW = attack.width,
+    let x = truePosition.x,
+      y = truePosition.y,
+      attW = 0,
+      attH = 0;
+    if (type === "primary") {
+      attW = attack.width;
       attH = attack.height;
+    }
+    if (type === "secondary" && rect) {
+      // this needs to get moved out of this function and into Sprite Projectiles to check after a call to draw in main.
+      attW = rect.width;
+      attH = rect.height;
+      x = rect.x;
+      y = rect.y;
+    }
     const knockBackOffset = { x: 0, y: 0 };
     if (direction === "d") {
       x += source.width / source.frames.max;
@@ -268,8 +281,12 @@ function SpriteCharacter({
   function log(offset?: Vector) {
     console.log({ type, position, source, offset });
   }
-  function getPosition(): Vector {
-    return position;
+  function getRect(): Rect {
+    return {
+      ...truePosition,
+      width: source.width / source.frames.max,
+      height: source.height,
+    };
   }
   function tickTock() {
     ticks === 3 ? (ticks = 0) : (ticks += 1);
@@ -277,7 +294,7 @@ function SpriteCharacter({
   }
   return {
     log,
-    getPosition,
+    getRect,
     draw,
     attack: attackHandler,
     changeDirection,
@@ -323,8 +340,7 @@ function SpriteMap({
 }
 function SpriteProjectile(
   ctx: CanvasRenderingContext2D,
-  secondaryAtt: { width: number; height: number },
-  zoomState: boolean
+  secondaryAtt: { width: number; height: number }
 ): ProjectileTypeSprite {
   let iOffset: Vector;
   const attPhysiscs = {
@@ -338,7 +354,6 @@ function SpriteProjectile(
       total: 60,
     },
   };
-
 
   function setValues(
     start: Vector,
@@ -359,24 +374,24 @@ function SpriteProjectile(
     attPhysiscs.currY += (distY / attPhysiscs.duration.total) * 4;
   }
 
-  function draw( offset: Vector) {
+  function draw(offset: Vector) {
     if (attPhysiscs.duration.current >= 1) {
-      const newOfset = {
+      const newOffset = {
         x: iOffset.x - offset.x,
         y: iOffset.y - offset.y,
       };
       ctx.fillStyle = "purple";
       ctx.fillRect(
-        attPhysiscs.currX + 8 - newOfset.x,
-        attPhysiscs.currY + 8 - newOfset.y,
+        attPhysiscs.currX + 8 - newOffset.x,
+        attPhysiscs.currY + 8 - newOffset.y,
         secondaryAtt.width,
         secondaryAtt.height
       );
       moveProjectile();
       ctx.fillStyle = "yellow";
       ctx.fillRect(
-        attPhysiscs.clickX - 8,
-        attPhysiscs.clickY - 8,
+        attPhysiscs.clickX - 8 - newOffset.x,
+        attPhysiscs.clickY - 8 - newOffset.y,
         secondaryAtt.width,
         secondaryAtt.height
       );
@@ -385,8 +400,17 @@ function SpriteProjectile(
     }
     return false;
   }
+  // need to check for collisions inside of this projectile
 
-  return { draw, setValues };
+  function getRect() {
+    return {
+      x: attPhysiscs.currX,
+      y: attPhysiscs.currY,
+      width: secondaryAtt.width,
+      height: secondaryAtt.height,
+    };
+  }
+  return { draw, setValues, getRect };
 }
 
 export { SpriteEntity, SpriteCharacter, SpriteMap, SpriteProjectile };

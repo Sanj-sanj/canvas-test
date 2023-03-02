@@ -300,30 +300,36 @@ function animate() {
 
   if (Control.isKeyPressed("secondaryAttack")) {
     renderingProjectile = true;
-
-    const newProjectile = SpriteProjectile(
-      ctx,
-      { width: 16, height: 16 },
-      zoomOn
-    );
+    const newProjectile = SpriteProjectile(ctx, { width: 16, height: 16 });
     newProjectile.setValues(getScreenCenter(), getLastClickPosition(), {
       ...offset,
     });
     projectiles.push(newProjectile);
   }
   if (renderingProjectile) {
-    const animationOngoing = projectiles.filter((projectile) =>
-      projectile.draw(offset)
-    );
+    const animationOngoing = projectiles.filter((projectile) => {
+      monsters.forEach((mon) =>
+        player.attack(
+          "secondary",
+          collisionState.checkForCollisionCharacter,
+          mon,
+          projectile.getRect()
+        )
+      );
+      return projectile.draw(offset);
+    });
+
     projectiles = animationOngoing;
     if (!projectiles.length) renderingProjectile = false;
   }
+
   if (Control.isKeyPressed("attack")) {
     if (monsters.length) {
       monsters.forEach((monster, i) => {
         const finishingBlow = player.attack(
-          getScreenCenter(),
+          "primary",
           collisionState.checkForCollisionCharacter,
+
           monster
         );
 
@@ -335,7 +341,7 @@ function animate() {
         }
       });
     }
-    player.attack(getScreenCenter(), collisionState.checkForCollisionCharacter);
+    player.attack("primary", collisionState.checkForCollisionCharacter);
   }
   if (deleteEntitysIndex.length) {
     /* we use a temporary array to store a collection of monster's which are still going
