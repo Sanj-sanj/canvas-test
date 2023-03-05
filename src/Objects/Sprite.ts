@@ -37,11 +37,15 @@ export type CharacterTypeSprite = {
   log: () => void;
   getRect: () => Rect;
   changeDirection: (key: MovementKey) => void;
+  secondaryAttack: (
+    checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
+    monster: EntityTypeSprite,
+    rect: Rect
+  ) => { isHit: boolean; finishingBlow: boolean };
   attack: (
     type: "primary" | "secondary",
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
-    monster?: EntityTypeSprite,
-    rect?: Rect
+    monster?: EntityTypeSprite
   ) => boolean;
 };
 
@@ -213,11 +217,43 @@ function SpriteCharacter({
     }
   }
 
+  function secondaryAttack(
+    collisionChecker: (rect0: Rect, rect1: Rect) => boolean,
+    monster: EntityTypeSprite,
+    projectileRect: Rect
+  ) {
+    const isHit = collisionChecker(projectileRect, monster.getRect());
+    if (isHit) {
+      const kbValue = 3;
+      let kbX = 0,
+        kbY = 0;
+      const monRect = monster.getRect();
+      if (projectileRect.y > monRect.y) {
+        kbY += kbValue;
+      } else {
+        kbY -= kbValue;
+      }
+      if (projectileRect.x > monRect.x) {
+        kbX -= kbValue;
+      } else {
+        kbX += kbValue;
+      }
+      monster.knockBackSprite({ x: kbX, y: kbY });
+      const hp = monster.alterHp(
+        Math.floor(stats.strength * 0.25 + attack.secondary.damage),
+        "-"
+      );
+      if (typeof hp === "number" && hp <= 0) {
+        return { finishingBlow: true, isHit };
+      }
+    }
+    return { finishingBlow: false, isHit };
+  }
+
   function attackHandler(
     type: "primary" | "secondary",
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
-    monster?: EntityTypeSprite,
-    rect?: Rect
+    monster?: EntityTypeSprite
   ) {
     const knockbackValue = 3;
     let x = truePosition.x,
@@ -225,15 +261,8 @@ function SpriteCharacter({
       attW = 0,
       attH = 0;
     if (type === "primary") {
-      attW = attack.width;
-      attH = attack.height;
-    }
-    if (type === "secondary" && rect) {
-      // this needs to get moved out of this function and into Sprite Projectiles to check after a call to draw in main.
-      attW = rect.width;
-      attH = rect.height;
-      x = rect.x;
-      y = rect.y;
+      attW = attack.primary.width;
+      attH = attack.primary.height;
     }
     const knockBackOffset = { x: 0, y: 0 };
     if (direction === "d") {
@@ -241,21 +270,21 @@ function SpriteCharacter({
       knockBackOffset.x += knockbackValue;
     }
     if (direction === "a") {
-      x -= attack.width;
+      x -= attack.primary.width;
       knockBackOffset.x -= knockbackValue;
     }
     if (direction === "w") {
       const temp = attW;
       attW = attH;
       attH = temp;
-      y -= attack.width / source.frames.max;
+      y -= attack.primary.width / source.frames.max;
       knockBackOffset.y -= knockbackValue;
     }
     if (direction === "s") {
       const temp = attH;
       attH = attW;
       attW = temp;
-      y += attack.height;
+      y += attack.primary.height;
       knockBackOffset.y += knockbackValue;
     }
     ctx.fillStyle = "red";
@@ -270,7 +299,10 @@ function SpriteCharacter({
       })
     ) {
       monster.knockBackSprite(knockBackOffset);
-      const hp = monster.alterHp(stats.damage, "-");
+      const hp = monster.alterHp(
+        Math.floor(stats.strength * 0.235 + attack.primary.damage),
+        "-"
+      );
       // monster.log();
       if (typeof hp === "number" && hp <= 0) {
         return true;
@@ -297,6 +329,7 @@ function SpriteCharacter({
     getRect,
     draw,
     attack: attackHandler,
+    secondaryAttack,
     changeDirection,
   };
 }
@@ -374,6 +407,10 @@ function SpriteProjectile(
     attPhysiscs.currY += (distY / attPhysiscs.duration.total) * 4;
   }
 
+  function endAnimation() {
+    attPhysiscs.duration.current = 0;
+  }
+
   function draw(offset: Vector) {
     if (attPhysiscs.duration.current >= 1) {
       const newOffset = {
@@ -410,7 +447,7 @@ function SpriteProjectile(
       height: secondaryAtt.height,
     };
   }
-  return { draw, setValues, getRect };
+  return { draw, setValues, getRect, endAnimation };
 }
 
 export { SpriteEntity, SpriteCharacter, SpriteMap, SpriteProjectile };

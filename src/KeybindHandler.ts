@@ -57,7 +57,7 @@ function KeybindHandler({
       y = e.clientY - rect.top;
     updateLastClickPosition({ x, y });
     // this timeout's duration number is the cooldown between new attacks
-    setTimeout(() => (secondaryAttackCooldown = false), 500);
+    setTimeout(() => (secondaryAttackCooldown = false), 400);
     // this number is to limit the number of times this function gets called in animation (calls only once per frame)
     setTimeout(() => (Keybinds.secondaryAttack.pressed = false), 10);
   }

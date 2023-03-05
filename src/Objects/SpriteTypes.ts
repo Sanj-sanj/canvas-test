@@ -3,14 +3,18 @@ type CharacterSpriteParams = {
   position: { x: number; y: number };
   stats: {
     health: number;
-    damage: number;
+    strength: number;
   };
   attack: {
-    width: number;
-    height: number;
+    primary: {
+      width: number;
+      height: number;
+      damage: number;
+    };
     secondary: {
       width: number;
       height: number;
+      damage: number;
     };
   };
   source: {
@@ -70,6 +74,7 @@ type ProjectileTypeSprite = {
   ) => void;
   draw: (offset: Vector) => boolean;
   getRect: () => { x: number; y: number; width: number; height: number };
+  endAnimation: () => void;
 };
 type Vector = { x: number; y: number };
 

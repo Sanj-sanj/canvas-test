@@ -1,5 +1,5 @@
 import {
-  SpriteEntity,
+  // SpriteEntity,
   SpriteCharacter,
   MapTypeSprite,
   EntityTypeSprite,
@@ -12,10 +12,11 @@ import { Map1, Map2 } from "./utils/MapStrings";
 
 import mageRight from "./Assets/mageRight.png";
 import mageLeft from "./Assets/mageLeft.png";
-import monImg from "./Assets/monsprite.png";
-import spirteSheet from "./Assets/sprites.png";
+// import monImg from "./Assets/monsprite.png";
+import spriteSheet from "./Assets/sprites.png";
 import "./style.css";
 import { ProjectileTypeSprite, Vector } from "./Objects/SpriteTypes";
+import { testMons } from "./Objects/GameEntitys";
 
 const root = document.querySelector<HTMLDivElement>("#app");
 // const canvas = document.createElement("canvas");
@@ -32,10 +33,8 @@ playerPicR.src = mageRight;
 const playerPicL = new Image();
 playerPicL.src = mageLeft;
 
-const monsterPic = new Image();
-monsterPic.src = monImg;
 const sheet = new Image();
-sheet.src = spirteSheet;
+sheet.src = spriteSheet;
 
 const collisionState = Collisions();
 let zoomOn = false;
@@ -108,17 +107,20 @@ const player = SpriteCharacter({
   ctx: ctx,
   stats: {
     health: 100,
-    damage: 25,
+    strength: 25,
   },
   attack: {
-    width: 32,
-    height: 32,
+    primary: {
+      width: 32,
+      height: 32,
+      damage: 25,
+    },
     secondary: {
       width: 16,
       height: 16,
+      damage: 10,
     },
   },
-
   source: {
     frames: { min: 0, max: 1 },
     height: 32,
@@ -129,124 +131,10 @@ const player = SpriteCharacter({
     },
   },
 });
-const monster1 = SpriteEntity({
-  type: "entity",
-  position: { x: 468, y: 450 },
-  ctx: ctx,
-  stats: {
-    health: 100,
-    damage: 5,
-  },
-  attack: {
-    width: 150,
-    height: 12,
-  },
-  source: {
-    frames: { min: 0, max: 5 },
-    height: 32,
-    width: 160,
-    img: monsterPic,
-  },
-});
-const monster2 = SpriteEntity({
-  type: "entity",
-  position: { x: 368, y: 650 },
-  ctx: ctx,
-  stats: {
-    health: 100,
-    damage: 5,
-  },
-  attack: {
-    width: 150,
-    height: 12,
-  },
-  source: {
-    frames: { min: 0, max: 5 },
-    height: 32,
-    width: 160,
-    img: monsterPic,
-  },
-});
-const monster3 = SpriteEntity({
-  type: "entity",
-  position: { x: 368, y: 550 },
-  ctx: ctx,
-  stats: {
-    health: 100,
-    damage: 5,
-  },
-  attack: {
-    width: 150,
-    height: 12,
-  },
-  source: {
-    frames: { min: 0, max: 5 },
-    height: 32,
-    width: 160,
-    img: monsterPic,
-  },
-});
-const monster4 = SpriteEntity({
-  type: "entity",
-  position: { x: 398, y: 550 },
-  ctx: ctx,
-  stats: {
-    health: 100,
-    damage: 5,
-  },
-  attack: {
-    width: 150,
-    height: 12,
-  },
-  source: {
-    frames: { min: 0, max: 5 },
-    height: 32,
-    width: 160,
-    img: monsterPic,
-  },
-});
-const monster5 = SpriteEntity({
-  type: "entity",
-  position: { x: 398, y: 560 },
-  ctx: ctx,
-  stats: {
-    health: 100,
-    damage: 5,
-  },
-  attack: {
-    width: 150,
-    height: 12,
-  },
-  source: {
-    frames: { min: 0, max: 5 },
-    height: 32,
-    width: 160,
-    img: monsterPic,
-  },
-});
-const monster6 = SpriteEntity({
-  type: "entity",
-  position: { x: 398, y: 530 },
-  ctx: ctx,
-  stats: {
-    health: 100,
-    damage: 5,
-  },
-  attack: {
-    width: 150,
-    height: 12,
-  },
-  source: {
-    frames: { min: 0, max: 5 },
-    height: 32,
-    width: 160,
-    img: monsterPic,
-  },
-});
 const mapTiles = BuildMapSprite(
   {
     ctx,
-    mapString: Map1,
+    mapString: Map2,
     offset,
     spriteSheet: sheet,
     tileSize: 32,
@@ -265,14 +153,7 @@ const Control = KeybindHandler({
   player,
 });
 
-let monsters: EntityTypeSprite[] = [
-  monster1,
-  monster2,
-  monster3,
-  monster4,
-  monster5,
-  monster6,
-];
+let monsters: EntityTypeSprite[] = testMons;
 let projectiles: ProjectileTypeSprite[] = [];
 const moveables: MapTypeSprite[] = [...mapTiles];
 let removedSprites: EntityTypeSprite[] = [];
@@ -308,14 +189,21 @@ function animate() {
   }
   if (renderingProjectile) {
     const animationOngoing = projectiles.filter((projectile) => {
-      monsters.forEach((mon) =>
-        player.attack(
-          "secondary",
+      monsters.forEach((monster, i) => {
+        const { finishingBlow, isHit } = player.secondaryAttack(
           collisionState.checkForCollisionCharacter,
-          mon,
+          monster,
           projectile.getRect()
-        )
-      );
+        );
+        if (isHit) {
+          projectile.endAnimation();
+          if (finishingBlow) {
+            removedSprites = [...removedSprites, monster];
+            deleteEntitysIndex.push(i);
+            monster.killThisSprite();
+          }
+        }
+      });
       return projectile.draw(offset);
     });
 
@@ -329,7 +217,6 @@ function animate() {
         const finishingBlow = player.attack(
           "primary",
           collisionState.checkForCollisionCharacter,
-
           monster
         );
 
@@ -344,10 +231,9 @@ function animate() {
     player.attack("primary", collisionState.checkForCollisionCharacter);
   }
   if (deleteEntitysIndex.length) {
-    /* we use a temporary array to store a collection of monster's which are still going
-    to be rendered, but we assign it after the monster have been removed from their original
-    location, otherwise monster's which should be unaffected get deleted by accident if 
-    deleteing multiple monsters on the same game tick.
+    /* temp array shallow copy
+    delete monster's whichby index to unaffect unrelated
+    monsters on the same game tick.
     */
     const tempMon: (EntityTypeSprite | null)[] = [...monsters];
     deleteEntitysIndex.forEach((n) => {
@@ -355,7 +241,7 @@ function animate() {
     });
     setTimeout(() => {
       monsters = tempMon.filter((m) => m !== null) as EntityTypeSprite[];
-    }, 250);
+    }, 300);
   }
   const tempPCoords = {
     x: getScreenCenter().x - offset.x,
