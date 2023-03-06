@@ -376,15 +376,16 @@ function SpriteProjectile(
   secondaryAtt: { width: number; height: number }
 ): ProjectileTypeSprite {
   let iOffset: Vector;
+  let currOffset: Vector = { x: 0, y: 0 };
   const attPhysiscs = {
     currX: 0,
     currY: 0,
     clickX: 0,
     clickY: 0,
-    baseSp5eed: 6,
+    baseSpeed: 3,
     duration: {
-      current: 60,
-      total: 60,
+      current: 90,
+      total: 180,
     },
   };
 
@@ -393,6 +394,7 @@ function SpriteProjectile(
     destination: Vector,
     initialOffset: Vector
   ) {
+    //initial offset should be a shallow copy to freeze values
     iOffset = initialOffset;
     attPhysiscs.clickX = destination.x;
     attPhysiscs.clickY = destination.y;
@@ -403,8 +405,10 @@ function SpriteProjectile(
   function moveProjectile() {
     const distX = attPhysiscs.clickX - (attPhysiscs.currX + 16),
       distY = attPhysiscs.clickY - (attPhysiscs.currY + 16);
-    attPhysiscs.currX += (distX / attPhysiscs.duration.total) * 4;
-    attPhysiscs.currY += (distY / attPhysiscs.duration.total) * 4;
+    attPhysiscs.currX +=
+      (distX / attPhysiscs.duration.current) * attPhysiscs.baseSpeed;
+    attPhysiscs.currY +=
+      (distY / attPhysiscs.duration.current) * attPhysiscs.baseSpeed;
   }
 
   function endAnimation() {
@@ -413,22 +417,22 @@ function SpriteProjectile(
 
   function draw(offset: Vector) {
     if (attPhysiscs.duration.current >= 1) {
-      const newOffset = {
+      currOffset = {
         x: iOffset.x - offset.x,
         y: iOffset.y - offset.y,
       };
       ctx.fillStyle = "purple";
       ctx.fillRect(
-        attPhysiscs.currX + 8 - newOffset.x,
-        attPhysiscs.currY + 8 - newOffset.y,
+        attPhysiscs.currX + 8 - currOffset.x,
+        attPhysiscs.currY + 8 - currOffset.y,
         secondaryAtt.width,
         secondaryAtt.height
       );
       moveProjectile();
       ctx.fillStyle = "yellow";
       ctx.fillRect(
-        attPhysiscs.clickX - 8 - newOffset.x,
-        attPhysiscs.clickY - 8 - newOffset.y,
+        attPhysiscs.clickX - 8 - currOffset.x,
+        attPhysiscs.clickY - 8 - currOffset.y,
         secondaryAtt.width,
         secondaryAtt.height
       );
@@ -437,12 +441,11 @@ function SpriteProjectile(
     }
     return false;
   }
-  // need to check for collisions inside of this projectile
 
   function getRect() {
     return {
-      x: attPhysiscs.currX,
-      y: attPhysiscs.currY,
+      x: attPhysiscs.currX - currOffset.x,
+      y: attPhysiscs.currY - currOffset.y,
       width: secondaryAtt.width,
       height: secondaryAtt.height,
     };

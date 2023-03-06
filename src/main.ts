@@ -206,7 +206,6 @@ function animate() {
       });
       return projectile.draw(offset);
     });
-
     projectiles = animationOngoing;
     if (!projectiles.length) renderingProjectile = false;
   }
