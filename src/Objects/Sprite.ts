@@ -1,3 +1,4 @@
+import { CollisionState } from "../Collisions";
 import { MovementKey } from "../KeybindingsTypes";
 import {
   CharacterSpriteParams,
@@ -38,19 +39,25 @@ export type CharacterTypeSprite = {
   getRect: () => Rect;
   changeDirection: (key: MovementKey) => void;
   secondaryAttack: (
-    checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
+    collision: CollisionState,
     monster: EntityTypeSprite,
-    rect: Rect
-  ) => { isHit: boolean; finishingBlow: boolean };
+    rect: Rect,
+    offset: Vector
+  ) => { isHit: boolean; finishingBlow: boolean; hitWall: boolean };
   attack: (
-    type: "primary" | "secondary",
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
     monster?: EntityTypeSprite
   ) => boolean;
 };
 
+/*
+ * ============================================================================
+ * ENTITY SPRITE BEGINS
+ * LINE 55
+ * ============================================================================
+ */
+
 function SpriteEntity({
-  type,
   position,
   source,
   ctx,
@@ -85,6 +92,7 @@ function SpriteEntity({
             position.x + offset.x - 8,
             position.y + offset.y - 32
           );
+          // ctx.font = "12px";
         }
       }
       ctx.drawImage(
@@ -103,7 +111,7 @@ function SpriteEntity({
     }
   }
   function log() {
-    console.log({ type, position, source, offset });
+    console.log({ position, source, offset });
     console.log(stats.health);
   }
   function updateOffset(offsetNew: Vector) {
@@ -168,8 +176,14 @@ function SpriteEntity({
   };
 }
 
+/*
+ * ============================================================================
+ * CHARACTER SPRITE BEGINS
+ * LINE 190
+ * ============================================================================
+ */
+
 function SpriteCharacter({
-  type,
   position,
   source,
   ctx,
@@ -178,7 +192,6 @@ function SpriteCharacter({
 }: CharacterSpriteParams): CharacterTypeSprite {
   let idTimeout: number | null = null;
   let ticks = 0;
-  // const helper = { log, draw, getPosition };
   let direction: MovementKey = "d";
   let truePosition = { x: 0, y: 0 };
   let spriteCorrelatedToDirection = source.img.right;
@@ -218,11 +231,20 @@ function SpriteCharacter({
   }
 
   function secondaryAttack(
-    collisionChecker: (rect0: Rect, rect1: Rect) => boolean,
+    collision: CollisionState,
     monster: EntityTypeSprite,
-    projectileRect: Rect
+    projectileRect: Rect,
+    offset: Vector
   ) {
-    const isHit = collisionChecker(projectileRect, monster.getRect());
+    const isHit = collision.checkForCollisionCharacter(
+      projectileRect,
+      monster.getRect()
+    );
+    const hitWall = collision.checkForCollisionProjectile(
+      projectileRect,
+      offset
+    );
+    if (hitWall) return { finishingBlow: false, isHit, hitWall };
     if (isHit) {
       const kbValue = 3;
       let kbX = 0,
@@ -244,26 +266,21 @@ function SpriteCharacter({
         "-"
       );
       if (typeof hp === "number" && hp <= 0) {
-        return { finishingBlow: true, isHit };
+        return { finishingBlow: true, isHit, hitWall };
       }
     }
-    return { finishingBlow: false, isHit };
+    return { finishingBlow: false, isHit, hitWall };
   }
 
   function attackHandler(
-    type: "primary" | "secondary",
     checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
     monster?: EntityTypeSprite
   ) {
     const knockbackValue = 3;
     let x = truePosition.x,
       y = truePosition.y,
-      attW = 0,
-      attH = 0;
-    if (type === "primary") {
-      attW = attack.primary.width;
+      attW = attack.primary.width,
       attH = attack.primary.height;
-    }
     const knockBackOffset = { x: 0, y: 0 };
     if (direction === "d") {
       x += source.width / source.frames.max;
@@ -311,7 +328,7 @@ function SpriteCharacter({
     return false;
   }
   function log(offset?: Vector) {
-    console.log({ type, position, source, offset });
+    console.log({ position, source, offset });
   }
   function getRect(): Rect {
     return {
@@ -333,13 +350,22 @@ function SpriteCharacter({
     changeDirection,
   };
 }
+
+/*
+ * ============================================================================
+ * SPRITE MAP BEGINS
+ * LINE 355
+ * ============================================================================
+ */
+
 function SpriteMap({
-  type,
   position,
   source,
   ctx,
+  debug,
 }: EnvironmentSpriteSheetParams): MapTypeSprite {
   const offset = { x: 0, y: 0 };
+
   function draw() {
     //  "mapSpriteSheet"
     ctx.drawImage(
@@ -353,9 +379,40 @@ function SpriteMap({
       32,
       32
     );
+    if (debug && source.metadata.type === "impede") {
+      ctx.font = "12zpx sans-serif";
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+      ctx.strokeText(
+        `x:${position.x + offset.x}`,
+        position.x + offset.x,
+        position.y + 14 + offset.y,
+        32
+      );
+      ctx.strokeText(
+        `y:${position.y + offset.y}`,
+        position.x + offset.x,
+        position.y + 26 + offset.y,
+        32
+      );
+
+      ctx.fillStyle = "red";
+      ctx.fillText(
+        `x:${position.x + offset.x}`,
+        position.x + offset.x,
+        position.y + 14 + offset.y,
+        32
+      );
+      ctx.fillText(
+        `y:${position.y + offset.y}`,
+        position.x + offset.x,
+        position.y + 26 + offset.y,
+        32
+      );
+    }
   }
   function log(offset?: Vector) {
-    console.log({ type, position, source, offset });
+    console.log({ position, source, offset });
   }
   function buildCollisionData(pos: Vector) {
     return { x: pos.x, y: pos.y };
@@ -444,8 +501,8 @@ function SpriteProjectile(
 
   function getRect() {
     return {
-      x: attPhysiscs.currX - currOffset.x,
-      y: attPhysiscs.currY - currOffset.y,
+      x: attPhysiscs.currX + 8 - currOffset.x,
+      y: attPhysiscs.currY + 8 - currOffset.y,
       width: secondaryAtt.width,
       height: secondaryAtt.height,
     };

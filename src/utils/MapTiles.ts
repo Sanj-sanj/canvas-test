@@ -73,7 +73,10 @@ const Legend: LegendEntry = {
   "*": {
     collisionType: "pass",
     type: "dirt road",
-    spritePath: [{ x: 2, y: 0 }],
+    spritePath: [
+      { x: 2, y: 0 },
+      { x: 3, y: 0 },
+    ],
     actors: [],
   },
   "#": {
@@ -92,8 +95,8 @@ const Legend: LegendEntry = {
     collisionType: "pass",
     type: "mud",
     spritePath: [
-      { x: 4, y: 0 },
       { x: 5, y: 0 },
+      { x: 4, y: 0 },
     ],
     actors: [],
   },

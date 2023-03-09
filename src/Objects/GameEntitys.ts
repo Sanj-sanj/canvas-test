@@ -12,7 +12,6 @@ monsterPic.src = monImg;
 // sheet.src = spriteSheet;
 
 const monster1 = SpriteEntity({
-  type: "entity",
   position: { x: 468, y: 450 },
   ctx: ctx,
   stats: {
@@ -31,7 +30,6 @@ const monster1 = SpriteEntity({
   },
 });
 const monster2 = SpriteEntity({
-  type: "entity",
   position: { x: 368, y: 650 },
   ctx: ctx,
   stats: {
@@ -50,8 +48,7 @@ const monster2 = SpriteEntity({
   },
 });
 const monster3 = SpriteEntity({
-  type: "entity",
-  position: { x: 368, y: 550 },
+  position: { x: 368, y: 450 },
   ctx: ctx,
   stats: {
     health: 100,
@@ -69,8 +66,7 @@ const monster3 = SpriteEntity({
   },
 });
 const monster4 = SpriteEntity({
-  type: "entity",
-  position: { x: 398, y: 550 },
+  position: { x: 442, y: 250 },
   ctx: ctx,
   stats: {
     health: 100,
@@ -88,7 +84,6 @@ const monster4 = SpriteEntity({
   },
 });
 const monster5 = SpriteEntity({
-  type: "entity",
   position: { x: 398, y: 560 },
   ctx: ctx,
   stats: {
@@ -107,7 +102,6 @@ const monster5 = SpriteEntity({
   },
 });
 const monster6 = SpriteEntity({
-  type: "entity",
   position: { x: 398, y: 530 },
   ctx: ctx,
   stats: {

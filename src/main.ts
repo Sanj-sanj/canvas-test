@@ -102,7 +102,6 @@ function updateOffset(pos: "x" | "y", operand: "+" | "-", speed = 6) {
 }
 
 const player = SpriteCharacter({
-  type: "character",
   position: currPlayerPostion,
   ctx: ctx,
   stats: {
@@ -138,6 +137,7 @@ const mapTiles = BuildMapSprite(
     offset,
     spriteSheet: sheet,
     tileSize: 32,
+    debug: true,
   },
   collisionState.appendCollidable
 );
@@ -190,11 +190,13 @@ function animate() {
   if (renderingProjectile) {
     const animationOngoing = projectiles.filter((projectile) => {
       monsters.forEach((monster, i) => {
-        const { finishingBlow, isHit } = player.secondaryAttack(
-          collisionState.checkForCollisionCharacter,
+        const { finishingBlow, isHit, hitWall } = player.secondaryAttack(
+          collisionState,
           monster,
-          projectile.getRect()
+          projectile.getRect(),
+          offset
         );
+        if (hitWall) projectile.endAnimation();
         if (isHit) {
           projectile.endAnimation();
           if (finishingBlow) {
@@ -214,7 +216,6 @@ function animate() {
     if (monsters.length) {
       monsters.forEach((monster, i) => {
         const finishingBlow = player.attack(
-          "primary",
           collisionState.checkForCollisionCharacter,
           monster
         );
@@ -226,8 +227,7 @@ function animate() {
           // to be fleshed outt
         }
       });
-    }
-    player.attack("primary", collisionState.checkForCollisionCharacter);
+    } else player.attack(collisionState.checkForCollisionCharacter);
   }
   if (deleteEntitysIndex.length) {
     /* temp array shallow copy

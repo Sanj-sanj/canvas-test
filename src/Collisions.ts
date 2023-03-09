@@ -11,12 +11,19 @@ export type CollisionState = {
     rect0: { x: number; y: number; width: number; height: number },
     rect1: { x: number; y: number; width: number; height: number }
   ) => boolean;
+  checkForCollisionProjectile: (arg0: Rect, arg1: Vector) => boolean;
 };
+type Rect = { x: number; y: number; width: number; height: number };
 type Vector = {
   x: number;
   y: number;
 };
 function Collisions(): CollisionState {
+  /* 
+  This function will contain all collision state related functions.
+  collisions: Vector array of environment related tiles 
+  */
+
   const collisions: Vector[] = [];
 
   function appendCollidable({ x, y }: Vector) {
@@ -37,20 +44,27 @@ function Collisions(): CollisionState {
       direction === "a" ? (topX -= speed) : (topX += speed);
     }
     //takes coord start of {x, y} then adds the width of the sprite, subtracting the speed of char / 2 to handle collision
-    return collisions.some((rect) => {
+    return collisions.some(({ x, y }) => {
       return (
-        topX + 2 + 30 - speed / 2 >= rect.x &&
-        topX + 2 <= rect.x + 30 - speed / 2 &&
-        topY + 2 <= rect.y + 30 - speed / 2 &&
-        topY + 2 + 30 - speed / 2 >= rect.y
+        topX + 2 + 30 - speed / 2 >= x &&
+        topX + 2 <= x + 30 - speed / 2 &&
+        topY + 2 <= y + 30 - speed / 2 &&
+        topY + 2 + 30 - speed / 2 >= y
       );
     });
   }
 
-  function checkForCollisionCharacter(
-    rect0: { x: number; y: number; width: number; height: number },
-    rect1: { x: number; y: number; width: number; height: number }
-  ) {
+  function checkForCollisionProjectile(rect: Rect, offset: Vector) {
+    return collisions.some(({ x, y }) => {
+      return (
+        rect.x + rect.width >= x + offset.x &&
+        rect.x <= x + offset.x + 32 &&
+        rect.y <= y + offset.y + 32 &&
+        rect.y + rect.height >= y + offset.y
+      );
+    });
+  }
+  function checkForCollisionCharacter(rect0: Rect, rect1: Rect) {
     return (
       rect0.x + rect0.width >= rect1.x &&
       rect0.x <= rect1.x + rect1.width &&
@@ -66,6 +80,7 @@ function Collisions(): CollisionState {
     log,
     checkForCollisionEnvironment,
     checkForCollisionCharacter,
+    checkForCollisionProjectile,
   };
 }
 export default Collisions;

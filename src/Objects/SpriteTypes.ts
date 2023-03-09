@@ -1,5 +1,4 @@
 type CharacterSpriteParams = {
-  type: "character";
   position: { x: number; y: number };
   stats: {
     health: number;
@@ -30,7 +29,6 @@ type CharacterSpriteParams = {
 };
 
 type EntitySpriteParams = {
-  type: "entity";
   position: { x: number; y: number };
   stats: {
     health: number;
@@ -50,7 +48,6 @@ type EntitySpriteParams = {
 };
 
 type EnvironmentSpriteSheetParams = {
-  type: "mapSpriteSheet";
   position: { x: number; y: number };
   source: {
     spriteSize: 32;
@@ -64,6 +61,7 @@ type EnvironmentSpriteSheetParams = {
     };
   };
   ctx: CanvasRenderingContext2D;
+  debug: boolean;
 };
 
 type ProjectileTypeSprite = {
