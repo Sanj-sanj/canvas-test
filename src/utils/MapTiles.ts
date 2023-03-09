@@ -29,8 +29,8 @@ export type MapTile =
 
 type LegendEntry = {
   [key in MapTile]: {
-    collisionType: "pass" | "impede";
     type: string;
+    depthLayer: { walkable: boolean; collidable: boolean };
     spritePath: Vec[];
     actors: [];
   };
@@ -38,163 +38,163 @@ type LegendEntry = {
 
 const Legend: LegendEntry = {
   "!": {
-    collisionType: "pass",
     type: "void",
     spritePath: [{ x: 0, y: 2 }],
     actors: [],
+    depthLayer: { walkable: false, collidable: false },
   },
   ".": {
-    collisionType: "pass",
     type: "grass",
     spritePath: [
       { x: 0, y: 0 },
       { x: 1, y: 0 },
     ],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   "~": {
-    collisionType: "impede",
     type: "shallow water",
     spritePath: [{ x: 0, y: 3 }],
     actors: [],
+    depthLayer: { walkable: false, collidable: false },
   },
   "%": {
-    collisionType: "impede",
     type: "deep water",
     spritePath: [{ x: 1, y: 3 }],
     actors: [],
+    depthLayer: { walkable: false, collidable: false },
   },
   $: {
-    collisionType: "pass",
     type: "grassy dirt road",
     spritePath: [{ x: 3, y: 0 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   "*": {
-    collisionType: "pass",
     type: "dirt road",
     spritePath: [
       { x: 2, y: 0 },
       { x: 3, y: 0 },
     ],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   "#": {
-    collisionType: "pass",
     type: "cobble road",
     spritePath: [{ x: 6, y: 0 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   c: {
-    collisionType: "pass",
     type: "cobble road with grass",
     spritePath: [{ x: 6, y: 1 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   "/": {
-    collisionType: "pass",
     type: "mud",
     spritePath: [
       { x: 5, y: 0 },
       { x: 4, y: 0 },
     ],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   "[": {
-    collisionType: "pass",
     type: "lava",
     spritePath: [{ x: 4, y: 2 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   "=": {
-    collisionType: "impede",
     type: "horizontal stone wall",
     spritePath: [{ x: 3, y: 2 }],
     actors: [],
+    depthLayer: { walkable: false, collidable: true },
   },
   ":": {
-    collisionType: "impede",
     type: "vertical stone wall",
     spritePath: [{ x: 1, y: 2 }],
     actors: [],
+    depthLayer: { walkable: false, collidable: true },
   },
   W: {
-    collisionType: "impede",
     type: "brick wall",
     spritePath: [{ x: 0, y: 1 }],
     actors: [],
+    depthLayer: { walkable: false, collidable: true },
   },
   "-": {
-    collisionType: "pass",
     type: "cave entrance",
     spritePath: [{ x: 2, y: 2 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   V: {
-    collisionType: "pass",
     type: "stairs down",
     spritePath: [{ x: 4, y: 1 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   X: {
-    collisionType: "pass",
     type: "tile floor",
     spritePath: [{ x: 5, y: 1 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   _: {
-    collisionType: "impede",
     type: "building wall horizontal",
     spritePath: [{ x: 1, y: 1 }],
     actors: [],
+    depthLayer: { walkable: false, collidable: true },
   },
   "|": {
-    collisionType: "impede",
     type: "building wall vertical",
     spritePath: [{ x: 3, y: 1 }],
     actors: [],
+    depthLayer: { walkable: false, collidable: true },
   },
   P: {
-    collisionType: "pass",
     type: "ground plants",
     spritePath: [{ x: 0, y: 1 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   b: {
-    collisionType: "pass",
     type: "small horizontal bride ",
     spritePath: [{ x: 5, y: 2 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   r: {
-    collisionType: "pass",
     type: "small vertical bride ",
     spritePath: [{ x: 6, y: 2 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   B: {
-    collisionType: "pass",
     type: "large horizontal bridge bottom",
     spritePath: [{ x: 3, y: 3 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   R: {
-    collisionType: "pass",
     type: "large horizontal bridge top",
     spritePath: [{ x: 4, y: 3 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   A: {
-    collisionType: "pass",
     type: "large vertical bridge  right",
     spritePath: [{ x: 5, y: 3 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   Q: {
-    collisionType: "pass",
     type: "large vertical bridge left",
     spritePath: [{ x: 6, y: 3 }],
     actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
 };
 export default Legend;

@@ -39,6 +39,16 @@ sheet.src = spriteSheet;
 const collisionState = Collisions();
 let zoomOn = false;
 let scale = 1;
+// our plyer's center position relative to the screen size will be by the formula:
+// [canvas.width | canvas.height] / 2 { / scaling } { - SPRITE SIZE / 2 for x})
+const currPlayerPostion = {
+  x: Math.floor(canvas.width / 2 - 16),
+  y: Math.floor(canvas.height / 2),
+};
+const offset = { x: 48, y: 0 };
+const lastClickPosition = { x: 0, y: 0 };
+
+// const currentMap = loadMap({})
 
 function toggleZoom(zoomState: boolean) {
   if (zoomState) {
@@ -54,24 +64,11 @@ function toggleZoom(zoomState: boolean) {
   }
 }
 
-// our plyer's center position relative to the screen size will be by the formula:
-// [canvas.width | canvas.height] / 2 { / scaling } { - SPRITE SIZE / 2 for x})
-const currPlayerPostion = {
-  x: Math.floor(canvas.width / 2 - 16),
-  y: Math.floor(canvas.height / 2),
-};
-const offset = { x: 48, y: 0 };
-const lastClickPosition = { x: 0, y: 0 };
-
-function getLastClickPosition() {
-  if (zoomOn) {
-    return {
-      x: lastClickPosition.x / 2,
-      y: lastClickPosition.y / 2,
-    };
-  }
-
-  return lastClickPosition;
+function getLastClickPosition(): Vector {
+  return {
+    x: lastClickPosition.x / scale,
+    y: lastClickPosition.y / scale,
+  };
 }
 
 function updateLastClickPosition(newPos: Vector) {
@@ -79,7 +76,7 @@ function updateLastClickPosition(newPos: Vector) {
   lastClickPosition.y = newPos.y;
 }
 
-function getScreenCenter() {
+function getScreenCenter(): Vector {
   if (zoomOn) {
     return {
       x: Math.floor(canvas.width / 2 / 2 - 8),

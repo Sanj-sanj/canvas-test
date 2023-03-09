@@ -1,8 +1,11 @@
 import { MovementKey } from "./KeybindingsTypes";
 export type CollisionState = {
   log: () => void;
-  appendCollidable: ({ x, y }: Vector) => void;
-  checkForCollisionEnvironment: (
+  appendCollidable: (
+    { x, y }: Vector,
+    depthLayer: { walkable: boolean; collidable: boolean }
+  ) => void;
+  checkForCollisionMovement: (
     playerPos: Vector,
     speed: number,
     direction: MovementKey
@@ -13,6 +16,7 @@ export type CollisionState = {
   ) => boolean;
   checkForCollisionProjectile: (arg0: Rect, arg1: Vector) => boolean;
 };
+
 type Rect = { x: number; y: number; width: number; height: number };
 type Vector = {
   x: number;
@@ -24,13 +28,24 @@ function Collisions(): CollisionState {
   collisions: Vector array of environment related tiles 
   */
 
-  const collisions: Vector[] = [];
+  const collisions: { moveable: Vector[]; collidable: Vector[] } = {
+    moveable: [],
+    collidable: [],
+  };
 
-  function appendCollidable({ x, y }: Vector) {
-    collisions.push({ x, y });
+  function appendCollidable(
+    { x, y }: Vector,
+    depthLayer: { walkable: boolean; collidable: boolean }
+  ) {
+    if (depthLayer.collidable === true) {
+      collisions.collidable.push({ x, y });
+    }
+    if (depthLayer.walkable === false) {
+      collisions.moveable.push({ x, y });
+    }
   }
 
-  function checkForCollisionEnvironment(
+  function checkForCollisionMovement(
     playerPos: { x: number; y: number },
     speed: number,
     direction: MovementKey
@@ -44,7 +59,7 @@ function Collisions(): CollisionState {
       direction === "a" ? (topX -= speed) : (topX += speed);
     }
     //takes coord start of {x, y} then adds the width of the sprite, subtracting the speed of char / 2 to handle collision
-    return collisions.some(({ x, y }) => {
+    return collisions.moveable.some(({ x, y }) => {
       return (
         topX + 2 + 30 - speed / 2 >= x &&
         topX + 2 <= x + 30 - speed / 2 &&
@@ -55,7 +70,7 @@ function Collisions(): CollisionState {
   }
 
   function checkForCollisionProjectile(rect: Rect, offset: Vector) {
-    return collisions.some(({ x, y }) => {
+    return collisions.collidable.some(({ x, y }) => {
       return (
         rect.x + rect.width >= x + offset.x &&
         rect.x <= x + offset.x + 32 &&
@@ -78,7 +93,7 @@ function Collisions(): CollisionState {
   return {
     appendCollidable,
     log,
-    checkForCollisionEnvironment,
+    checkForCollisionMovement,
     checkForCollisionCharacter,
     checkForCollisionProjectile,
   };

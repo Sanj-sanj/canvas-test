@@ -16,14 +16,17 @@ type BuildMapParams = {
 //we need to build all colidable elements into a big list to  be checked on main files keyboard press check in animate
 function BuildMapSprite(
   { ctx, mapString, spriteSheet, tileSize, offset, debug }: BuildMapParams,
-  appendCollisionData: (boxData: Vector) => void
+  appendCollisionData: (
+    boxData: Vector,
+    depthLayer: { walkable: boolean; collidable: boolean }
+  ) => void
 ): MapTypeSprite[] {
   return mapString
     .trim()
     .split("\n")
     .reduce((acc, curr, y) => {
       const SpritesArray = curr.split("").map((tile, x) => {
-        const { type, spritePath, collisionType } = Legend[tile as MapTile];
+        const { type, spritePath, depthLayer } = Legend[tile as MapTile];
         const thisPos = {
           x: x * tileSize + offset.x,
           y: y * tileSize + offset.y,
@@ -45,7 +48,7 @@ function BuildMapSprite(
             metadata: {
               actors: [],
               spritePath: spriteImgToUse as Vector,
-              type: collisionType,
+              depth: depthLayer,
             },
           },
           debug,
@@ -53,9 +56,9 @@ function BuildMapSprite(
 
         // this collision check needs to be performed on Sprite instanstiation
 
-        collisionType === "impede"
-          ? appendCollisionData(thisSprite.buildCollisionData(thisPos))
-          : null;
+        // depthLayer.collidable
+        thisSprite.buildCollisionData(thisPos, appendCollisionData);
+
         return thisSprite;
       });
       return [...acc, ...SpritesArray];

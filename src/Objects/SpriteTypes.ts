@@ -55,7 +55,7 @@ type EnvironmentSpriteSheetParams = {
     width: number;
     height: number;
     metadata: {
-      type: string;
+      depth: { walkable: boolean; collidable: boolean };
       spritePath: Vector;
       actors: [];
     };

@@ -9,10 +9,13 @@ import {
 } from "./SpriteTypes";
 
 export type MapTypeSprite = {
-  buildCollisionData: (position: Vector) => {
-    x: number;
-    y: number;
-  };
+  buildCollisionData: (
+    position: Vector,
+    appendCollidable: (
+      arg: Vector,
+      depthLayer: { walkable: boolean; collidable: boolean }
+    ) => void
+  ) => void;
   log: (offset?: Vector) => void;
   draw: () => void;
   updateOffset: (newOffset: Vector) => void;
@@ -85,6 +88,7 @@ function SpriteEntity({
           8
         );
         if (typeof invulnerabilityID === "number") {
+          ctx.save();
           ctx.fillStyle = "red";
           ctx.font = "bold 24px sans-serif";
           ctx.fillText(
@@ -92,7 +96,7 @@ function SpriteEntity({
             position.x + offset.x - 8,
             position.y + offset.y - 32
           );
-          // ctx.font = "12px";
+          ctx.restore();
         }
       }
       ctx.drawImage(
@@ -379,7 +383,7 @@ function SpriteMap({
       32,
       32
     );
-    if (debug && source.metadata.type === "impede") {
+    if (debug && source.metadata.depth.collidable) {
       ctx.font = "12zpx sans-serif";
       ctx.strokeStyle = "black";
       ctx.lineWidth = 2;
@@ -414,9 +418,16 @@ function SpriteMap({
   function log(offset?: Vector) {
     console.log({ position, source, offset });
   }
-  function buildCollisionData(pos: Vector) {
-    return { x: pos.x, y: pos.y };
+  function buildCollisionData(
+    pos: Vector,
+    appendCollidable: (
+      arg: Vector,
+      depthLayer: { walkable: boolean; collidable: boolean }
+    ) => void
+  ) {
+    return appendCollidable({ x: pos.x, y: pos.y }, source.metadata.depth);
   }
+
   function updateOffset(offsetNew: Vector) {
     offset.x = offsetNew.x;
     offset.y = offsetNew.y;

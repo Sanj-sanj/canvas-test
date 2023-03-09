@@ -102,7 +102,7 @@ function KeybindHandler({
     // if (haltMovement) return;
     if (
       isKeyPressed("w") &&
-      !collidables.checkForCollisionEnvironment(
+      !collidables.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
         "w"
@@ -112,7 +112,7 @@ function KeybindHandler({
     }
     if (
       isKeyPressed("s") &&
-      !collidables.checkForCollisionEnvironment(
+      !collidables.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
         "s"
@@ -122,7 +122,7 @@ function KeybindHandler({
     }
     if (
       isKeyPressed("a") &&
-      !collidables.checkForCollisionEnvironment(
+      !collidables.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
         "a"
@@ -132,7 +132,7 @@ function KeybindHandler({
     }
     if (
       isKeyPressed("d") &&
-      !collidables.checkForCollisionEnvironment(
+      !collidables.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
         "d"
