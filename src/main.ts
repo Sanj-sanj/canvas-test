@@ -130,11 +130,11 @@ const player = SpriteCharacter({
 const mapTiles = BuildMapSprite(
   {
     ctx,
-    mapString: Map2,
+    mapString: Map1,
     offset,
     spriteSheet: sheet,
     tileSize: 32,
-    debug: true,
+    debug: false,
   },
   collisionState.appendCollidable
 );

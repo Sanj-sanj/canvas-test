@@ -54,11 +54,7 @@ function BuildMapSprite(
           debug,
         });
 
-        // this collision check needs to be performed on Sprite instanstiation
-
-        // depthLayer.collidable
         thisSprite.buildCollisionData(thisPos, appendCollisionData);
-
         return thisSprite;
       });
       return [...acc, ...SpritesArray];

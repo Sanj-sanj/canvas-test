@@ -75,6 +75,71 @@ function SpriteEntity({
   let lastDamageTaken = "";
   const offset = { x: 0, y: 0 };
 
+  const rngNum = (n: number) => Math.round(Math.random() * n);
+
+  function wander(maxRange: number, entitySpeed: number) {
+    type order = {
+      direction: Direction;
+      duration: number;
+      inc: { x: number; y: number };
+    };
+    type Direction = "up" | "down" | "left" | "right" | "wait";
+    const dir: Direction[] = [
+      "up",
+      "down",
+      "left",
+      "right",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+    ];
+    const orders: order[] = [];
+    function foo(d: Direction) {
+      if (d === "up") {
+        return { y: -entitySpeed, x: 0 };
+      }
+      if (d === "down") {
+        return { y: entitySpeed, x: 0 };
+      }
+      if (d === "right") {
+        return { x: entitySpeed, y: 0 };
+      }
+      if (d === "left") {
+        return { x: -entitySpeed, y: 0 };
+      }
+      return { x: 0, y: 0 };
+    }
+    function buildQueue() {
+      for (let i = 0; i < 20; i++) {
+        const pos = rngNum(dir.length - 1);
+        orders.push({
+          direction: dir[pos],
+          duration: rngNum(maxRange),
+          inc: foo(dir[pos]),
+        });
+      }
+    }
+    function walk(): Vector {
+      const first = orders[0];
+      if (!first) {
+        buildQueue();
+        return walk();
+      }
+      if (first.duration === 0) {
+        orders.shift();
+        return walk();
+      }
+      first.duration--;
+      return first.inc;
+    }
+    buildQueue();
+    console.log(orders);
+    return { walk };
+  }
+  const directions = wander(80, 2);
   function draw() {
     if (stats.health >= 0) {
       if (isUnderAttack) {
@@ -110,7 +175,11 @@ function SpriteEntity({
         source.width / source.frames.max,
         source.height * 1
       );
+      const { x, y } = directions.walk();
+      position.x += x;
+      position.y += y;
       if (spriteFrameIntervalID !== null || source.frames.max === 1) return;
+      // position.x += 1;
       spriteFrameIntervalID = setTimeout(() => tickTock(), 300);
     }
   }
