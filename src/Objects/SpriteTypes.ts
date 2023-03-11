@@ -1,6 +1,8 @@
-import { CollisionState } from "../Collisions";
+import { CollisionState } from "../utils/Handlers/Collisions/CollisionTypes";
+import { MovementKey } from "../utils/Handlers/Keybinds/KeybindingsTypes";
 
 type CharacterSpriteParams = {
+  collisions: CollisionState;
   position: { x: number; y: number };
   stats: {
     health: number;
@@ -31,6 +33,7 @@ type CharacterSpriteParams = {
 };
 
 type EntitySpriteParams = {
+  collisions: CollisionState;
   position: { x: number; y: number };
   stats: {
     health: number;
@@ -50,6 +53,16 @@ type EntitySpriteParams = {
   ctx: CanvasRenderingContext2D;
 };
 
+export type EntityTypeSprite = {
+  draw: () => void;
+  log: (offset?: Vector) => void;
+  getRect: () => Rect;
+  updateOffset: (offset: Vector) => void;
+  moveSprite: ({ x, y }: Vector, direction: MovementKey) => void;
+  alterHp: (damage: number, modifier: "+" | "-") => number | undefined;
+  killThisSprite: () => void;
+};
+
 type EnvironmentSpriteSheetParams = {
   position: { x: number; y: number };
   source: {
@@ -67,6 +80,19 @@ type EnvironmentSpriteSheetParams = {
   debug: boolean;
 };
 
+export type MapTypeSprite = {
+  buildCollisionData: (
+    position: Vector,
+    appendCollidable: (
+      arg: Vector,
+      depthLayer: { walkable: boolean; collidable: boolean }
+    ) => void
+  ) => void;
+  log: (offset?: Vector) => void;
+  draw: () => void;
+  updateOffset: (newOffset: Vector) => void;
+};
+
 type ProjectileTypeSprite = {
   setValues: (
     start: Vector,
@@ -74,10 +100,11 @@ type ProjectileTypeSprite = {
     initialOffset: Vector
   ) => void;
   draw: (offset: Vector) => boolean;
-  getRect: () => { x: number; y: number; width: number; height: number };
+  getRect: () => Rect;
   endAnimation: () => void;
 };
 type Vector = { x: number; y: number };
+type Rect = { x: number; y: number; width: number; height: number };
 
 type SpriteParams = EntitySpriteParams | EnvironmentSpriteSheetParams;
 
@@ -87,5 +114,6 @@ export type {
   EnvironmentSpriteSheetParams,
   ProjectileTypeSprite,
   Vector,
+  Rect,
   SpriteParams,
 };

@@ -1,10 +1,12 @@
-import collisions, { CollisionState } from "./Collisions";
 import { AuxKey, Keybinds, MovementKey } from "./KeybindingsTypes";
-import { CharacterTypeSprite } from "./Objects/Sprite";
-import { Vector } from "./Objects/SpriteTypes";
+
+import { Vector } from "../../../Objects/SpriteTypes";
+import { CollisionState } from "../Collisions/CollisionTypes";
+import { CharacterTypeSprite } from "../../../Objects/SpriteCharacter";
 
 type KeybindParams = {
   animate: () => void;
+  Collisions: CollisionState;
   player: CharacterTypeSprite;
   keypressActions: {
     toggleZoom: (zoomOn: boolean) => void;
@@ -14,6 +16,7 @@ type KeybindParams = {
 };
 
 function KeybindHandler({
+  Collisions,
   animate,
   keypressActions: { toggleZoom, updateOffset, updateLastClickPosition },
   player,
@@ -63,7 +66,7 @@ function KeybindHandler({
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === Keybinds.aux.pause.keybind) {
       // player.log(offset);
-      collisions.log();
+      Collisions.log();
       Keybinds.aux.pause.pressed = !Keybinds.aux.pause.pressed;
       animate(); //force the loop to start again if debug has been toggled off -> on
     }
@@ -106,7 +109,7 @@ function KeybindHandler({
     // if (haltMovement) return;
     if (
       isKeyPressed("up", "movement") &&
-      !collisions.checkForCollisionMovement(
+      !Collisions.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
         "up"
@@ -116,7 +119,7 @@ function KeybindHandler({
     }
     if (
       isKeyPressed("down", "movement") &&
-      !collisions.checkForCollisionMovement(
+      !Collisions.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
         "down"
@@ -126,7 +129,7 @@ function KeybindHandler({
     }
     if (
       isKeyPressed("left", "movement") &&
-      !collisions.checkForCollisionMovement(
+      !Collisions.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
         "left"
@@ -136,7 +139,7 @@ function KeybindHandler({
     }
     if (
       isKeyPressed("right", "movement") &&
-      !collisions.checkForCollisionMovement(
+      !Collisions.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
         "right"

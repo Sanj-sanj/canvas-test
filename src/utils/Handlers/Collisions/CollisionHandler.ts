@@ -1,33 +1,12 @@
-import { MovementKey } from "./KeybindingsTypes";
-export type CollisionState = {
-  log: () => void;
-  appendCollidable: (
-    { x, y }: Vector,
-    depthLayer: { walkable: boolean; collidable: boolean }
-  ) => void;
-  checkForCollisionMovement: (
-    spritePos: Vector,
-    speed: number,
-    direction: MovementKey
-  ) => boolean;
-  checkForCollisionSprite: (
-    rect0: { x: number; y: number; width: number; height: number },
-    rect1: { x: number; y: number; width: number; height: number }
-  ) => boolean;
-  checkForCollisionProjectile: (spriteRect: Rect, offset: Vector) => boolean;
-};
+import { Rect, Vector } from "../../../Objects/SpriteTypes";
+import { CollisionState } from "./CollisionTypes";
+import { MovementKey } from "../Keybinds/KeybindingsTypes";
 
-type Rect = { x: number; y: number; width: number; height: number };
-type Vector = {
-  x: number;
-  y: number;
-};
-function Collisions(): CollisionState {
+function CollisionHandler(): CollisionState {
   /* 
   This function will contain all collision state related functions.
   collisions: Vector array of environment related tiles 
   */
-
   const collisions: { walkable: Vector[]; collidable: Vector[] } = {
     walkable: [],
     collidable: [],
@@ -99,5 +78,4 @@ function Collisions(): CollisionState {
     checkForCollisionProjectile,
   };
 }
-const collisions: CollisionState = Collisions();
-export default collisions;
+export default CollisionHandler;

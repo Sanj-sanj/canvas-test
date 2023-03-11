@@ -1,5 +1,5 @@
-import { MapTypeSprite, SpriteMap } from "./Objects/Sprite";
-import { Vector } from "./Objects/SpriteTypes";
+import SpriteMap from "./Objects/SpriteMap";
+import { MapTypeSprite, Vector } from "./Objects/SpriteTypes";
 import Legend, { MapTile } from "./utils/MapTiles";
 
 type BuildMapParams = {
@@ -10,10 +10,7 @@ type BuildMapParams = {
   offset: { x: number; y: number };
   debug: boolean;
 };
-// we will have to add in more params to the draw function inside renderer, it will porbably take actor data to display them later
-// type Renderer = { draw: (offset: Vec) => void; log: (offset?: Vec) => void };
 
-//we need to build all colidable elements into a big list to  be checked on main files keyboard press check in animate
 function BuildMapSprite(
   { ctx, mapString, spriteSheet, tileSize, offset, debug }: BuildMapParams,
   appendCollisionData: (
