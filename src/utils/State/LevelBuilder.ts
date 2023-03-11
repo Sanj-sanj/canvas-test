@@ -30,7 +30,7 @@ function LevelBuilder() {
   const SpriteState = {
     monsters: [...TestMonsters] as EntityTypeSprite[],
     projectiles: [] as ProjectileTypeSprite[],
-    removedSprites: [] as EntityTypeSprite[],
+    removedSprites: [] as (EntityTypeSprite | null)[],
   };
   const moveables: MapTypeSprite[] = [...MapTiles];
   let { monsters, removedSprites } = SpriteState;
@@ -77,7 +77,7 @@ function LevelBuilder() {
           if (isHit) {
             projectile.endAnimation();
             if (finishingBlow) {
-              removedSprites = [...removedSprites, monster];
+              // removedSprites = [...removedSprites, monster];
               deleteEntitysIndex.push(i);
               monster.killThisSprite();
             }
@@ -94,7 +94,7 @@ function LevelBuilder() {
         monsters.forEach((monster, i) => {
           const finishingBlow = Player.attack(monster);
           if (finishingBlow) {
-            removedSprites = [...removedSprites, monster];
+            // removedSprites = [...removedSprites, monster];
             deleteEntitysIndex.push(i);
             monster.killThisSprite();
           }
@@ -107,11 +107,14 @@ function LevelBuilder() {
     monsters on the same game tick.
     */
       const tempMon: (EntityTypeSprite | null)[] = [...monsters];
+      const deleted: (EntityTypeSprite | null)[] = [];
       deleteEntitysIndex.forEach((n) => {
+        deleted.push(tempMon[n]);
         tempMon[n] = null;
       });
       setTimeout(() => {
         monsters = tempMon.filter((m) => m !== null) as EntityTypeSprite[];
+        removedSprites = [...removedSprites, ...deleted];
       }, 300);
     }
     const tempPCoords = {

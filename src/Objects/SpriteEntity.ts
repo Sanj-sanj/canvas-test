@@ -24,19 +24,11 @@ function SpriteEntity({
     direction: Direction;
     duration: number;
     inc: { x: number; y: number };
+    stop: boolean;
   };
   function wander(maxRange: number, entitySpeed: number) {
-    const dir: Direction[] = [
-      "up",
-      "down",
-      "left",
-      "right",
-      "wait",
-      "wait",
-      "wait",
-      "wait",
-      "wait",
-    ];
+    let stop = false;
+    const dir: Direction[] = ["up", "down", "left", "right", "wait", "wait"];
     const orders: Order[] = [];
     function incremental(d: Direction) {
       if (d === "up") {
@@ -54,16 +46,23 @@ function SpriteEntity({
       return { x: 0, y: 0 };
     }
     function buildQueue() {
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 10; i++) {
         const pos = rngNum(dir.length - 1);
         orders.push({
           direction: dir[pos],
           duration: rngNum(maxRange),
           inc: incremental(dir[pos]),
+          stop,
         });
       }
     }
+    function halt() {
+      stop = true;
+    }
     function walk(): Order {
+      if (stop) {
+        return { direction: "wait", duration: 9999, inc: { x: 0, y: 0 }, stop };
+      }
       const first = orders[0];
       if (!first) {
         buildQueue();
@@ -77,52 +76,67 @@ function SpriteEntity({
       return first;
     }
     buildQueue();
-    return { walk };
+    return { walk, halt };
   }
   const directions = wander(80, stats.speed);
   function draw() {
-    if (stats.health >= 0) {
-      if (isUnderAttack) {
-        ctx.fillStyle = "red";
-        ctx.fillRect(position.x + offset.x, position.y + offset.y - 16, 32, 8);
-        ctx.fillStyle = "green";
-        ctx.fillRect(
-          position.x + offset.x,
-          position.y + offset.y - 16,
-          (stats.health / maxHp) * 32,
-          8
-        );
-        if (typeof invulnerabilityID === "number") {
-          ctx.save();
-          ctx.fillStyle = "red";
-          ctx.font = "bold 24px sans-serif";
-          ctx.fillText(
-            lastDamageTaken,
-            position.x + offset.x - 8,
-            position.y + offset.y - 32
-          );
-          ctx.restore();
-        }
-      }
-      ctx.drawImage(
-        source.img,
-        (source.width / source.frames.max) * ticks,
-        0,
-        source.width / source.frames.max, // maximum number of frames in total of the provided sprite
-        source.height,
-        position.x + offset.x,
-        position.y + offset.y,
-        source.width / source.frames.max,
-        source.height * 1
+    if (isUnderAttack) {
+      // HP BAR
+      ctx.fillStyle = "black";
+      ctx.fillRect(
+        position.x - 1 + offset.x,
+        position.y - 1 + offset.y - 16,
+        34,
+        10
       );
-      const { inc, direction } = directions.walk();
-      if (direction !== "wait") {
-        moveSprite({ x: inc.x, y: inc.y }, direction);
+      ctx.fillStyle = "red";
+      ctx.fillRect(position.x + offset.x, position.y + offset.y - 16, 32, 8);
+      ctx.fillStyle = "green";
+      ctx.fillRect(
+        position.x + offset.x,
+        position.y + offset.y - 16,
+        stats.health > 0 ? (stats.health / maxHp) * 32 : 0,
+        8
+      );
+      if (typeof invulnerabilityID === "number") {
+        // DAMAGE OVER HP TEXT
+        ctx.save();
+        ctx.font = "bold 24px sans-serif";
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 4;
+        ctx.strokeText(
+          lastDamageTaken,
+          position.x + offset.x - 8,
+          position.y + offset.y - 32
+        );
+        ctx.fillStyle = "white";
+        ctx.fillText(
+          lastDamageTaken,
+          position.x + offset.x - 8,
+          position.y + offset.y - 32
+        );
+        ctx.restore();
       }
-
-      if (spriteFrameIntervalID !== null || source.frames.max === 1) return;
-      spriteFrameIntervalID = setTimeout(() => tickTock(), 300);
     }
+    // ACTUAL SPRITE
+    ctx.drawImage(
+      source.img,
+      (source.width / source.frames.max) * ticks,
+      0,
+      source.width / source.frames.max, // maximum number of frames in total of the provided sprite
+      source.height,
+      position.x + offset.x,
+      position.y + offset.y,
+      source.width / source.frames.max,
+      source.height * 1
+    );
+    const { inc, direction, stop } = directions.walk();
+    if (direction !== "wait" && stop !== true) {
+      moveSprite({ x: inc.x, y: inc.y }, direction);
+    }
+
+    if (spriteFrameIntervalID !== null || source.frames.max === 1) return;
+    spriteFrameIntervalID = setTimeout(() => tickTock(), 300);
   }
   function log() {
     console.log({ position, source, offset });
@@ -164,12 +178,13 @@ function SpriteEntity({
     statusDisplayCooldown = setTimeout(() => {
       isUnderAttack = false;
       statusDisplayCooldown = null;
-    }, 2000);
+    }, 3000);
     return stats.health;
   }
   function killThisSprite() {
     //this function will probably play out a death animation?
     console.log("im ded!");
+    directions.halt();
   }
 
   function getRect() {

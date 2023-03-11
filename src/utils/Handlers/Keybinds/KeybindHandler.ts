@@ -23,16 +23,20 @@ function KeybindHandler({
 }: KeybindParams) {
   const Keybinds: Keybinds = {
     movement: {
-      up: { pressed: false, keybind: "w", direction: "up" },
-      down: { pressed: false, keybind: "s", direction: "down" },
-      left: { pressed: false, keybind: "a", direction: "left" },
-      right: { pressed: false, keybind: "d", direction: "right" },
+      up: { pressed: false, keybind: "w", action: "up" },
+      down: { pressed: false, keybind: "s", action: "down" },
+      left: { pressed: false, keybind: "a", action: "left" },
+      right: { pressed: false, keybind: "d", action: "right" },
     },
     aux: {
-      pause: { pressed: false, keybind: "]" },
-      zoom: { pressed: false, keybind: "z" },
-      attack: { pressed: false, keybind: "p" },
-      secondaryAttack: { pressed: false, coords: { x: 0, y: 0 } },
+      pause: { pressed: false, keybind: "]", action: "pause" },
+      zoom: { pressed: false, keybind: "z", action: "zoom" },
+      attack: { pressed: false, keybind: "p", action: "attack" },
+      secondaryAttack: {
+        pressed: false,
+        coords: { x: 0, y: 0 },
+        action: "secondaryAttack",
+      },
     },
   };
   // let haltMovement = false;
@@ -91,7 +95,7 @@ function KeybindHandler({
       (key) => key.keybind === mvKey
     );
     if (movementKey) {
-      player.changeDirection(movementKey.direction);
+      player.changeDirection(movementKey.action);
       movementKey.pressed = true;
     }
   }

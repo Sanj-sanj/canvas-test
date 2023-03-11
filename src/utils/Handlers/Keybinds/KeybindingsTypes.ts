@@ -1,15 +1,19 @@
 export type Keybinds = {
   movement: {
-    up: { pressed: boolean; keybind: "w"; direction: "up" };
-    down: { pressed: boolean; keybind: "s"; direction: "down" };
-    left: { pressed: boolean; keybind: "a"; direction: "left" };
-    right: { pressed: boolean; keybind: "d"; direction: "right" };
+    up: { pressed: boolean; keybind: "w"; action: "up" };
+    down: { pressed: boolean; keybind: "s"; action: "down" };
+    left: { pressed: boolean; keybind: "a"; action: "left" };
+    right: { pressed: boolean; keybind: "d"; action: "right" };
   };
   aux: {
-    pause: { pressed: boolean; keybind: "]" };
-    zoom: { pressed: boolean; keybind: "z" };
-    attack: { pressed: boolean; keybind: "p" };
-    secondaryAttack: { pressed: boolean; coords: { x: number; y: number } };
+    pause: { pressed: boolean; keybind: "]"; action: "pause" };
+    zoom: { pressed: boolean; keybind: "z"; action: "zoom" };
+    attack: { pressed: boolean; keybind: "p"; action: "attack" };
+    secondaryAttack: {
+      pressed: boolean;
+      coords: { x: number; y: number };
+      action: "secondaryAttack";
+    };
   };
 };
 
