@@ -5,7 +5,7 @@ import {
   EntityTypeSprite,
   SpriteProjectile,
 } from "./Objects/Sprite";
-import Collisions from "./Collisions";
+import collisions from "./Collisions";
 import BuildMapSprite from "./BuildMapSprites";
 import KeybindHandler from "./KeybindHandler";
 import { Map1, Map2 } from "./utils/MapStrings";
@@ -36,7 +36,6 @@ playerPicL.src = mageLeft;
 const sheet = new Image();
 sheet.src = spriteSheet;
 
-const collisionState = Collisions();
 let zoomOn = false;
 let scale = 1;
 // our plyer's center position relative to the screen size will be by the formula:
@@ -48,7 +47,7 @@ const currPlayerPostion = {
 const offset = { x: 48, y: 0 };
 const lastClickPosition = { x: 0, y: 0 };
 
-// const currentMap = loadMap({})
+// const currentMap = loadLevel({})
 
 function toggleZoom(zoomState: boolean) {
   if (zoomState) {
@@ -136,12 +135,11 @@ const mapTiles = BuildMapSprite(
     tileSize: 32,
     debug: false,
   },
-  collisionState.appendCollidable
+  collisions.appendCollidable
 );
 
 const Control = KeybindHandler({
   animate,
-  collidables: collisionState,
   keypressActions: {
     updateOffset,
     toggleZoom,
@@ -156,7 +154,7 @@ const moveables: MapTypeSprite[] = [...mapTiles];
 let removedSprites: EntityTypeSprite[] = [];
 let renderingProjectile = false;
 function animate() {
-  if (Control.isKeyPressed("pause")) return;
+  if (Control.isKeyPressed("pause", "aux")) return;
   ctx.scale(scale, scale);
   window.requestAnimationFrame(animate);
   // this canvas edit fills everything in black before redrawing other sprites
@@ -176,7 +174,7 @@ function animate() {
 
   const deleteEntitysIndex: number[] = [];
 
-  if (Control.isKeyPressed("secondaryAttack")) {
+  if (Control.isKeyPressed("secondaryAttack", "aux")) {
     renderingProjectile = true;
     const newProjectile = SpriteProjectile(ctx, { width: 16, height: 16 });
     newProjectile.setValues(getScreenCenter(), getLastClickPosition(), {
@@ -188,7 +186,6 @@ function animate() {
     const animationOngoing = projectiles.filter((projectile) => {
       monsters.forEach((monster, i) => {
         const { finishingBlow, isHit, hitWall } = player.secondaryAttack(
-          collisionState,
           monster,
           projectile.getRect(),
           offset
@@ -209,22 +206,17 @@ function animate() {
     if (!projectiles.length) renderingProjectile = false;
   }
 
-  if (Control.isKeyPressed("attack")) {
+  if (Control.isKeyPressed("attack", "aux")) {
     if (monsters.length) {
       monsters.forEach((monster, i) => {
-        const finishingBlow = player.attack(
-          collisionState.checkForCollisionCharacter,
-          monster
-        );
-
+        const finishingBlow = player.attack(monster);
         if (finishingBlow) {
           removedSprites = [...removedSprites, monster];
           deleteEntitysIndex.push(i);
           monster.killThisSprite();
-          // to be fleshed outt
         }
       });
-    } else player.attack(collisionState.checkForCollisionCharacter);
+    } else player.attack();
   }
   if (deleteEntitysIndex.length) {
     /* temp array shallow copy

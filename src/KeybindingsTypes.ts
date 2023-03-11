@@ -1,12 +1,17 @@
 export type Keybinds = {
-  w: { pressed: boolean };
-  s: { pressed: boolean };
-  a: { pressed: boolean };
-  d: { pressed: boolean };
-  pause: { pressed: boolean };
-  zoom: { pressed: boolean };
-  attack: { pressed: boolean };
-  secondaryAttack: { pressed: boolean; coords: { x: number; y: number } };
+  movement: {
+    up: { pressed: boolean; keybind: "w"; direction: "up" };
+    down: { pressed: boolean; keybind: "s"; direction: "down" };
+    left: { pressed: boolean; keybind: "a"; direction: "left" };
+    right: { pressed: boolean; keybind: "d"; direction: "right" };
+  };
+  aux: {
+    pause: { pressed: boolean; keybind: "]" };
+    zoom: { pressed: boolean; keybind: "z" };
+    attack: { pressed: boolean; keybind: "p" };
+    secondaryAttack: { pressed: boolean; coords: { x: number; y: number } };
+  };
 };
 
-export type MovementKey = "w" | "a" | "s" | "d";
+export type MovementKey = "up" | "down" | "left" | "right";
+export type AuxKey = "pause" | "zoom" | "attack" | "secondaryAttack";

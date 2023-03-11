@@ -1,4 +1,4 @@
-import { CollisionState } from "../Collisions";
+import collisions, { CollisionState } from "../Collisions";
 import { MovementKey } from "../KeybindingsTypes";
 import {
   CharacterSpriteParams,
@@ -25,7 +25,7 @@ export type EntityTypeSprite = {
   log: (offset?: Vector) => void;
   getRect: () => Rect;
   updateOffset: (offset: Vector) => void;
-  knockBackSprite: ({ x, y }: Vector) => void;
+  moveSprite: ({ x, y }: Vector, direction: MovementKey) => void;
   alterHp: (damage: number, modifier: "+" | "-") => number | undefined;
   killThisSprite: () => void;
 };
@@ -42,15 +42,11 @@ export type CharacterTypeSprite = {
   getRect: () => Rect;
   changeDirection: (key: MovementKey) => void;
   secondaryAttack: (
-    collision: CollisionState,
     monster: EntityTypeSprite,
     rect: Rect,
     offset: Vector
   ) => { isHit: boolean; finishingBlow: boolean; hitWall: boolean };
-  attack: (
-    checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
-    monster?: EntityTypeSprite
-  ) => boolean;
+  attack: (monster?: EntityTypeSprite) => boolean;
 };
 
 /*
@@ -77,13 +73,13 @@ function SpriteEntity({
 
   const rngNum = (n: number) => Math.round(Math.random() * n);
 
+  type Direction = "up" | "down" | "left" | "right" | "wait";
+  type Order = {
+    direction: Direction;
+    duration: number;
+    inc: { x: number; y: number };
+  };
   function wander(maxRange: number, entitySpeed: number) {
-    type order = {
-      direction: Direction;
-      duration: number;
-      inc: { x: number; y: number };
-    };
-    type Direction = "up" | "down" | "left" | "right" | "wait";
     const dir: Direction[] = [
       "up",
       "down",
@@ -96,8 +92,8 @@ function SpriteEntity({
       "wait",
       "wait",
     ];
-    const orders: order[] = [];
-    function foo(d: Direction) {
+    const orders: Order[] = [];
+    function incremental(d: Direction) {
       if (d === "up") {
         return { y: -entitySpeed, x: 0 };
       }
@@ -118,11 +114,11 @@ function SpriteEntity({
         orders.push({
           direction: dir[pos],
           duration: rngNum(maxRange),
-          inc: foo(dir[pos]),
+          inc: incremental(dir[pos]),
         });
       }
     }
-    function walk(): Vector {
+    function walk(): Order {
       const first = orders[0];
       if (!first) {
         buildQueue();
@@ -133,13 +129,12 @@ function SpriteEntity({
         return walk();
       }
       first.duration--;
-      return first.inc;
+      return first;
     }
     buildQueue();
-    console.log(orders);
     return { walk };
   }
-  const directions = wander(80, 2);
+  const directions = wander(80, stats.speed);
   function draw() {
     if (stats.health >= 0) {
       if (isUnderAttack) {
@@ -175,11 +170,12 @@ function SpriteEntity({
         source.width / source.frames.max,
         source.height * 1
       );
-      const { x, y } = directions.walk();
-      position.x += x;
-      position.y += y;
+      const { inc, direction } = directions.walk();
+      if (direction !== "wait") {
+        moveSprite({ x: inc.x, y: inc.y }, direction);
+      }
+
       if (spriteFrameIntervalID !== null || source.frames.max === 1) return;
-      // position.x += 1;
       spriteFrameIntervalID = setTimeout(() => tickTock(), 300);
     }
   }
@@ -194,7 +190,15 @@ function SpriteEntity({
     offset.x = offsetNew.x;
     offset.y = offsetNew.y;
   }
-  function knockBackSprite({ x, y }: Vector) {
+  function moveSprite({ x, y }: Vector, direction: MovementKey) {
+    if (
+      collisions.checkForCollisionMovement(
+        { x: position.x, y: position.y },
+        stats.speed,
+        direction
+      )
+    )
+      return;
     position.x += x;
     position.y += y;
   }
@@ -233,7 +237,7 @@ function SpriteEntity({
     return rect;
   }
   function tickTock() {
-    const max = 3, //max ammount of frames to cycle through the sprite
+    const max = 2, //max ammount of frames to cycle through the sprite
       min = 0; // reset index
     ticks === max ? (ticks = min) : (ticks += 1);
     spriteFrameIntervalID = null;
@@ -243,7 +247,7 @@ function SpriteEntity({
     log,
     getRect,
     updateOffset,
-    knockBackSprite,
+    moveSprite,
     alterHp,
     killThisSprite,
   };
@@ -265,7 +269,7 @@ function SpriteCharacter({
 }: CharacterSpriteParams): CharacterTypeSprite {
   let idTimeout: number | null = null;
   let ticks = 0;
-  let direction: MovementKey = "d";
+  let direction: MovementKey = "right";
   let truePosition = { x: 0, y: 0 };
   let spriteCorrelatedToDirection = source.img.right;
 
@@ -291,10 +295,10 @@ function SpriteCharacter({
   function changeDirection(key: MovementKey) {
     direction = key;
     switch (key) {
-      case "d":
+      case "right":
         spriteCorrelatedToDirection = source.img.right;
         break;
-      case "a":
+      case "left":
         spriteCorrelatedToDirection = source.img.left;
         break;
 
@@ -304,36 +308,35 @@ function SpriteCharacter({
   }
 
   function secondaryAttack(
-    collision: CollisionState,
     monster: EntityTypeSprite,
     projectileRect: Rect,
     offset: Vector
   ) {
-    const isHit = collision.checkForCollisionCharacter(
+    const isHit = collisions.checkForCollisionSprite(
       projectileRect,
       monster.getRect()
     );
-    const hitWall = collision.checkForCollisionProjectile(
+    const hitWall = collisions.checkForCollisionProjectile(
       projectileRect,
       offset
     );
     if (hitWall) return { finishingBlow: false, isHit, hitWall };
     if (isHit) {
-      const kbValue = 3;
-      let kbX = 0,
-        kbY = 0;
-      const monRect = monster.getRect();
-      if (projectileRect.y > monRect.y) {
-        kbY += kbValue;
-      } else {
-        kbY -= kbValue;
-      }
-      if (projectileRect.x > monRect.x) {
-        kbX -= kbValue;
-      } else {
-        kbX += kbValue;
-      }
-      monster.knockBackSprite({ x: kbX, y: kbY });
+      // const kbValue = 3;
+      // let kbX = 0,
+      //   kbY = 0;
+      // const monRect = monster.getRect();
+      // if (projectileRect.y > monRect.y) {
+      //   kbY += kbValue;
+      // } else {
+      //   kbY -= kbValue;
+      // }
+      // if (projectileRect.x > monRect.x) {
+      //   kbX -= kbValue;
+      // } else {
+      //   kbX += kbValue;
+      // }
+      // monster.moveSprite({ x: kbX, y: kbY },);
       const hp = monster.alterHp(
         Math.floor(stats.strength * 0.25 + attack.secondary.damage),
         "-"
@@ -345,32 +348,29 @@ function SpriteCharacter({
     return { finishingBlow: false, isHit, hitWall };
   }
 
-  function attackHandler(
-    checkForCollisionCharacter: (rect0: Rect, rect1: Rect) => boolean,
-    monster?: EntityTypeSprite
-  ) {
+  function attackHandler(monster?: EntityTypeSprite) {
     const knockbackValue = 3;
     let x = truePosition.x,
       y = truePosition.y,
       attW = attack.primary.width,
       attH = attack.primary.height;
     const knockBackOffset = { x: 0, y: 0 };
-    if (direction === "d") {
+    if (direction === "right") {
       x += source.width / source.frames.max;
       knockBackOffset.x += knockbackValue;
     }
-    if (direction === "a") {
+    if (direction === "left") {
       x -= attack.primary.width;
       knockBackOffset.x -= knockbackValue;
     }
-    if (direction === "w") {
+    if (direction === "up") {
       const temp = attW;
       attW = attH;
       attH = temp;
       y -= attack.primary.width / source.frames.max;
       knockBackOffset.y -= knockbackValue;
     }
-    if (direction === "s") {
+    if (direction === "down") {
       const temp = attH;
       attH = attW;
       attW = temp;
@@ -381,14 +381,14 @@ function SpriteCharacter({
     ctx.fillRect(x, y, attW, attH);
     if (
       monster &&
-      checkForCollisionCharacter(monster.getRect(), {
+      collisions.checkForCollisionSprite(monster.getRect(), {
         x: x,
         y: y,
         height: attH,
         width: attW,
       })
     ) {
-      monster.knockBackSprite(knockBackOffset);
+      monster.moveSprite(knockBackOffset, direction);
       const hp = monster.alterHp(
         Math.floor(stats.strength * 0.235 + attack.primary.damage),
         "-"

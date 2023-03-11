@@ -6,15 +6,15 @@ export type CollisionState = {
     depthLayer: { walkable: boolean; collidable: boolean }
   ) => void;
   checkForCollisionMovement: (
-    playerPos: Vector,
+    spritePos: Vector,
     speed: number,
     direction: MovementKey
   ) => boolean;
-  checkForCollisionCharacter: (
+  checkForCollisionSprite: (
     rect0: { x: number; y: number; width: number; height: number },
     rect1: { x: number; y: number; width: number; height: number }
   ) => boolean;
-  checkForCollisionProjectile: (arg0: Rect, arg1: Vector) => boolean;
+  checkForCollisionProjectile: (spriteRect: Rect, offset: Vector) => boolean;
 };
 
 type Rect = { x: number; y: number; width: number; height: number };
@@ -28,8 +28,8 @@ function Collisions(): CollisionState {
   collisions: Vector array of environment related tiles 
   */
 
-  const collisions: { moveable: Vector[]; collidable: Vector[] } = {
-    moveable: [],
+  const collisions: { walkable: Vector[]; collidable: Vector[] } = {
+    walkable: [],
     collidable: [],
   };
 
@@ -41,30 +41,31 @@ function Collisions(): CollisionState {
       collisions.collidable.push({ x, y });
     }
     if (depthLayer.walkable === false) {
-      collisions.moveable.push({ x, y });
+      collisions.walkable.push({ x, y });
     }
   }
 
   function checkForCollisionMovement(
-    playerPos: { x: number; y: number },
+    spritePos: { x: number; y: number },
     speed: number,
     direction: MovementKey
   ) {
-    let topY = playerPos.y,
-      topX = playerPos.x;
-    if (direction === "w" || direction === "s") {
-      direction === "w" ? (topY -= speed) : (topY += speed);
+    let topY = spritePos.y,
+      topX = spritePos.x;
+    if (direction === "up" || direction === "down") {
+      direction === "up" ? (topY -= speed) : (topY += speed);
     }
-    if (direction === "a" || direction === "d") {
-      direction === "a" ? (topX -= speed) : (topX += speed);
+    if (direction === "left" || direction === "right") {
+      direction === "left" ? (topX -= speed) : (topX += speed);
     }
-    //takes coord start of {x, y} then adds the width of the sprite, subtracting the speed of char / 2 to handle collision
-    return collisions.moveable.some(({ x, y }) => {
+    //takes coord start of {x, y}then adds the width of the sprite, subtracting the speed of char / 2 to handle collision
+    //hard code 30 for sprite width to fit into 1x1 tiles
+    return collisions.walkable.some(({ x, y }) => {
       return (
-        topX + 2 + 30 - speed / 2 >= x &&
-        topX + 2 <= x + 30 - speed / 2 &&
-        topY + 2 <= y + 30 - speed / 2 &&
-        topY + 2 + 30 - speed / 2 >= y
+        topX + 30 - speed / 2 >= x &&
+        topX <= x + 30 - speed / 2 &&
+        topY <= y + 30 - speed / 2 &&
+        topY + 30 - speed / 2 >= y
       );
     });
   }
@@ -79,7 +80,7 @@ function Collisions(): CollisionState {
       );
     });
   }
-  function checkForCollisionCharacter(rect0: Rect, rect1: Rect) {
+  function checkForCollisionSprite(rect0: Rect, rect1: Rect) {
     return (
       rect0.x + rect0.width >= rect1.x &&
       rect0.x <= rect1.x + rect1.width &&
@@ -94,8 +95,9 @@ function Collisions(): CollisionState {
     appendCollidable,
     log,
     checkForCollisionMovement,
-    checkForCollisionCharacter,
+    checkForCollisionSprite,
     checkForCollisionProjectile,
   };
 }
-export default Collisions;
+const collisions: CollisionState = Collisions();
+export default collisions;

@@ -1,11 +1,10 @@
-import { CollisionState } from "./Collisions";
-import { Keybinds, MovementKey } from "./KeybindingsTypes";
+import collisions, { CollisionState } from "./Collisions";
+import { AuxKey, Keybinds, MovementKey } from "./KeybindingsTypes";
 import { CharacterTypeSprite } from "./Objects/Sprite";
 import { Vector } from "./Objects/SpriteTypes";
 
 type KeybindParams = {
   animate: () => void;
-  collidables: CollisionState;
   player: CharacterTypeSprite;
   keypressActions: {
     toggleZoom: (zoomOn: boolean) => void;
@@ -16,28 +15,27 @@ type KeybindParams = {
 
 function KeybindHandler({
   animate,
-  collidables,
   keypressActions: { toggleZoom, updateOffset, updateLastClickPosition },
   player,
 }: KeybindParams) {
   const Keybinds: Keybinds = {
-    w: { pressed: false },
-    s: { pressed: false },
-    a: { pressed: false },
-    d: { pressed: false },
-    attack: { pressed: false },
-    secondaryAttack: { pressed: false, coords: { x: 0, y: 0 } },
-    pause: { pressed: false },
-    zoom: { pressed: false },
+    movement: {
+      up: { pressed: false, keybind: "w", direction: "up" },
+      down: { pressed: false, keybind: "s", direction: "down" },
+      left: { pressed: false, keybind: "a", direction: "left" },
+      right: { pressed: false, keybind: "d", direction: "right" },
+    },
+    aux: {
+      pause: { pressed: false, keybind: "]" },
+      zoom: { pressed: false, keybind: "z" },
+      attack: { pressed: false, keybind: "p" },
+      secondaryAttack: { pressed: false, coords: { x: 0, y: 0 } },
+    },
   };
   // let haltMovement = false;
   let zoomOnCooldown = false;
   let attackCooldown = false;
   let secondaryAttackCooldown = false;
-
-  function toggleKeyPressed(key: MovementKey, bool: boolean) {
-    Keybinds[key].pressed = bool;
-  }
 
   function initControls() {
     const canvas = document.querySelector("canvas") as HTMLCanvasElement;
@@ -48,9 +46,9 @@ function KeybindHandler({
 
   function handleMouseClick(e: MouseEvent) {
     if (secondaryAttackCooldown) return;
-    if (Keybinds.secondaryAttack.pressed) return;
+    if (Keybinds.aux.secondaryAttack.pressed) return;
     secondaryAttackCooldown = true;
-    Keybinds.secondaryAttack.pressed = true;
+    Keybinds.aux.secondaryAttack.pressed = true;
     const targ = e.target as HTMLCanvasElement;
     const rect = targ.getBoundingClientRect();
     const x = e.clientX - rect.left,
@@ -59,91 +57,99 @@ function KeybindHandler({
     // this timeout's duration number is the cooldown between new attacks
     setTimeout(() => (secondaryAttackCooldown = false), 400);
     // this number is to limit the number of times this function gets called in animation (calls only once per frame)
-    setTimeout(() => (Keybinds.secondaryAttack.pressed = false), 10);
+    setTimeout(() => (Keybinds.aux.secondaryAttack.pressed = false), 10);
   }
 
   function handleKeyDown(e: KeyboardEvent) {
-    if (e.key === "]") {
+    if (e.key === Keybinds.aux.pause.keybind) {
       // player.log(offset);
-      collidables.log();
-      Keybinds.pause.pressed = !Keybinds.pause.pressed;
+      collisions.log();
+      Keybinds.aux.pause.pressed = !Keybinds.aux.pause.pressed;
       animate(); //force the loop to start again if debug has been toggled off -> on
     }
-    if (e.key === "z") {
+    if (e.key === Keybinds.aux.zoom.keybind) {
       if (zoomOnCooldown) return;
-      Keybinds.zoom.pressed = !Keybinds.zoom.pressed;
+      Keybinds.aux.zoom.pressed = !Keybinds.aux.zoom.pressed;
       zoomOnCooldown = true;
       setTimeout(() => (zoomOnCooldown = false), 200);
-      toggleZoom(Keybinds.zoom.pressed);
+      toggleZoom(Keybinds.aux.zoom.pressed);
     }
-    if (e.key === "p") {
+    if (e.key === Keybinds.aux.attack.keybind) {
       if (attackCooldown) return;
-      const attackLingerDur = 124;
-      if (Keybinds.attack.pressed) return;
+      const attackLingerDur = 100;
+      if (Keybinds.aux.attack.pressed) return;
       attackCooldown = true;
-      Keybinds.attack.pressed = true;
-      setTimeout(() => (Keybinds.attack.pressed = false), attackLingerDur);
+      Keybinds.aux.attack.pressed = true;
+      setTimeout(() => (Keybinds.aux.attack.pressed = false), attackLingerDur);
       setTimeout(() => (attackCooldown = false), 300);
     }
-    const mvKey = e.key as MovementKey;
-    if (mvKey in Keybinds) {
-      player.changeDirection(mvKey);
-      return toggleKeyPressed(mvKey, true);
+    const mvKey = e.key;
+    const movementKey = Object.values(Keybinds.movement).find(
+      (key) => key.keybind === mvKey
+    );
+    if (movementKey) {
+      player.changeDirection(movementKey.direction);
+      movementKey.pressed = true;
     }
   }
 
   function handleKeyUp(e: KeyboardEvent) {
     //called on keyup to stop movement
-    const mvKey = e.key as MovementKey;
-    if (mvKey in Keybinds) toggleKeyPressed(mvKey, false);
+    const mvKey = e.key;
+    const movementKeybind = Object.values(Keybinds.movement).find(
+      (key) => key.keybind === mvKey
+    );
+    if (movementKeybind?.pressed) movementKeybind.pressed = false;
   }
 
   function keypressEventEmitter(coords: { x: number; y: number }, speed = 3) {
     // if (haltMovement) return;
     if (
-      isKeyPressed("w") &&
-      !collidables.checkForCollisionMovement(
+      isKeyPressed("up", "movement") &&
+      !collisions.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
-        "w"
+        "up"
       )
     ) {
       updateOffset("y", "+", speed);
     }
     if (
-      isKeyPressed("s") &&
-      !collidables.checkForCollisionMovement(
+      isKeyPressed("down", "movement") &&
+      !collisions.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
-        "s"
+        "down"
       )
     ) {
       updateOffset("y", "-", speed);
     }
     if (
-      isKeyPressed("a") &&
-      !collidables.checkForCollisionMovement(
+      isKeyPressed("left", "movement") &&
+      !collisions.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
-        "a"
+        "left"
       )
     ) {
       updateOffset("x", "+", speed);
     }
     if (
-      isKeyPressed("d") &&
-      !collidables.checkForCollisionMovement(
+      isKeyPressed("right", "movement") &&
+      !collisions.checkForCollisionMovement(
         { x: coords.x, y: coords.y },
         speed,
-        "d"
+        "right"
       )
     ) {
       updateOffset("x", "-", speed);
     }
   }
 
-  function isKeyPressed(key: keyof Keybinds) {
-    return Keybinds[key].pressed;
+  function isKeyPressed(key: MovementKey | AuxKey, type: "movement" | "aux") {
+    if (type === "movement")
+      return Keybinds.movement[key as MovementKey].pressed;
+    return Keybinds.aux[key as AuxKey].pressed;
   }
 
   return {

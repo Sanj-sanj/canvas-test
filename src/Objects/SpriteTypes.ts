@@ -1,3 +1,5 @@
+import { CollisionState } from "../Collisions";
+
 type CharacterSpriteParams = {
   position: { x: number; y: number };
   stats: {
@@ -33,6 +35,7 @@ type EntitySpriteParams = {
   stats: {
     health: number;
     damage: number;
+    speed: number;
   };
   attack: {
     width: number;
