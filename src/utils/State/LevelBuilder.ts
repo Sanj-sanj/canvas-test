@@ -14,7 +14,7 @@ const sheet = new Image();
 sheet.src = spriteSheet;
 
 function LevelBuilder() {
-  const { Camera, Control, Player, MapTiles, TestMonsters } = State(
+  const { Camera, Control, Collisions, Player, MapTiles, TestMonsters } = State(
     canvas,
     ctx,
     animate
@@ -67,17 +67,20 @@ function LevelBuilder() {
     }
     if (renderingProjectile) {
       const animationOngoing = projectiles.filter((projectile) => {
+        const hasHitWall = Collisions.checkForCollisionProjectile(
+          projectile.getRect(),
+          offset
+        );
+        if (hasHitWall) projectile.endAnimation();
         monsters.forEach((monster, i) => {
-          const { finishingBlow, isHit, hitWall } = Player.secondaryAttack(
-            monster,
+          const hasHitMon = Collisions.checkForCollisionSprite(
             projectile.getRect(),
-            offset
+            monster.getRect()
           );
-          if (hitWall) projectile.endAnimation();
-          if (isHit) {
+          const { finishingBlow } = Player.secondaryAttack(monster, hasHitMon);
+          if (hasHitMon) {
             projectile.endAnimation();
             if (finishingBlow) {
-              // removedSprites = [...removedSprites, monster];
               deleteEntitysIndex.push(i);
               monster.killThisSprite();
             }
@@ -85,6 +88,7 @@ function LevelBuilder() {
         });
         return projectile.draw(offset);
       });
+
       projectiles = animationOngoing;
       if (!projectiles.length) renderingProjectile = false;
     }
@@ -94,7 +98,6 @@ function LevelBuilder() {
         monsters.forEach((monster, i) => {
           const finishingBlow = Player.attack(monster);
           if (finishingBlow) {
-            // removedSprites = [...removedSprites, monster];
             deleteEntitysIndex.push(i);
             monster.killThisSprite();
           }

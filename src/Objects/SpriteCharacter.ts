@@ -14,9 +14,8 @@ export type CharacterTypeSprite = {
   changeDirection: (key: MovementKey) => void;
   secondaryAttack: (
     monster: EntityTypeSprite,
-    rect: Rect,
-    offset: Vector
-  ) => { isHit: boolean; finishingBlow: boolean; hitWall: boolean };
+    hasHitMon: boolean
+  ) => { finishingBlow: boolean };
   attack: (monster?: EntityTypeSprite) => boolean;
 };
 
@@ -68,21 +67,8 @@ function SpriteCharacter({
     }
   }
 
-  function secondaryAttack(
-    monster: EntityTypeSprite,
-    projectileRect: Rect,
-    offset: Vector
-  ) {
-    const isHit = collisions.checkForCollisionSprite(
-      projectileRect,
-      monster.getRect()
-    );
-    const hitWall = collisions.checkForCollisionProjectile(
-      projectileRect,
-      offset
-    );
-    if (hitWall) return { finishingBlow: false, isHit, hitWall };
-    if (isHit) {
+  function secondaryAttack(monster: EntityTypeSprite, hasHitMon: boolean) {
+    if (hasHitMon) {
       // const kbValue = 3;
       // let kbX = 0,
       //   kbY = 0;
@@ -103,10 +89,10 @@ function SpriteCharacter({
         "-"
       );
       if (typeof hp === "number" && hp <= 0) {
-        return { finishingBlow: true, isHit, hitWall };
+        return { finishingBlow: true };
       }
     }
-    return { finishingBlow: false, isHit, hitWall };
+    return { finishingBlow: false };
   }
 
   function attackHandler(monster?: EntityTypeSprite) {

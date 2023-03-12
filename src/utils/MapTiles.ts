@@ -3,6 +3,7 @@ type Vec = { x: number; y: number };
 export type MapTile =
   | "."
   | "~"
+  | "@"
   | ":"
   | "["
   | "*"
@@ -35,7 +36,10 @@ type LegendEntry = {
     actors: [];
   };
 };
-
+/*
+DepthLayer's walkable property is for defining where and where not a Entity/Character Sprite that is moveable can move to.
+             collidable property is for defining where a Projectile Sprite cannot move to. (Collisions detection for projectiles) 
+*/
 const Legend: LegendEntry = {
   "!": {
     type: "void",
@@ -63,6 +67,12 @@ const Legend: LegendEntry = {
     spritePath: [{ x: 1, y: 3 }],
     actors: [],
     depthLayer: { walkable: false, collidable: false },
+  },
+  "@": {
+    type: "sand",
+    spritePath: [{ x: 2, y: 3 }],
+    actors: [],
+    depthLayer: { walkable: true, collidable: false },
   },
   $: {
     type: "grassy dirt road",
