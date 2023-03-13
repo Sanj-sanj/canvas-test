@@ -19,57 +19,56 @@ function LevelBuilder() {
     ctx,
     animate
   );
-  const { getScale, getScreenCenter, getLastClickPosition, CameraState } =
-    Camera;
-  const { offset } = CameraState;
+  const { cameraState, updateRenderingProjectiles } = Camera;
 
-  const projectileState = {
-    renderingProjectile: false,
-    projectiles: [] as ProjectileTypeSprite[],
-  };
   const SpriteState = {
     monsters: [...TestMonsters] as EntityTypeSprite[],
     projectiles: [] as ProjectileTypeSprite[],
     removedSprites: [] as (EntityTypeSprite | null)[],
+    background: [...MapTiles] as MapTypeSprite[],
   };
-  const moveables: MapTypeSprite[] = [...MapTiles];
-  let { monsters, removedSprites } = SpriteState;
-  let { renderingProjectile, projectiles } = projectileState;
+  let { monsters, removedSprites, projectiles, background } = SpriteState; //eslint-disable-line
 
   function animate() {
     if (Control.isKeyPressed("pause", "aux")) return;
-    ctx.scale(getScale(), getScale());
+    ctx.scale(cameraState.scale(), cameraState.scale());
     window.requestAnimationFrame(animate);
     // this canvas edit fills everything in black before redrawing other sprites
     // needed when zooming in and out, otherwise artefacts of previous renders exist outside of drawn sprite boundaries.
     ctx.fillStyle = "black";
     ctx?.fillRect(0, 0, canvas.width, canvas.height);
 
-    moveables.forEach((moveable) => {
-      moveable.updateOffset(offset);
-      moveable.draw();
+    background.forEach((tile) => {
+      tile.updateOffset(cameraState.offset());
+      tile.draw();
     });
-    monsters.forEach((mon) => {
-      mon.updateOffset(offset);
-      mon.draw();
+    monsters.forEach((monster) => {
+      monster.updateOffset(cameraState.offset());
+      monster.draw();
     });
-    Player.draw(getScreenCenter());
+    Player.draw(cameraState.screenCenter());
 
     const deleteEntitysIndex: number[] = [];
 
     if (Control.isKeyPressed("secondaryAttack", "aux")) {
-      renderingProjectile = true;
+      // renderingProjectile = true;
+      updateRenderingProjectiles(true);
+
       const newProjectile = SpriteProjectile(ctx, { width: 16, height: 16 });
-      newProjectile.setValues(getScreenCenter(), getLastClickPosition(), {
-        ...offset,
-      });
+      newProjectile.setValues(
+        cameraState.screenCenter(),
+        cameraState.lastClickedPosition(),
+        {
+          ...cameraState.offset(),
+        }
+      );
       projectiles.push(newProjectile);
     }
-    if (renderingProjectile) {
+    if (cameraState.renderingProjectiles()) {
       const animationOngoing = projectiles.filter((projectile) => {
         const hasHitWall = Collisions.checkForCollisionProjectile(
           projectile.getRect(),
-          offset
+          cameraState.offset()
         );
         if (hasHitWall) projectile.endAnimation();
         monsters.forEach((monster, i) => {
@@ -86,11 +85,11 @@ function LevelBuilder() {
             }
           }
         });
-        return projectile.draw(offset);
+        return projectile.draw(cameraState.offset());
       });
 
       projectiles = animationOngoing;
-      if (!projectiles.length) renderingProjectile = false;
+      if (!projectiles.length) updateRenderingProjectiles(false);
     }
 
     if (Control.isKeyPressed("attack", "aux")) {
@@ -121,8 +120,8 @@ function LevelBuilder() {
       }, 300);
     }
     const tempPCoords = {
-      x: getScreenCenter().x - offset.x,
-      y: getScreenCenter().y - offset.y,
+      x: cameraState.screenCenter().x - cameraState.offset().x,
+      y: cameraState.screenCenter().y - cameraState.offset().y,
     };
 
     Control.keypressEventEmitter(tempPCoords, 4);

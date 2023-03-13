@@ -9,7 +9,7 @@ type KeybindParams = {
   Collisions: CollisionState;
   player: CharacterTypeSprite;
   keypressActions: {
-    toggleZoom: (zoomOn: boolean) => void;
+    toggleZoom: () => void;
     updateOffset: (pos: "x" | "y", operand: "-" | "+", speed?: number) => void;
     updateLastClickPosition: (newPos: Vector) => void;
   };
@@ -79,7 +79,7 @@ function KeybindHandler({
       Keybinds.aux.zoom.pressed = !Keybinds.aux.zoom.pressed;
       zoomOnCooldown = true;
       setTimeout(() => (zoomOnCooldown = false), 200);
-      toggleZoom(Keybinds.aux.zoom.pressed);
+      toggleZoom();
     }
     if (e.key === Keybinds.aux.attack.keybind) {
       if (attackCooldown) return;

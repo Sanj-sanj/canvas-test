@@ -3,7 +3,6 @@ import { MovementKey } from "../utils/Handlers/Keybinds/KeybindingsTypes";
 
 type CharacterSpriteParams = {
   collisions: CollisionState;
-  position: { x: number; y: number };
   stats: {
     health: number;
     strength: number;

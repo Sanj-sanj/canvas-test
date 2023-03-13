@@ -23,18 +23,17 @@ function State(
 ) {
   const Collisions = CollisionHandler();
   const Camera = CameraHandler({ height: canvas.height, width: canvas.width });
-  const { offset } = Camera.CameraState;
+  /*
+    { initalOffset: { x: -210 / 2, y: -144 / 2 }, zoomEnalbed: true }
+     this particular offset value will be used when loading a new map while the 
+     player's zoomEnabled == true to combat the offset caused by zooming before positioning
+     player sprite on the screen.
+     */
+  const { offset } = Camera.cameraState;
   const { updateOffset, toggleZoom, updateLastClickPosition } = Camera;
 
-  // our plyer's center position relative to the screen size will be by the formula:
-  // [canvas.width | canvas.height] / 2 { / scaling } { - SPRITE SIZE / 2 for x})
-  const currPlayerPostion = {
-    x: Math.floor(canvas.width / 2 - 16),
-    y: Math.floor(canvas.height / 2),
-  };
   const Player = SpriteCharacter({
     collisions: Collisions,
-    position: currPlayerPostion,
     ctx: ctx,
     stats: {
       health: 100,
@@ -77,7 +76,7 @@ function State(
     {
       ctx,
       mapString: Map1,
-      offset,
+      offset: offset(),
       spriteSheet: sheet,
       tileSize: 32,
       debug: false,

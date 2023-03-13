@@ -21,7 +21,6 @@ export type CharacterTypeSprite = {
 
 function SpriteCharacter({
   collisions,
-  position,
   source,
   ctx,
   stats,
@@ -148,7 +147,7 @@ function SpriteCharacter({
     return false;
   }
   function log(offset?: Vector) {
-    console.log({ position, source, offset });
+    console.log({ source, offset });
   }
   function getRect(): Rect {
     return {
