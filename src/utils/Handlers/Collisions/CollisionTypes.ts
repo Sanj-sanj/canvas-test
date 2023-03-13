@@ -17,4 +17,5 @@ export type CollisionState = {
     rect1: { x: number; y: number; width: number; height: number }
   ) => boolean;
   checkForCollisionProjectile: (spriteRect: Rect, offset: Vector) => boolean;
+  getRandomWalkableTile: () => Vector;
 };

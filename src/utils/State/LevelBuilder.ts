@@ -14,7 +14,7 @@ const sheet = new Image();
 sheet.src = spriteSheet;
 
 function LevelBuilder() {
-  const { Camera, Control, Collisions, Player, MapTiles, TestMonsters } = State(
+  const { Camera, Control, Collisions, Player, MapTiles, Entities } = State(
     canvas,
     ctx,
     animate
@@ -22,7 +22,7 @@ function LevelBuilder() {
   const { cameraState, updateRenderingProjectiles } = Camera;
 
   const SpriteState = {
-    monsters: [...TestMonsters] as EntityTypeSprite[],
+    monsters: [...Entities] as EntityTypeSprite[],
     projectiles: [] as ProjectileTypeSprite[],
     removedSprites: [] as (EntityTypeSprite | null)[],
     background: [...MapTiles] as MapTypeSprite[],

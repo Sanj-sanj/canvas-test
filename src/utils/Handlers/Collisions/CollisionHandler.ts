@@ -7,9 +7,14 @@ function CollisionHandler(): CollisionState {
   This function will contain all collision state related functions.
   collisions: Vector array of environment related tiles 
   */
-  const collisions: { walkable: Vector[]; collidable: Vector[] } = {
-    walkable: [],
+  const collisions: {
+    unwalkable: Vector[];
+    collidable: Vector[];
+    walkable: Vector[];
+  } = {
+    unwalkable: [],
     collidable: [],
+    walkable: [],
   };
 
   function appendCollidable(
@@ -20,6 +25,9 @@ function CollisionHandler(): CollisionState {
       collisions.collidable.push({ x, y });
     }
     if (depthLayer.walkable === false) {
+      collisions.unwalkable.push({ x, y });
+    }
+    if (depthLayer.walkable === true) {
       collisions.walkable.push({ x, y });
     }
   }
@@ -39,7 +47,7 @@ function CollisionHandler(): CollisionState {
     }
     //takes coord start of {x, y}then adds the width of the sprite, subtracting the speed of char / 2 to handle collision
     //hard code 30 for sprite width to fit into 1x1 tiles
-    return collisions.walkable.some(({ x, y }) => {
+    return collisions.unwalkable.some(({ x, y }) => {
       return (
         topX + 30 - speed / 2 >= x &&
         topX <= x + 30 - speed / 2 &&
@@ -67,6 +75,13 @@ function CollisionHandler(): CollisionState {
       rect0.y + rect0.width >= rect1.y
     );
   }
+
+  function getRandomWalkableTile() {
+    return collisions.walkable[
+      Math.floor(Math.random() * collisions.walkable.length)
+    ];
+  }
+
   function log() {
     console.log(collisions);
   }
@@ -76,6 +91,7 @@ function CollisionHandler(): CollisionState {
     checkForCollisionMovement,
     checkForCollisionSprite,
     checkForCollisionProjectile,
+    getRandomWalkableTile,
   };
 }
 export default CollisionHandler;
