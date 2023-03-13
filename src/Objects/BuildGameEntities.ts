@@ -18,7 +18,6 @@ function BuildGameEntities(
       img: HTMLImageElement;
     };
   },
-
   quantity: number
 ) {
   const entities: EntityTypeSprite[] = [];
