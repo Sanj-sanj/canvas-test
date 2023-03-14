@@ -19,6 +19,7 @@ type LevelParams = {
   mapName: "startingPoint" | "smallTown";
   lastScreenOffset: Vector;
   newScreenOffset: Vector; // provided by the lastScreenOffset tile to have unique transportation [Map1 tile 1 => map2 tile 2  | Map1 tile 5 => Map 2 tile 15 ]
+  zoomEnabled: boolean;
 };
 
 function LevelBuilder(level?: LevelParams) {
@@ -26,6 +27,7 @@ function LevelBuilder(level?: LevelParams) {
     mapName: "startingPoint",
     lastScreenOffset: { x: 0, y: 0 },
     newScreenOffset: { x: 0, y: 0 },
+    zoomEnabled: false,
   };
   const { Camera, Control, Collisions, Player, MapTiles, Entities } = State(
     canvas,
@@ -35,6 +37,7 @@ function LevelBuilder(level?: LevelParams) {
   );
   const { cameraState, updateRenderingProjectiles } = Camera;
 
+  Control.initControls();
   const SpriteState = {
     monsters: [...Entities] as EntityTypeSprite[],
     projectiles: [] as ProjectileTypeSprite[],
@@ -49,22 +52,26 @@ function LevelBuilder(level?: LevelParams) {
     destination: Vector;
     newMapName: MapNames;
   }) {
-    console.log(level);
     const newlvl = LevelBuilder({
-      lastScreenOffset: cameraState.offset(),
       mapName: level.newMapName,
+      lastScreenOffset: cameraState.offset(),
       newScreenOffset: {
         x: level.destination.x * 16,
         y: level.destination.y * 16,
       },
+      zoomEnabled: cameraState.zoomEnabled(),
     });
-    return newlvl.animate();
+    Control.unbindControls();
+    newlvl.animate();
   }
 
   function animate() {
-    if (Control.isKeyPressed("pause", "aux")) return;
     ctx.scale(cameraState.scale(), cameraState.scale());
     const frame = window.requestAnimationFrame(animate);
+    if (Control.isKeyPressed("pause", "aux")) {
+      window.cancelAnimationFrame(frame);
+      return;
+    }
     // this canvas edit fills everything in black before redrawing other sprites
     // needed when zooming in and out, otherwise artefacts of previous renders exist outside of drawn sprite boundaries.
     ctx.fillStyle = "black";
@@ -155,17 +162,10 @@ function LevelBuilder(level?: LevelParams) {
     };
 
     Control.keypressEventEmitter(tempPCoords, 4);
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (Control.checkIfPlayerMoving()) {
       const nextLevel = Collisions.checkForCollisionTeleport(
         Player.getRect(),
         cameraState.offset()
-      );
-      console.log(
-        Collisions.checkForCollisionTeleport(
-          Player.getRect(),
-          cameraState.offset()
-        )
       );
       if (nextLevel) {
         window.cancelAnimationFrame(frame);
@@ -173,8 +173,8 @@ function LevelBuilder(level?: LevelParams) {
         // return;
       }
     }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
-  Control.initControls();
   return { animate };
 }
 

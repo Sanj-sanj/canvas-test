@@ -1,5 +1,5 @@
 import { Rect, Vector } from "../../../Objects/SpriteTypes";
-import { MapNames, Teleports } from "../../MapStrings";
+import { MapNames } from "../../MapStrings";
 import { MovementKey } from "../Keybinds/KeybindingsTypes";
 
 type teleportCollisionData = {

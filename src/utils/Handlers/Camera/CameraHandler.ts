@@ -4,10 +4,10 @@ function CameraHandler(
   canvas: { width: number; height: number },
   options?: {
     initalOffset?: Vector;
-    zoomEnalbed?: boolean;
+    zoomEnabled?: boolean;
   }
 ) {
-  let zoomOn = options?.zoomEnalbed || false;
+  let zoomOn = false;
   let scale = zoomOn ? 2 : 1;
   const offset = options?.initalOffset || { x: 0, y: 0 };
   const lastClickPosition = { x: 0, y: 0 };
@@ -19,7 +19,11 @@ function CameraHandler(
     scale: getScale,
     renderingProjectiles: getRenderingProjectiles,
     offset: getOffset,
+    zoomEnabled: getZoom,
   };
+
+  //toggle zoom to adjust offset values after state has been setup for new level renders.
+  if (options?.zoomEnabled) setTimeout(() => toggleZoom(), 0);
 
   function updateRenderingProjectiles(newVal: boolean) {
     isReneringPojectiles = newVal;
@@ -51,6 +55,9 @@ function CameraHandler(
   }
   function getRenderingProjectiles(): boolean {
     return isReneringPojectiles;
+  }
+  function getZoom() {
+    return zoomOn;
   }
   function getOffset() {
     return offset;

@@ -27,7 +27,7 @@ function SpriteCharacter({
   attack,
 }: CharacterSpriteParams): CharacterTypeSprite {
   let idTimeout: number | null = null;
-  let ticks = 0;
+  let ticks = 1;
   let direction: MovementKey = "right";
   let truePosition = { x: 0, y: 0 };
   let spriteCorrelatedToDirection = source.img.right;
@@ -51,6 +51,8 @@ function SpriteCharacter({
         tickTock();
         idTimeout = null;
       }, 300);
+    } else {
+      ticks = 1;
     }
     truePosition = relativePosition;
     return;
@@ -104,16 +106,16 @@ function SpriteCharacter({
   function attackHandler(monster?: EntityTypeSprite) {
     const knockbackValue = 3;
     let x = truePosition.x,
-      y = truePosition.y,
+      y = truePosition.y - 16,
       attW = attack.primary.width,
       attH = attack.primary.height;
     const knockBackOffset = { x: 0, y: 0 };
     if (direction === "right") {
-      x += source.width / source.frames.max;
+      x += attack.primary.width - 5;
       knockBackOffset.x += knockbackValue;
     }
     if (direction === "left") {
-      x -= attack.primary.width;
+      x -= attack.primary.width - 5;
       knockBackOffset.x -= knockbackValue;
     }
     if (direction === "up") {

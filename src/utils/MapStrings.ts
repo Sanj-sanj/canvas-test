@@ -38,7 +38,7 @@ function createMapMetaData(LevelParams: {
       entityString: EntitiesMap2,
       teleports: {
         initial: { x: 0, y: 0 },
-        destination: { x: 0, y: 0 },
+        destination: { x: -7, y: 7 },
         newMapName: "startingPoint",
       },
 

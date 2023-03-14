@@ -51,6 +51,13 @@ function KeybindHandler({
     canvas.addEventListener("mousedown", handleMouseClick);
   }
 
+  function unbindControls() {
+    const canvas = document.querySelector("canvas") as HTMLCanvasElement;
+    document.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("keyup", handleKeyUp);
+    canvas.removeEventListener("mousedown", handleMouseClick);
+  }
+
   function checkIfPlayerMoving() {
     return Object.values(Keybinds.movement).some(
       ({ pressed }) => pressed === true
@@ -76,7 +83,8 @@ function KeybindHandler({
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === Keybinds.aux.pause.keybind) {
       // player.log(offset);
-      Collisions.log();
+      console.count();
+      // Collisions.log();
       Keybinds.aux.pause.pressed = !Keybinds.aux.pause.pressed;
       animate(); //force the loop to start again if debug has been toggled off -> on
     }
@@ -171,6 +179,7 @@ function KeybindHandler({
     isKeyPressed,
     checkIfPlayerMoving,
     initControls,
+    unbindControls,
   };
 }
 export default KeybindHandler;

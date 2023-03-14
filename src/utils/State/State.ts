@@ -4,9 +4,8 @@ import BuildGameEntities from "../../Objects/BuildGameEntities";
 import SpriteCharacter from "../../Objects/SpriteCharacter";
 import createMapMetaData from "../MapStrings";
 import spriteSheet from "../../Assets/sprites.png";
-import mageLeft from "../../Assets/mageLeft.png";
-// import mageRight from "../../Assets/mageRight.png";
-import mageRight2 from "../../Assets/mageV2.png";
+import mageLeft from "../../Assets/mage_left_v2.png";
+import mageRight from "../../Assets/mage_right_v2.png";
 import monImg from "../../Assets/monsprite.png";
 import CameraHandler from "../Handlers/Camera/CameraHandler";
 import CollisionHandler from "../Handlers/Collisions/CollisionHandler";
@@ -17,8 +16,7 @@ const playerPicR = new Image();
 const playerPicL = new Image();
 const monsterPic = new Image();
 const sheet = new Image();
-// playerPicR.src = mageRight;
-playerPicR.src = mageRight2;
+playerPicR.src = mageRight;
 playerPicL.src = mageLeft;
 monsterPic.src = monImg;
 sheet.src = spriteSheet;
@@ -31,13 +29,17 @@ function State(
     mapName: "startingPoint" | "smallTown";
     lastScreenOffset: Vector;
     newScreenOffset: Vector;
+    zoomEnabled: boolean;
   }
 ) {
   const mapData = createMapMetaData(LevelParams);
   const Collisions = CollisionHandler();
   const Camera = CameraHandler(
     { height: canvas.height, width: canvas.width },
-    { initalOffset: LevelParams.newScreenOffset }
+    {
+      initalOffset: LevelParams.newScreenOffset,
+      zoomEnabled: LevelParams.zoomEnabled,
+    }
   );
 
   /*
@@ -73,11 +75,10 @@ function State(
       height: 48,
       width: 96,
       img: {
-        // left: playerPicL,
+        left: playerPicL,
         right: playerPicR,
       },
     },
-    // isMoving: Control.checkIfPlayerMoving
   });
 
   const Control = KeybindHandler({
@@ -120,7 +121,7 @@ function State(
     },
     mapData
   );
-  console.log(Entities);
+
   return { Collisions, Control, Camera, MapTiles, Player, Entities };
 }
 export default State;
