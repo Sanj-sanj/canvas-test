@@ -1,6 +1,7 @@
 import SpriteEntity from "./SpriteEntity";
 import { CollisionState } from "../utils/Handlers/Collisions/CollisionTypes";
-import { EntityTypeSprite } from "./SpriteTypes";
+import { EntityTypeSprite, Vector } from "./SpriteTypes";
+import { MapData } from "../utils/MapStrings";
 
 function genStats() {
   return { health: 100, damage: 5, speed: 2 };
@@ -11,6 +12,7 @@ function BuildGameEntities(
     attack: { width: number; height: number };
     collisions: CollisionState;
     ctx: CanvasRenderingContext2D;
+    offset: Vector;
     source: {
       frames: { min: number; max: number };
       height: number;
@@ -18,14 +20,44 @@ function BuildGameEntities(
       img: HTMLImageElement;
     };
   },
-  quantity: number
+  MapData: MapData
 ) {
   const entities: EntityTypeSprite[] = [];
-  for (let i = 0; i < quantity; i++) {
-    const { x, y } = entityChart.collisions.getRandomWalkableTile();
-    const stats = genStats();
-    entities.push(SpriteEntity({ ...entityChart, position: { x, y }, stats }));
-  }
+
+  MapData.entityString
+    .trim()
+    .split("\n")
+    .forEach((row, y) => {
+      row.split("").map((tile, x) => {
+        const thispos = {
+          x: x * 32 + entityChart.offset.x,
+          y: y * 32 + entityChart.offset.y,
+        };
+        if (tile === "m") {
+          const stats = genStats();
+          entities.push(
+            SpriteEntity({
+              ...entityChart,
+              position: { x: thispos.x, y: thispos.y },
+              stats,
+            })
+          );
+        }
+        if (tile === "-") {
+          //teleport tile
+          const teleport = {
+            ...MapData.teleports,
+            initial: {
+              x: x * 32 + entityChart.offset.x,
+              y: y * 32 + entityChart.offset.y,
+            },
+          };
+          entityChart.collisions.appendTeleport(teleport);
+          // console.log(teleport);
+        }
+      });
+    });
+  // }
   return entities;
 }
 export default BuildGameEntities;

@@ -1,6 +1,7 @@
 import { Rect, Vector } from "../../../Objects/SpriteTypes";
 import { CollisionState } from "./CollisionTypes";
 import { MovementKey } from "../Keybinds/KeybindingsTypes";
+import { MapNames } from "../../MapStrings";
 
 function CollisionHandler(): CollisionState {
   /* 
@@ -11,10 +12,12 @@ function CollisionHandler(): CollisionState {
     unwalkable: Vector[];
     collidable: Vector[];
     walkable: Vector[];
+    teleport: { newMapName: MapNames; initial: Vector; destination: Vector }[];
   } = {
     unwalkable: [],
     collidable: [],
     walkable: [],
+    teleport: [],
   };
 
   function appendCollidable(
@@ -30,6 +33,13 @@ function CollisionHandler(): CollisionState {
     if (depthLayer.walkable === true) {
       collisions.walkable.push({ x, y });
     }
+  }
+  function appendTeleport(teleport: {
+    initial: Vector;
+    destination: Vector;
+    newMapName: MapNames;
+  }) {
+    collisions.teleport.push(teleport);
   }
 
   function checkForCollisionMovement(
@@ -53,6 +63,20 @@ function CollisionHandler(): CollisionState {
         topX <= x + 30 - speed / 2 &&
         topY <= y + 30 - speed / 2 &&
         topY + 30 - speed / 2 >= y
+      );
+    });
+  }
+
+  function checkForCollisionTeleport(playerRect: Rect, offset: Vector) {
+    return collisions.teleport.find((t) => {
+      return checkForCollisionSprite(
+        { width: 32, height: 32, x: playerRect.x, y: playerRect.y },
+        {
+          x: t.initial.x + offset.x,
+          y: t.initial.y + offset.y,
+          width: 32,
+          height: 32,
+        }
       );
     });
   }
@@ -87,7 +111,9 @@ function CollisionHandler(): CollisionState {
   }
   return {
     appendCollidable,
+    appendTeleport,
     log,
+    checkForCollisionTeleport,
     checkForCollisionMovement,
     checkForCollisionSprite,
     checkForCollisionProjectile,

@@ -51,6 +51,12 @@ function KeybindHandler({
     canvas.addEventListener("mousedown", handleMouseClick);
   }
 
+  function checkIfPlayerMoving() {
+    return Object.values(Keybinds.movement).some(
+      ({ pressed }) => pressed === true
+    );
+  }
+
   function handleMouseClick(e: MouseEvent) {
     if (secondaryAttackCooldown) return;
     if (Keybinds.aux.secondaryAttack.pressed) return;
@@ -120,6 +126,7 @@ function KeybindHandler({
       )
     ) {
       updateOffset("y", "+", speed);
+      // Collisions.checkForCollisionTeleport(player.getRect(), offset)
     }
     if (
       isKeyPressed("down", "movement") &&
@@ -162,6 +169,7 @@ function KeybindHandler({
   return {
     keypressEventEmitter,
     isKeyPressed,
+    checkIfPlayerMoving,
     initControls,
   };
 }

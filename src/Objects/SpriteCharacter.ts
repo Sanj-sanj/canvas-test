@@ -8,7 +8,7 @@ import {
 } from "./SpriteTypes";
 
 export type CharacterTypeSprite = {
-  draw: (relativePostion: Vector) => void;
+  draw: (relativePostion: Vector, isMoving: boolean) => void;
   log: () => void;
   getRect: () => Rect;
   changeDirection: (key: MovementKey) => void;
@@ -32,37 +32,44 @@ function SpriteCharacter({
   let truePosition = { x: 0, y: 0 };
   let spriteCorrelatedToDirection = source.img.right;
 
-  function draw(relativePosition: Vector) {
-    truePosition = relativePosition;
+  function draw(relativePosition: Vector, isMoving: boolean) {
     // relativePdosition exists to handle respositioning player sprite on Zoom action.
     ctx.drawImage(
       spriteCorrelatedToDirection,
-      source.width * ticks,
+      (source.width / source.frames.max) * ticks,
       0,
       source.width / source.frames.max,
       source.height,
       relativePosition.x,
-      relativePosition.y,
+      relativePosition.y - 18,
       source.width / source.frames.max,
       source.height * 1
     );
-    if (idTimeout !== null || source.frames.max === 1) return;
-    idTimeout = setTimeout(() => tickTock(), 300);
+    if (isMoving) {
+      if (idTimeout !== null || source.frames.max === 1) return;
+      idTimeout = setTimeout(() => {
+        tickTock();
+        idTimeout = null;
+      }, 300);
+    }
+    truePosition = relativePosition;
     return;
   }
 
   function changeDirection(key: MovementKey) {
     direction = key;
-    switch (key) {
-      case "right":
-        spriteCorrelatedToDirection = source.img.right;
-        break;
-      case "left":
-        spriteCorrelatedToDirection = source.img.left;
-        break;
+    if (source.img.left) {
+      switch (key) {
+        case "right":
+          spriteCorrelatedToDirection = source.img.right;
+          break;
+        case "left":
+          spriteCorrelatedToDirection = source.img.left;
+          break;
 
-      default:
-        break;
+        default:
+          break;
+      }
     }
   }
 
@@ -157,7 +164,7 @@ function SpriteCharacter({
     };
   }
   function tickTock() {
-    ticks === 3 ? (ticks = 0) : (ticks += 1);
+    ticks === source.frames.max - 1 ? (ticks = 0) : (ticks += 1);
     idTimeout = null;
   }
   return {

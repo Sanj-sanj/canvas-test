@@ -3,7 +3,7 @@ import { MapTypeSprite, Vector } from "./Objects/SpriteTypes";
 import Legend, { MapTile } from "./utils/MapTiles";
 
 type BuildMapParams = {
-  mapString: string;
+  mapData: string;
   ctx: CanvasRenderingContext2D;
   spriteSheet: HTMLImageElement;
   tileSize: 16 | 32;
@@ -12,13 +12,13 @@ type BuildMapParams = {
 };
 
 function BuildMapSprite(
-  { ctx, mapString, spriteSheet, tileSize, offset, debug }: BuildMapParams,
+  { ctx, mapData, spriteSheet, tileSize, offset, debug }: BuildMapParams,
   appendCollisionData: (
     boxData: Vector,
     depthLayer: { walkable: boolean; collidable: boolean }
   ) => void
 ): MapTypeSprite[] {
-  return mapString
+  return mapData
     .trim()
     .split("\n")
     .reduce((acc, curr, y) => {
