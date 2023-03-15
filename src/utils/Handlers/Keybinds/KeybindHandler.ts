@@ -1,13 +1,10 @@
 import { AuxKey, Keybinds, MovementKey } from "./KeybindingsTypes";
-
 import { Vector } from "../../../Objects/SpriteTypes";
 import { CollisionState } from "../Collisions/CollisionTypes";
-import { CharacterTypeSprite } from "../../../Objects/SpriteCharacter";
 
 type KeybindParams = {
   animate: () => void;
   Collisions: CollisionState;
-  player: CharacterTypeSprite;
   keypressActions: {
     toggleZoom: () => void;
     updateOffset: (pos: "x" | "y", operand: "-" | "+", speed?: number) => void;
@@ -19,7 +16,6 @@ function KeybindHandler({
   Collisions,
   animate,
   keypressActions: { toggleZoom, updateOffset, updateLastClickPosition },
-  player,
 }: KeybindParams) {
   const Keybinds: Keybinds = {
     movement: {
@@ -79,7 +75,6 @@ function KeybindHandler({
     // this number is to limit the number of times this function gets called in animation (calls only once per frame)
     setTimeout(() => (Keybinds.aux.secondaryAttack.pressed = false), 10);
   }
-
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === Keybinds.aux.pause.keybind) {
       // player.log(offset);
@@ -109,7 +104,6 @@ function KeybindHandler({
       (key) => key.keybind === mvKey
     );
     if (movementKey) {
-      player.changeDirection(movementKey.action);
       movementKey.pressed = true;
     }
   }
@@ -168,6 +162,10 @@ function KeybindHandler({
     }
   }
 
+  function getMovingDirection() {
+    return Object.values(Keybinds.movement).find(({ pressed }) => pressed)
+      ?.action;
+  }
   function isKeyPressed(key: MovementKey | AuxKey, type: "movement" | "aux") {
     if (type === "movement")
       return Keybinds.movement[key as MovementKey].pressed;
@@ -180,6 +178,7 @@ function KeybindHandler({
     checkIfPlayerMoving,
     initControls,
     unbindControls,
+    getMovingDirection,
   };
 }
 export default KeybindHandler;

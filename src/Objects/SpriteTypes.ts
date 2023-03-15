@@ -22,7 +22,9 @@ type CharacterSpriteParams = {
   source: {
     img: {
       right: HTMLImageElement;
-      left?: HTMLImageElement;
+      left: HTMLImageElement;
+      down: HTMLImageElement;
+      up: HTMLImageElement;
     };
     width: number;
     height: number;

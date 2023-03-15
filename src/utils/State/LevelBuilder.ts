@@ -152,6 +152,7 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
 
     Control.keypressEventEmitter(tempPCoords, 4);
     if (Control.checkIfPlayerMoving()) {
+      Player.changeDirection(Control.getMovingDirection());
       const nextLevel = Collisions.checkForCollisionTeleport(
         Player.getRect(),
         cameraState.offset()
@@ -159,7 +160,6 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
       if (nextLevel) {
         window.cancelAnimationFrame(frame);
         changeLevel(nextLevel);
-        // return;
       }
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0);

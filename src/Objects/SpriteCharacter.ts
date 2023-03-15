@@ -11,7 +11,7 @@ export type CharacterTypeSprite = {
   draw: (relativePostion: Vector, isMoving: boolean) => void;
   log: () => void;
   getRect: () => Rect;
-  changeDirection: (key: MovementKey) => void;
+  changeDirection: (key: MovementKey | undefined) => void;
   secondaryAttack: (
     monster: EntityTypeSprite,
     hasHitMon: boolean
@@ -28,9 +28,9 @@ function SpriteCharacter({
 }: CharacterSpriteParams): CharacterTypeSprite {
   let idTimeout: number | null = null;
   let ticks = 1;
-  let direction: MovementKey = "right";
+  let direction: MovementKey = "down";
   let truePosition = { x: 0, y: 0 };
-  let spriteCorrelatedToDirection = source.img.right;
+  let spriteCorrelatedToDirection = source.img.down;
 
   function draw(relativePosition: Vector, isMoving: boolean) {
     // relativePdosition exists to handle respositioning player sprite on Zoom action.
@@ -58,20 +58,25 @@ function SpriteCharacter({
     return;
   }
 
-  function changeDirection(key: MovementKey) {
+  function changeDirection(key: MovementKey | undefined) {
+    if (!key) return;
     direction = key;
-    if (source.img.left) {
-      switch (key) {
-        case "right":
-          spriteCorrelatedToDirection = source.img.right;
-          break;
-        case "left":
-          spriteCorrelatedToDirection = source.img.left;
-          break;
+    switch (key) {
+      case "right":
+        spriteCorrelatedToDirection = source.img.right;
+        break;
+      case "left":
+        spriteCorrelatedToDirection = source.img.left;
+        break;
+      case "down":
+        spriteCorrelatedToDirection = source.img.down;
+        break;
+      case "up":
+        spriteCorrelatedToDirection = source.img.up;
+        break;
 
-        default:
-          break;
-      }
+      default:
+        break;
     }
   }
 

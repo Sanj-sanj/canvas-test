@@ -5,6 +5,8 @@ import createMapAndEntityMetaData, { TeleportData } from "../MapStrings";
 import spriteSheet from "../../Assets/sprites.png";
 import mageLeft from "../../Assets/mage_left_v2.png";
 import mageRight from "../../Assets/mage_right_v2.png";
+import mageUp from "../../Assets/mage_up_v2.png";
+import mageDown from "../../Assets/mage_down_v2.png";
 import monImg from "../../Assets/monsprite.png";
 import CameraHandler from "../Handlers/Camera/CameraHandler";
 import CollisionHandler from "../Handlers/Collisions/CollisionHandler";
@@ -13,10 +15,15 @@ import { LevelParams } from "./LevelBuilder";
 
 const playerPicR = new Image();
 const playerPicL = new Image();
+const playerPicD = new Image();
+const playerPicU = new Image();
 const monsterPic = new Image();
 const sheet = new Image();
+
 playerPicR.src = mageRight;
 playerPicL.src = mageLeft;
+playerPicU.src = mageUp;
+playerPicD.src = mageDown;
 monsterPic.src = monImg;
 sheet.src = spriteSheet;
 
@@ -87,6 +94,8 @@ function State(
         img: {
           left: playerPicL,
           right: playerPicR,
+          up: playerPicU,
+          down: playerPicD,
         },
       },
     },
@@ -100,7 +109,6 @@ function State(
       updateLastClickPosition: updateLastClickPosition,
       updateOffset: updateOffset,
     },
-    player: Entities.player,
     Collisions,
   });
   const MapTiles = BuildMapSprite(
