@@ -1,20 +1,15 @@
 import { Rect, Vector } from "../../../Objects/SpriteTypes";
-import { MapNames } from "../../MapStrings";
+import { TeleportData, Teleports } from "../../MapStrings";
 import { MovementKey } from "../Keybinds/KeybindingsTypes";
-
-type teleportCollisionData = {
-  initial: Vector;
-  destination: Vector;
-  newMapName: MapNames;
-};
 
 export type CollisionState = {
   log: () => void;
+  setNewMapOffset: (newPos: Vector) => void;
   appendCollidable: (
     { x, y }: Vector,
     depthLayer: { walkable: boolean; collidable: boolean }
   ) => void;
-  appendTeleport: (teleport: teleportCollisionData) => void;
+  appendTeleport: (...teleport: Teleports) => void;
   checkForCollisionMovement: (
     spritePos: Vector,
     speed: number,
@@ -28,6 +23,7 @@ export type CollisionState = {
   checkForCollisionTeleport: (
     playerRect: Rect,
     offset: Vector
-  ) => teleportCollisionData | undefined;
+  ) => TeleportData | undefined;
   getRandomWalkableTile: () => Vector;
+  getNewMapOffset: () => Vector;
 };

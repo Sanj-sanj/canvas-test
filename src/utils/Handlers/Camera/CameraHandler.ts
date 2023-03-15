@@ -25,6 +25,10 @@ function CameraHandler(
   //toggle zoom to adjust offset values after state has been setup for new level renders.
   if (options?.zoomEnabled) setTimeout(() => toggleZoom(), 0);
 
+  function overrideOffset(newPos: Vector) {
+    (offset.x = newPos.x), (offset.y = newPos.y);
+  }
+
   function updateRenderingProjectiles(newVal: boolean) {
     isReneringPojectiles = newVal;
   }
@@ -88,6 +92,7 @@ function CameraHandler(
   }
   return {
     toggleZoom,
+    overrideOffset,
     updateLastClickPosition,
     updateRenderingProjectiles,
     updateOffset,

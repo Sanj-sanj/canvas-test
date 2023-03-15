@@ -1,7 +1,13 @@
 import SpriteEntity from "./SpriteEntity";
 import { CollisionState } from "../utils/Handlers/Collisions/CollisionTypes";
-import { EntityTypeSprite, Vector } from "./SpriteTypes";
-import { MapData } from "../utils/MapStrings";
+import { CharacterSpriteParams, EntityTypeSprite } from "./SpriteTypes";
+import {
+  EntityMarker,
+  MapData,
+  TeleportData,
+  TeleportTileMarker,
+} from "../utils/MapStrings";
+import SpriteCharacter, { CharacterTypeSprite } from "./SpriteCharacter";
 
 function genStats() {
   return { health: 100, damage: 5, speed: 2 };
@@ -12,7 +18,6 @@ function BuildGameEntities(
     attack: { width: number; height: number };
     collisions: CollisionState;
     ctx: CanvasRenderingContext2D;
-    offset: Vector;
     source: {
       frames: { min: number; max: number };
       height: number;
@@ -20,22 +25,43 @@ function BuildGameEntities(
       img: HTMLImageElement;
     };
   },
-  MapData: MapData
+  MapData: MapData,
+  playerData: CharacterSpriteParams,
+  newLevel?: TeleportData
 ) {
-  const entities: EntityTypeSprite[] = [];
+  const results = {
+    entities: [] as EntityTypeSprite[],
+    player: {} as CharacterTypeSprite,
+  };
+  results.player = SpriteCharacter(playerData);
 
   MapData.entityString
     .trim()
     .split("\n")
     .forEach((row, y) => {
       row.split("").map((tile, x) => {
+        const thisTile = tile as EntityMarker;
         const thispos = {
-          x: x * 32 + entityChart.offset.x,
-          y: y * 32 + entityChart.offset.y,
+          x: x * 32,
+          y: y * 32,
         };
-        if (tile === "m") {
+
+        if (newLevel && thisTile === newLevel.meta.destination) {
+          /* 
+           IF LOADING A NEW LEVEL:
+           update Collisions's "playerInital" Vector.
+           this new value is used after building state to reset the 
+           camera to this specific position. becaus this is the destination from a teleport.
+          */
+          entityChart.collisions.setNewMapOffset({
+            x: thispos.x - newLevel.meta.destinationOffset.x * 64,
+            y: thispos.y - newLevel.meta.destinationOffset.y * 64,
+          });
+        }
+
+        if (thisTile === "m") {
           const stats = genStats();
-          entities.push(
+          results.entities.push(
             SpriteEntity({
               ...entityChart,
               position: { x: thispos.x, y: thispos.y },
@@ -43,21 +69,24 @@ function BuildGameEntities(
             })
           );
         }
-        if (tile === "-") {
+        if (
+          !Number.isNaN(+thisTile) &&
+          MapData.validTeleportTiles.includes(thisTile as TeleportTileMarker)
+        ) {
           //teleport tile
-          const teleport = {
-            ...MapData.teleports,
-            initial: {
-              x: x * 32 + entityChart.offset.x,
-              y: y * 32 + entityChart.offset.y,
+          const teleports = MapData.teleportData[+thisTile];
+          const teleportD = {
+            ...teleports,
+            collision: {
+              x: x * 32,
+              y: y * 32,
             },
           };
-          entityChart.collisions.appendTeleport(teleport);
-          // console.log(teleport);
+          entityChart.collisions.appendTeleport(teleportD);
         }
       });
     });
   // }
-  return entities;
+  return results;
 }
 export default BuildGameEntities;

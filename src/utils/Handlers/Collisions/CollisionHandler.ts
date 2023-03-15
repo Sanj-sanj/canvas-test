@@ -1,7 +1,7 @@
 import { Rect, Vector } from "../../../Objects/SpriteTypes";
 import { CollisionState } from "./CollisionTypes";
 import { MovementKey } from "../Keybinds/KeybindingsTypes";
-import { MapNames } from "../../MapStrings";
+import { TeleportData, Teleports } from "../../MapStrings";
 
 function CollisionHandler(): CollisionState {
   /* 
@@ -12,13 +12,19 @@ function CollisionHandler(): CollisionState {
     unwalkable: Vector[];
     collidable: Vector[];
     walkable: Vector[];
-    teleport: { newMapName: MapNames; initial: Vector; destination: Vector }[];
+    teleport: TeleportData[];
+    playerInital: Vector;
   } = {
     unwalkable: [],
     collidable: [],
     walkable: [],
     teleport: [],
+    playerInital: { x: 316, y: 300 },
   };
+
+  function setNewMapOffset(newOffset: Vector) {
+    collisions.playerInital = newOffset;
+  }
 
   function appendCollidable(
     { x, y }: Vector,
@@ -34,12 +40,8 @@ function CollisionHandler(): CollisionState {
       collisions.walkable.push({ x, y });
     }
   }
-  function appendTeleport(teleport: {
-    initial: Vector;
-    destination: Vector;
-    newMapName: MapNames;
-  }) {
-    collisions.teleport.push(teleport);
+  function appendTeleport(...teleports: Teleports) {
+    collisions.teleport.push(...teleports);
   }
 
   function checkForCollisionMovement(
@@ -68,12 +70,12 @@ function CollisionHandler(): CollisionState {
   }
 
   function checkForCollisionTeleport(playerRect: Rect, offset: Vector) {
-    return collisions.teleport.find((t) => {
+    return collisions.teleport.find((tile) => {
       return checkForCollisionSprite(
         { width: 32, height: 32, x: playerRect.x, y: playerRect.y },
         {
-          x: t.initial.x + offset.x,
-          y: t.initial.y + offset.y,
+          x: tile.collision.x + offset.x,
+          y: tile.collision.y + offset.y,
           width: 32,
           height: 32,
         }
@@ -105,19 +107,23 @@ function CollisionHandler(): CollisionState {
       Math.floor(Math.random() * collisions.walkable.length)
     ];
   }
-
+  function getNewMapOffset() {
+    return collisions.playerInital;
+  }
   function log() {
     console.log(collisions);
   }
   return {
     appendCollidable,
     appendTeleport,
+    setNewMapOffset,
     log,
     checkForCollisionTeleport,
     checkForCollisionMovement,
     checkForCollisionSprite,
     checkForCollisionProjectile,
     getRandomWalkableTile,
+    getNewMapOffset,
   };
 }
 export default CollisionHandler;

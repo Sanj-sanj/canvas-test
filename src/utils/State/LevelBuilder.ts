@@ -2,44 +2,38 @@ import {
   ProjectileTypeSprite,
   MapTypeSprite,
   EntityTypeSprite,
-  Vector,
 } from "../../Objects/SpriteTypes";
 import SpriteProjectile from "../../Objects/SpriteProjectile";
 import spriteSheet from "../../Assets/sprites.png";
 
 import State from "./State";
-import { MapNames } from "../MapStrings";
+import { TeleportData } from "../MapStrings";
 
 const canvas = document.querySelector("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 const sheet = new Image();
 sheet.src = spriteSheet;
 
-type LevelParams = {
+export type LevelParams = {
   mapName: "startingPoint" | "smallTown";
-  lastScreenOffset: Vector;
-  newScreenOffset: Vector; // provided by the lastScreenOffset tile to have unique transportation [Map1 tile 1 => map2 tile 2  | Map1 tile 5 => Map 2 tile 15 ]
   zoomEnabled: boolean;
 };
 
-function LevelBuilder(level?: LevelParams) {
-  const levelData = level || {
-    mapName: "startingPoint",
-    lastScreenOffset: { x: 0, y: 0 },
-    newScreenOffset: { x: 0, y: 0 },
-    zoomEnabled: false,
-  };
-  const { Camera, Control, Collisions, Player, MapTiles, Entities } = State(
+function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
+  const levelData = level;
+  const { Camera, Control, Collisions, MapTiles, Entities } = State(
     canvas,
     ctx,
     animate,
-    levelData
+    levelData,
+    newLevel
   );
+  const Player = Entities.player;
   const { cameraState, updateRenderingProjectiles } = Camera;
 
   Control.initControls();
   const SpriteState = {
-    monsters: [...Entities] as EntityTypeSprite[],
+    monsters: [...Entities.entities] as EntityTypeSprite[],
     projectiles: [] as ProjectileTypeSprite[],
     removedSprites: [] as (EntityTypeSprite | null)[],
     background: [...MapTiles] as MapTypeSprite[],
@@ -47,20 +41,14 @@ function LevelBuilder(level?: LevelParams) {
   };
   let { monsters, removedSprites, projectiles, background } = SpriteState; //eslint-disable-line
 
-  function changeLevel(level: {
-    initial: Vector;
-    destination: Vector;
-    newMapName: MapNames;
-  }) {
-    const newlvl = LevelBuilder({
-      mapName: level.newMapName,
-      lastScreenOffset: cameraState.offset(),
-      newScreenOffset: {
-        x: level.destination.x * 16,
-        y: level.destination.y * 16,
+  function changeLevel(level: TeleportData) {
+    const newlvl = LevelBuilder(
+      {
+        mapName: level.destinationName,
+        zoomEnabled: cameraState.zoomEnabled(),
       },
-      zoomEnabled: cameraState.zoomEnabled(),
-    });
+      level
+    );
     Control.unbindControls();
     newlvl.animate();
   }
@@ -85,6 +73,7 @@ function LevelBuilder(level?: LevelParams) {
       monster.updateOffset(cameraState.offset());
       monster.draw();
     });
+
     Player.draw(cameraState.screenCenter(), Control.checkIfPlayerMoving());
 
     const deleteEntitysIndex: number[] = [];

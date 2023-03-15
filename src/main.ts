@@ -8,6 +8,9 @@ canvas.width = 864;
 canvas.height = 576;
 
 root?.append(canvas);
-const { animate } = LevelBuilder();
+const { animate } = LevelBuilder({
+  mapName: "startingPoint",
+  zoomEnabled: false,
+});
 
 animate();

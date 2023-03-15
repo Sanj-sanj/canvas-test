@@ -1,8 +1,7 @@
 import BuildMapSprite from "../../BuildMapSprites";
 import BuildGameEntities from "../../Objects/BuildGameEntities";
 
-import SpriteCharacter from "../../Objects/SpriteCharacter";
-import createMapMetaData from "../MapStrings";
+import createMapAndEntityMetaData, { TeleportData } from "../MapStrings";
 import spriteSheet from "../../Assets/sprites.png";
 import mageLeft from "../../Assets/mage_left_v2.png";
 import mageRight from "../../Assets/mage_right_v2.png";
@@ -10,7 +9,7 @@ import monImg from "../../Assets/monsprite.png";
 import CameraHandler from "../Handlers/Camera/CameraHandler";
 import CollisionHandler from "../Handlers/Collisions/CollisionHandler";
 import KeybindHandler from "../Handlers/Keybinds/KeybindHandler";
-import { Vector } from "../../Objects/SpriteTypes";
+import { LevelParams } from "./LevelBuilder";
 
 const playerPicR = new Image();
 const playerPicL = new Image();
@@ -25,22 +24,19 @@ function State(
   canvas: { height: number; width: number },
   ctx: CanvasRenderingContext2D,
   animate: () => void,
-  LevelParams: {
-    mapName: "startingPoint" | "smallTown";
-    lastScreenOffset: Vector;
-    newScreenOffset: Vector;
-    zoomEnabled: boolean;
-  }
+  LevelData: LevelParams,
+  newLevel?: TeleportData
 ) {
-  const mapData = createMapMetaData(LevelParams);
+  const mapData = createMapAndEntityMetaData(LevelData);
   const Collisions = CollisionHandler();
   const Camera = CameraHandler(
     { height: canvas.height, width: canvas.width },
     {
-      initalOffset: LevelParams.newScreenOffset,
-      zoomEnabled: LevelParams.zoomEnabled,
+      zoomEnabled: LevelData.zoomEnabled,
     }
   );
+  const { updateOffset, toggleZoom, updateLastClickPosition } = Camera;
+  const { offset } = Camera.cameraState;
 
   /*
     { initalOffset: { x: -210 / 2, y: -144 / 2 }, zoomEnalbed: true }
@@ -48,66 +44,11 @@ function State(
      player's zoomEnabled == true to combat the offset caused by zooming before positioning
      player sprite on the screen.
      */
-  const { updateOffset, toggleZoom, updateLastClickPosition } = Camera;
-  const { offset } = Camera.cameraState;
-
-  const Player = SpriteCharacter({
-    collisions: Collisions,
-    ctx: ctx,
-    stats: {
-      health: 100,
-      strength: 25,
-    },
-    attack: {
-      primary: {
-        width: 32,
-        height: 32,
-        damage: 25,
-      },
-      secondary: {
-        width: 16,
-        height: 16,
-        damage: 10,
-      },
-    },
-    source: {
-      frames: { min: 0, max: 3 },
-      height: 48,
-      width: 96,
-      img: {
-        left: playerPicL,
-        right: playerPicR,
-      },
-    },
-  });
-
-  const Control = KeybindHandler({
-    animate,
-    keypressActions: {
-      toggleZoom: toggleZoom,
-      updateLastClickPosition: updateLastClickPosition,
-      updateOffset: updateOffset,
-    },
-    player: Player,
-    Collisions,
-  });
-  const MapTiles = BuildMapSprite(
-    {
-      ctx,
-      mapData: mapData.mapString,
-      offset: mapData.initalOffset,
-      spriteSheet: sheet,
-      tileSize: 32,
-      debug: false,
-    },
-    Collisions.appendCollidable
-  );
 
   const Entities = BuildGameEntities(
     {
       collisions: Collisions,
       ctx: ctx,
-      offset: offset(),
       attack: {
         width: 150,
         height: 12,
@@ -119,9 +60,70 @@ function State(
         img: monsterPic,
       },
     },
-    mapData
+    mapData,
+    {
+      collisions: Collisions,
+      ctx: ctx,
+      stats: {
+        health: 100,
+        strength: 25,
+      },
+      attack: {
+        primary: {
+          width: 32,
+          height: 32,
+          damage: 25,
+        },
+        secondary: {
+          width: 16,
+          height: 16,
+          damage: 10,
+        },
+      },
+      source: {
+        frames: { min: 0, max: 3 },
+        height: 48,
+        width: 96,
+        img: {
+          left: playerPicL,
+          right: playerPicR,
+        },
+      },
+    },
+    newLevel
   );
 
-  return { Collisions, Control, Camera, MapTiles, Player, Entities };
+  const Control = KeybindHandler({
+    animate,
+    keypressActions: {
+      toggleZoom: toggleZoom,
+      updateLastClickPosition: updateLastClickPosition,
+      updateOffset: updateOffset,
+    },
+    player: Entities.player,
+    Collisions,
+  });
+  const MapTiles = BuildMapSprite(
+    {
+      ctx,
+      mapData: mapData.mapString,
+      offset: offset(),
+      spriteSheet: sheet,
+      tileSize: 32,
+      debug: false,
+    },
+    Collisions.appendCollidable
+  );
+  /*
+  Once the game level loads the player is centerd offset of canvas drawing start of the topleft which is x:0,y:0
+  the following will take the screen center, get the newly loaded map's offset provided by the game Entity's layer map
+  then we subtract the offset by the camera position to get the new relative position for our hero on game level loads.
+  */
+  const b = Camera.cameraState.screenCenter();
+  const a = Collisions.getNewMapOffset();
+  const newLevelPosition = { x: b.x - a.x, y: b.y - a.y };
+  Camera.overrideOffset(newLevelPosition);
+
+  return { Collisions, Control, Camera, MapTiles, Entities };
 }
 export default State;
