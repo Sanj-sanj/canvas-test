@@ -7,7 +7,7 @@ import SpriteProjectile from "../../Objects/SpriteProjectile";
 import spriteSheet from "../../Assets/sprites.png";
 
 import State from "./State";
-import { TeleportData } from "../MapStrings";
+import { MapNames, TeleportData } from "../MapData/MapAndEntityData";
 
 const canvas = document.querySelector("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -15,7 +15,7 @@ const sheet = new Image();
 sheet.src = spriteSheet;
 
 export type LevelParams = {
-  mapName: "startingPoint" | "smallTown";
+  mapName: MapNames;
   zoomEnabled: boolean;
 };
 

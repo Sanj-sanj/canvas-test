@@ -1,6 +1,6 @@
-import SpriteMap from "./Objects/SpriteMap";
-import { MapTypeSprite, Vector } from "./Objects/SpriteTypes";
-import Legend, { MapTile } from "./utils/MapTiles";
+import SpriteMap from "./SpriteMap";
+import { MapTypeSprite, Vector } from "./SpriteTypes";
+import Legend, { MapTile } from "../utils/MapData/MapDefinitions";
 
 type BuildMapParams = {
   mapData: string;
@@ -23,7 +23,7 @@ function BuildMapSprite(
     .split("\n")
     .reduce((acc, curr, y) => {
       const SpritesArray = curr.split("").map((tile, x) => {
-        const { type, spritePath, depthLayer } = Legend[tile as MapTile];
+        const { tileName, spritePath, depthLayer } = Legend[tile as MapTile];
         const thisPos = {
           x: x * tileSize + offset.x,
           y: y * tileSize + offset.y,

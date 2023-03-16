@@ -1,7 +1,9 @@
-import BuildMapSprite from "../../BuildMapSprites";
+import BuildMapSprite from "../../Objects/BuildMapSprites";
 import BuildGameEntities from "../../Objects/BuildGameEntities";
 
-import createMapAndEntityMetaData, { TeleportData } from "../MapStrings";
+import createMapAndEntityMetaData, {
+  TeleportData,
+} from "../MapData/MapAndEntityData";
 import spriteSheet from "../../Assets/sprites.png";
 import mageLeft from "../../Assets/mage_left_v2.png";
 import mageRight from "../../Assets/mage_right_v2.png";

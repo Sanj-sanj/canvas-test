@@ -1,10 +1,22 @@
-import { Vector } from "../Objects/SpriteTypes";
-import { LevelParams } from "./State/LevelBuilder";
+import { Vector } from "../../Objects/SpriteTypes";
+import { LevelParams } from "../State/LevelBuilder";
 
-export type MapNames = "startingPoint" | "smallTown";
+export type MapNames = "startingPoint" | "smallTown" | "startingPointBasement";
 
-export type TeleportTileMarker = "0" | "1" | "2";
-export type EntityMarker = "." | "m" | TeleportTileMarker;
+export type TeleportTileMarker =
+  | "0"
+  | "1"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9";
+type BlankTile = ".";
+type MonsterTiles = "m";
+export type EntityMarker = BlankTile | MonsterTiles | TeleportTileMarker;
 
 export type TeleportData = {
   comingFrom: MapNames;
@@ -72,12 +84,12 @@ function createMapAndEntityMetaData({
         {
           initial: "2",
           meta: {
-            destination: "2",
-            newMapName: "smallTown",
-            destinationOffset: { x: 0, y: -1 },
+            destination: "0",
+            newMapName: "startingPointBasement",
+            destinationOffset: { x: 0, y: 1 },
           },
           comingFrom: "startingPoint",
-          destinationName: "smallTown",
+          destinationName: "startingPointBasement",
           collision: {
             x: 0,
             y: 0,
@@ -100,6 +112,29 @@ function createMapAndEntityMetaData({
             destinationOffset: { x: 0, y: -1 },
           },
           comingFrom: "smallTown",
+          destinationName: "startingPoint",
+          collision: {
+            x: 0,
+            y: 0,
+          },
+        },
+      ],
+      zoomEnabled,
+    },
+    startingPointBasement: {
+      validTeleportTiles: ["0"],
+      mapName: "startingPointBasement",
+      mapString: Map3,
+      entityString: EntitiesMap3,
+      teleportData: [
+        {
+          initial: "0",
+          meta: {
+            destination: "2",
+            newMapName: "startingPoint",
+            destinationOffset: { x: 0, y: 1 },
+          },
+          comingFrom: "startingPointBasement",
           destinationName: "startingPoint",
           collision: {
             x: 0,
@@ -225,7 +260,7 @@ const EntitiesMap2 = `
 ...............
 .................
 ..................
-....2.............
+..................
 ...................
 .............m......
 ....................
@@ -244,6 +279,37 @@ const EntitiesMap2 = `
 .....m..............
 ....................
 .........0....
+`;
+
+const Map3 = `
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
+!~~*********************//////~!
+!~~******|___________|*///////~!
+!~~~*****|XXXXXXXXXXX|*//////~~!
+!~~~*****|XXXXXXXXXXX|*////~~~~!
+!~~~*****|XVXXXXXXXXX|*////~~~~!
+!~~~~****|XXXXXXXXXXX|*///~~~/~!
+!~~~*****|XXXXXXXXXXX|*///~~~/~!
+!~~******_____________*//~~~~/~!
+!~~********************/~~~~//~!
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+`;
+const EntitiesMap3 = `
+................................
+................................
+................................
+................................
+................................
+................................
+...........0....................
+................................
+................................
+................................
+................................
+................................
+................................
 `;
 
 export { Map1, Map2 };

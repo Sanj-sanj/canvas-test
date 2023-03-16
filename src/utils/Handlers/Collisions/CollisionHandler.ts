@@ -1,7 +1,7 @@
 import { Rect, Vector } from "../../../Objects/SpriteTypes";
 import { CollisionState } from "./CollisionTypes";
 import { MovementKey } from "../Keybinds/KeybindingsTypes";
-import { TeleportData, Teleports } from "../../MapStrings";
+import { TeleportData, Teleports } from "../../MapData/MapAndEntityData";
 
 function CollisionHandler(): CollisionState {
   /* 

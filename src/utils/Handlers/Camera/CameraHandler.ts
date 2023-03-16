@@ -3,13 +3,12 @@ import { Vector } from "../../../Objects/SpriteTypes";
 function CameraHandler(
   canvas: { width: number; height: number },
   options?: {
-    initalOffset?: Vector;
     zoomEnabled?: boolean;
   }
 ) {
   let zoomOn = false;
   let scale = zoomOn ? 2 : 1;
-  const offset = options?.initalOffset || { x: 0, y: 0 };
+  const offset = { x: 0, y: 0 };
   const lastClickPosition = { x: 0, y: 0 };
   let isReneringPojectiles = false;
 

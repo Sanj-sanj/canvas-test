@@ -6,7 +6,7 @@ import {
   MapData,
   TeleportData,
   TeleportTileMarker,
-} from "../utils/MapStrings";
+} from "../utils/MapData/MapAndEntityData";
 import SpriteCharacter, { CharacterTypeSprite } from "./SpriteCharacter";
 
 function genStats() {
