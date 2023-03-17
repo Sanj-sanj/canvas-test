@@ -41,7 +41,7 @@ function SpriteCharacter({
       source.width / source.frames.max,
       source.height,
       relativePosition.x,
-      relativePosition.y - 18,
+      relativePosition.y - 20,
       source.width / source.frames.max,
       source.height * 1
     );
@@ -54,7 +54,7 @@ function SpriteCharacter({
     } else {
       ticks = 1;
     }
-    truePosition = relativePosition;
+    truePosition = { x: relativePosition.x, y: relativePosition.y - 20 };
     return;
   }
 
@@ -111,7 +111,7 @@ function SpriteCharacter({
   function attackHandler(monster?: EntityTypeSprite) {
     const knockbackValue = 3;
     let x = truePosition.x,
-      y = truePosition.y - 16,
+      y = truePosition.y,
       attW = attack.primary.width,
       attH = attack.primary.height;
     const knockBackOffset = { x: 0, y: 0 };

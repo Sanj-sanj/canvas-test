@@ -4,7 +4,8 @@ import BuildGameEntities from "../../Objects/BuildGameEntities";
 import createMapAndEntityMetaData, {
   TeleportData,
 } from "../MapData/MapAndEntityData";
-import spriteSheet from "../../Assets/sprites.png";
+import spriteSheet from "../../Assets/sprites2.png";
+import forgroundSpriteSheet from "../../Assets/foregroundSprites.png";
 import mageLeft from "../../Assets/mage_left_v2.png";
 import mageRight from "../../Assets/mage_right_v2.png";
 import mageUp from "../../Assets/mage_up_v2.png";
@@ -14,6 +15,7 @@ import CameraHandler from "../Handlers/Camera/CameraHandler";
 import CollisionHandler from "../Handlers/Collisions/CollisionHandler";
 import KeybindHandler from "../Handlers/Keybinds/KeybindHandler";
 import { LevelParams } from "./LevelBuilder";
+import BuildForegroundSprites from "../../Objects/BuildForegroundSprites";
 
 const playerPicR = new Image();
 const playerPicL = new Image();
@@ -21,6 +23,7 @@ const playerPicD = new Image();
 const playerPicU = new Image();
 const monsterPic = new Image();
 const sheet = new Image();
+const foregroundSheet = new Image();
 
 playerPicR.src = mageRight;
 playerPicL.src = mageLeft;
@@ -28,6 +31,7 @@ playerPicU.src = mageUp;
 playerPicD.src = mageDown;
 monsterPic.src = monImg;
 sheet.src = spriteSheet;
+foregroundSheet.src = forgroundSpriteSheet;
 
 function State(
   canvas: { height: number; width: number },
@@ -119,7 +123,27 @@ function State(
       mapData: mapData.mapString,
       offset: offset(),
       spriteSheet: sheet,
-      tileSize: 32,
+      sheetData: {
+        sheetHeight: 160,
+        sheetWidth: 224,
+        spriteSize: 32,
+      },
+      debug: false,
+    },
+    Collisions.appendCollidable
+  );
+
+  const ForegroundTiles = BuildForegroundSprites(
+    {
+      ctx,
+      entityData: mapData.foregroundString,
+      spriteSheet: foregroundSheet,
+      offset: offset(),
+      sheetData: {
+        sheetHeight: 128,
+        sheetWidth: 128,
+        spriteSize: 32,
+      },
       debug: false,
     },
     Collisions.appendCollidable
@@ -134,6 +158,6 @@ function State(
   const newLevelPosition = { x: b.x - a.x, y: b.y - a.y };
   Camera.overrideOffset(newLevelPosition);
 
-  return { Collisions, Control, Camera, MapTiles, Entities };
+  return { Collisions, Control, Camera, MapTiles, ForegroundTiles, Entities };
 }
 export default State;

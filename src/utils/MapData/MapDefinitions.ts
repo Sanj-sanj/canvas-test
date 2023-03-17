@@ -5,7 +5,7 @@ export type MapTile =
   | "~"
   | "@"
   | ":"
-  | "["
+  | "^"
   | "*"
   | "$"
   | "/"
@@ -28,19 +28,20 @@ export type MapTile =
   | "A"
   | "Q";
 
-type LegendEntry = {
-  [key in MapTile]: {
+/*
+  DepthLayer's walkable property is for defining where and where not a Entity/Character Sprite that is moveable can move to.
+               collidable property is for defining where a Projectile Sprite cannot move to. (Collisions detection for projectiles) 
+  */
+export type LegendEntry<T extends string> = {
+  [k in T]: {
     tileName: string;
     depthLayer: { walkable: boolean; collidable: boolean };
     spritePath: Vec[];
     actors: [];
   };
 };
-/*
-DepthLayer's walkable property is for defining where and where not a Entity/Character Sprite that is moveable can move to.
-             collidable property is for defining where a Projectile Sprite cannot move to. (Collisions detection for projectiles) 
-*/
-const Legend: LegendEntry = {
+
+export const Legend: LegendEntry<MapTile> = {
   "!": {
     tileName: "void",
     spritePath: [{ x: 0, y: 2 }],
@@ -110,8 +111,8 @@ const Legend: LegendEntry = {
     actors: [],
     depthLayer: { walkable: true, collidable: false },
   },
-  "[": {
-    tileName: "lava",
+  "^": {
+    tileName: "stairs up",
     spritePath: [{ x: 4, y: 2 }],
     actors: [],
     depthLayer: { walkable: true, collidable: false },
@@ -207,4 +208,3 @@ const Legend: LegendEntry = {
     depthLayer: { walkable: true, collidable: false },
   },
 };
-export default Legend;

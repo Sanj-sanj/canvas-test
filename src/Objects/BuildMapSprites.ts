@@ -1,18 +1,22 @@
 import SpriteMap from "./SpriteMap";
 import { MapTypeSprite, Vector } from "./SpriteTypes";
-import Legend, { MapTile } from "../utils/MapData/MapDefinitions";
+import { Legend, MapTile } from "../utils/MapData/MapDefinitions";
 
 type BuildMapParams = {
   mapData: string;
   ctx: CanvasRenderingContext2D;
   spriteSheet: HTMLImageElement;
-  tileSize: 16 | 32;
+  sheetData: {
+    spriteSize: 32;
+    sheetWidth: number;
+    sheetHeight: number;
+  };
   offset: { x: number; y: number };
   debug: boolean;
 };
 
 function BuildMapSprite(
-  { ctx, mapData, spriteSheet, tileSize, offset, debug }: BuildMapParams,
+  { ctx, mapData, spriteSheet, sheetData, offset, debug }: BuildMapParams,
   appendCollisionData: (
     boxData: Vector,
     depthLayer: { walkable: boolean; collidable: boolean }
@@ -25,8 +29,8 @@ function BuildMapSprite(
       const SpritesArray = curr.split("").map((tile, x) => {
         const { tileName, spritePath, depthLayer } = Legend[tile as MapTile];
         const thisPos = {
-          x: x * tileSize + offset.x,
-          y: y * tileSize + offset.y,
+          x: x * sheetData.spriteSize + offset.x,
+          y: y * sheetData.spriteSize + offset.y,
         };
         //some tiles have more than one tile available for drawing to spice things up
         let spriteImgToUse = spritePath[0];
@@ -39,9 +43,9 @@ function BuildMapSprite(
           position: thisPos,
           source: {
             img: spriteSheet,
-            width: 160,
-            height: 96,
-            spriteSize: 32,
+            width: sheetData.sheetWidth,
+            height: sheetData.sheetHeight,
+            spriteSize: sheetData.spriteSize,
             metadata: {
               actors: [],
               spritePath: spriteImgToUse as Vector,

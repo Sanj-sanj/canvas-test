@@ -2,7 +2,7 @@ import SpriteEntity from "./SpriteEntity";
 import { CollisionState } from "../utils/Handlers/Collisions/CollisionTypes";
 import { CharacterSpriteParams, EntityTypeSprite } from "./SpriteTypes";
 import {
-  EntityMarker,
+  EntityTile,
   MapData,
   TeleportData,
   TeleportTileMarker,
@@ -34,13 +34,12 @@ function BuildGameEntities(
     player: {} as CharacterTypeSprite,
   };
   results.player = SpriteCharacter(playerData);
-
   MapData.entityString
     .trim()
     .split("\n")
     .forEach((row, y) => {
       row.split("").map((tile, x) => {
-        const thisTile = tile as EntityMarker;
+        const thisTile = tile as EntityTile;
         const thispos = {
           x: x * 32,
           y: y * 32,
@@ -58,7 +57,7 @@ function BuildGameEntities(
             y: thispos.y - newLevel.meta.destinationOffset.y * 64,
           });
         }
-
+        // MONSTER ENTITY LOGIC
         if (thisTile === "m") {
           const stats = genStats();
           results.entities.push(
@@ -69,11 +68,11 @@ function BuildGameEntities(
             })
           );
         }
+        //TELEPORT TILE LOGIC
         if (
           !Number.isNaN(+thisTile) &&
           MapData.validTeleportTiles.includes(thisTile as TeleportTileMarker)
         ) {
-          //teleport tile
           const teleports = MapData.teleportData[+thisTile];
           const teleportD = {
             ...teleports,

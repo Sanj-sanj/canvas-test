@@ -21,13 +21,8 @@ export type LevelParams = {
 
 function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
   const levelData = level;
-  const { Camera, Control, Collisions, MapTiles, Entities } = State(
-    canvas,
-    ctx,
-    animate,
-    levelData,
-    newLevel
-  );
+  const { Camera, Control, Collisions, MapTiles, ForegroundTiles, Entities } =
+    State(canvas, ctx, animate, levelData, newLevel);
   const Player = Entities.player;
   const { cameraState, updateRenderingProjectiles } = Camera;
 
@@ -37,9 +32,14 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
     projectiles: [] as ProjectileTypeSprite[],
     removedSprites: [] as (EntityTypeSprite | null)[],
     background: [...MapTiles] as MapTypeSprite[],
+    foreground: [...ForegroundTiles] as MapTypeSprite[],
     // TeleportTiles => takes you to new map by recalling level builder with new state values
   };
-  let { monsters, removedSprites, projectiles, background } = SpriteState; //eslint-disable-line
+  //eslint-disable-next-line
+  let { monsters, removedSprites, projectiles, background, foreground } =
+    SpriteState;
+
+  console.log(foreground);
 
   function changeLevel(level: TeleportData) {
     const newlvl = LevelBuilder(
@@ -75,6 +75,11 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
     });
 
     Player.draw(cameraState.screenCenter(), Control.checkIfPlayerMoving());
+
+    foreground.forEach((tile) => {
+      tile.updateOffset(cameraState.offset());
+      tile.draw();
+    });
 
     const deleteEntitysIndex: number[] = [];
 
@@ -150,8 +155,8 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
       y: cameraState.screenCenter().y - cameraState.offset().y,
     };
 
-    Control.keypressEventEmitter(tempPCoords, 4);
     if (Control.checkIfPlayerMoving()) {
+      Control.keypressEventEmitter(tempPCoords, 8);
       Player.changeDirection(Control.getMovingDirection());
       const nextLevel = Collisions.checkForCollisionTeleport(
         Player.getRect(),

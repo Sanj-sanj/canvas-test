@@ -1,5 +1,6 @@
 import { Vector } from "../../Objects/SpriteTypes";
 import { LevelParams } from "../State/LevelBuilder";
+
 import selectMap from "./Maps";
 export type MapNames = "startingPoint" | "smallTown" | "startingPointBasement";
 
@@ -16,14 +17,13 @@ export type TeleportTileMarker =
   | "9";
 type BlankTile = ".";
 type MonsterTiles = "m";
-export type EntityMarker = BlankTile | MonsterTiles | TeleportTileMarker;
+export type EntityTile = BlankTile | MonsterTiles | TeleportTileMarker;
 
 export type TeleportData = {
   comingFrom: MapNames;
   destinationName: MapNames;
   initial: TeleportTileMarker;
   meta: {
-    newMapName: MapNames;
     destination: TeleportTileMarker;
     destinationOffset: Vector;
   };
@@ -38,6 +38,7 @@ export type MapData = {
   mapName: MapNames;
   mapString: string;
   entityString: string;
+  foregroundString: string;
   teleportData: Teleports;
   zoomEnabled: boolean;
 };
@@ -46,19 +47,19 @@ function createMapAndEntityMetaData({
   mapName,
   zoomEnabled,
 }: LevelParams): MapData {
-  const { mapString, entityString } = selectMap(mapName);
+  const { mapString, entityString, foregroundString } = selectMap(mapName);
   const maps: { [key in MapNames]: MapData } = {
     startingPoint: {
       validTeleportTiles: ["1", "0", "2"],
       mapName: "startingPoint",
       mapString,
       entityString,
+      foregroundString,
       teleportData: [
         {
           initial: "0",
           meta: {
             destination: "0",
-            newMapName: "smallTown",
             destinationOffset: { x: 0, y: 1 },
           },
           comingFrom: "startingPoint",
@@ -71,9 +72,8 @@ function createMapAndEntityMetaData({
         {
           initial: "1",
           meta: {
-            destination: "0",
-            newMapName: "smallTown",
-            destinationOffset: { x: 0, y: 1 },
+            destination: "1",
+            destinationOffset: { x: 0.5, y: 0 },
           },
           comingFrom: "startingPoint",
           destinationName: "smallTown",
@@ -86,7 +86,6 @@ function createMapAndEntityMetaData({
           initial: "2",
           meta: {
             destination: "0",
-            newMapName: "startingPointBasement",
             destinationOffset: { x: 0, y: 1 },
           },
           comingFrom: "startingPoint",
@@ -100,16 +99,29 @@ function createMapAndEntityMetaData({
       zoomEnabled,
     },
     smallTown: {
-      validTeleportTiles: ["0"],
+      validTeleportTiles: ["0", "1"],
       mapName: "smallTown",
       mapString,
       entityString,
+      foregroundString,
       teleportData: [
         {
           initial: "0",
           meta: {
             destination: "0",
-            newMapName: "startingPoint",
+            destinationOffset: { x: 0, y: -1 },
+          },
+          comingFrom: "smallTown",
+          destinationName: "startingPoint",
+          collision: {
+            x: 0,
+            y: 0,
+          },
+        },
+        {
+          initial: "1",
+          meta: {
+            destination: "1",
             destinationOffset: { x: 0, y: -1 },
           },
           comingFrom: "smallTown",
@@ -127,12 +139,12 @@ function createMapAndEntityMetaData({
       mapName: "startingPointBasement",
       mapString,
       entityString,
+      foregroundString,
       teleportData: [
         {
           initial: "0",
           meta: {
             destination: "2",
-            newMapName: "startingPoint",
             destinationOffset: { x: 0, y: 1 },
           },
           comingFrom: "startingPointBasement",
