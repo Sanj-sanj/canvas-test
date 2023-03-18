@@ -33,13 +33,10 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
     removedSprites: [] as (EntityTypeSprite | null)[],
     background: [...MapTiles] as MapTypeSprite[],
     foreground: [...ForegroundTiles] as MapTypeSprite[],
-    // TeleportTiles => takes you to new map by recalling level builder with new state values
   };
   //eslint-disable-next-line
   let { monsters, removedSprites, projectiles, background, foreground } =
     SpriteState;
-
-  console.log(foreground);
 
   function changeLevel(level: TeleportData) {
     const newlvl = LevelBuilder(
@@ -156,7 +153,7 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
     };
 
     if (Control.checkIfPlayerMoving()) {
-      Control.keypressEventEmitter(tempPCoords, 8);
+      Control.keypressEventEmitter(tempPCoords, 6);
       Player.changeDirection(Control.getMovingDirection());
       const nextLevel = Collisions.checkForCollisionTeleport(
         Player.getRect(),

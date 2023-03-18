@@ -54,7 +54,7 @@ function SpriteCharacter({
     } else {
       ticks = 1;
     }
-    truePosition = { x: relativePosition.x, y: relativePosition.y - 20 };
+    truePosition = { x: relativePosition.x, y: relativePosition.y };
     return;
   }
 
@@ -127,14 +127,14 @@ function SpriteCharacter({
       const temp = attW;
       attW = attH;
       attH = temp;
-      y -= attack.primary.width / source.frames.max;
+      y -= attack.primary.height - 5;
       knockBackOffset.y -= knockbackValue;
     }
     if (direction === "down") {
       const temp = attH;
       attH = attW;
       attW = temp;
-      y += attack.primary.height;
+      y += attack.primary.height - 5;
       knockBackOffset.y += knockbackValue;
     }
     ctx.fillStyle = "red";

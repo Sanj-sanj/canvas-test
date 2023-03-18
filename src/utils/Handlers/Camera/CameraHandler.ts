@@ -74,14 +74,15 @@ function CameraHandler(
   function getScreenCenter(): Vector {
     // our plyer's center position relative to the screen size will be by the formula:
     // [canvas.width | canvas.height] / 2 { / scaling } { - SPRITE SIZE / 2 for x})
+
     if (zoomOn) {
       return {
-        x: Math.floor(canvas.width / 2 / 2 - 8),
+        x: Math.floor(canvas.width / 2 / 2 - 18),
         y: Math.floor(canvas.height / 2 / 2),
       };
     }
     return {
-      x: Math.floor(canvas.width / 2 - 16),
+      x: Math.floor(canvas.width / 2 - 24),
       y: Math.floor(canvas.height / 2),
     };
   }

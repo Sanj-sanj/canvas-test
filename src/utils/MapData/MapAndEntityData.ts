@@ -28,6 +28,7 @@ export type TeleportData = {
     destinationOffset: Vector;
   };
   collision: {
+    // true values are provided on level creation at BuildGameEntities.
     x: number;
     y: number;
   };
@@ -73,7 +74,7 @@ function createMapAndEntityMetaData({
           initial: "1",
           meta: {
             destination: "1",
-            destinationOffset: { x: 0.5, y: 0 },
+            destinationOffset: { x: 1, y: 0 },
           },
           comingFrom: "startingPoint",
           destinationName: "smallTown",
@@ -86,7 +87,7 @@ function createMapAndEntityMetaData({
           initial: "2",
           meta: {
             destination: "0",
-            destinationOffset: { x: 0, y: 1 },
+            destinationOffset: { x: -1, y: 0 },
           },
           comingFrom: "startingPoint",
           destinationName: "startingPointBasement",
@@ -145,7 +146,7 @@ function createMapAndEntityMetaData({
           initial: "0",
           meta: {
             destination: "2",
-            destinationOffset: { x: 0, y: 1 },
+            destinationOffset: { x: -1, y: 0 },
           },
           comingFrom: "startingPointBasement",
           destinationName: "startingPoint",

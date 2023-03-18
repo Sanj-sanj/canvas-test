@@ -19,10 +19,13 @@ function CollisionHandler(): CollisionState {
     collidable: [],
     walkable: [],
     teleport: [],
-    playerInital: { x: 316, y: 300 },
+    playerInital: { x: 322, y: 288 },
   };
 
   function setNewMapOffset(newOffset: Vector) {
+    /*
+    When loading a new level, the value created here will represent the player's position
+     */
     collisions.playerInital = newOffset;
   }
 
@@ -61,24 +64,21 @@ function CollisionHandler(): CollisionState {
     //hard code 30 for sprite width to fit into 1x1 tiles
     return collisions.unwalkable.some(({ x, y }) => {
       return (
-        topX + 30 - speed / 2 >= x &&
-        topX <= x + 30 - speed / 2 &&
-        topY <= y + 30 - speed / 2 &&
-        topY + 30 - speed / 2 >= y
+        topX + 32 - speed / 2 >= x &&
+        topX <= x + 32 - speed / 2 &&
+        topY <= y + 32 - speed / 2 &&
+        topY + 32 - speed / 2 >= y
       );
     });
   }
 
   function checkForCollisionTeleport(playerRect: Rect, offset: Vector) {
     return collisions.teleport.find((tile) => {
-      return checkForCollisionSprite(
-        { width: 32, height: 32, x: playerRect.x, y: playerRect.y },
-        {
-          x: tile.collision.x + offset.x,
-          y: tile.collision.y + offset.y,
-          width: 32,
-          height: 32,
-        }
+      return (
+        playerRect.x + playerRect.width - 8 >= tile.collision.x + offset.x &&
+        playerRect.x <= tile.collision.x + 8 + offset.x &&
+        playerRect.y <= tile.collision.y + 8 + offset.y &&
+        playerRect.y + playerRect.width - 8 >= tile.collision.y + offset.y
       );
     });
   }

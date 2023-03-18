@@ -4,7 +4,7 @@ import BuildGameEntities from "../../Objects/BuildGameEntities";
 import createMapAndEntityMetaData, {
   TeleportData,
 } from "../MapData/MapAndEntityData";
-import spriteSheet from "../../Assets/sprites2.png";
+import spriteSheet from "../../Assets/sprites.png";
 import forgroundSpriteSheet from "../../Assets/foregroundSprites.png";
 import mageLeft from "../../Assets/mage_left_v2.png";
 import mageRight from "../../Assets/mage_right_v2.png";

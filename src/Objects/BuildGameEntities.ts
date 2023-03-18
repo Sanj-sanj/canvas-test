@@ -53,8 +53,8 @@ function BuildGameEntities(
            camera to this specific position. becaus this is the destination from a teleport.
           */
           entityChart.collisions.setNewMapOffset({
-            x: thispos.x - newLevel.meta.destinationOffset.x * 64,
-            y: thispos.y - newLevel.meta.destinationOffset.y * 64,
+            x: thispos.x - newLevel.meta.destinationOffset.x * 32,
+            y: thispos.y - newLevel.meta.destinationOffset.y * 32,
           });
         }
         // MONSTER ENTITY LOGIC
