@@ -8,6 +8,7 @@ export type Keybinds = {
   aux: {
     pause: { pressed: boolean; keybind: "]"; action: "pause" };
     zoom: { pressed: boolean; keybind: "z"; action: "zoom" };
+    interaction: { pressed: boolean; keybind: "e"; action: "interact" };
     attack: { pressed: boolean; keybind: "p"; action: "attack" };
     secondaryAttack: {
       pressed: boolean;
@@ -18,4 +19,9 @@ export type Keybinds = {
 };
 
 export type MovementKey = "up" | "down" | "left" | "right";
-export type AuxKey = "pause" | "zoom" | "attack" | "secondaryAttack";
+export type AuxKey =
+  | "pause"
+  | "zoom"
+  | "attack"
+  | "secondaryAttack"
+  | "interaction";

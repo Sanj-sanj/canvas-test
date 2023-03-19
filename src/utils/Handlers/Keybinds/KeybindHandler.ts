@@ -27,6 +27,7 @@ function KeybindHandler({
     aux: {
       pause: { pressed: false, keybind: "]", action: "pause" },
       zoom: { pressed: false, keybind: "z", action: "zoom" },
+      interaction: { pressed: false, keybind: "e", action: "interact" },
       attack: { pressed: false, keybind: "p", action: "attack" },
       secondaryAttack: {
         pressed: false,
@@ -89,6 +90,11 @@ function KeybindHandler({
       zoomOnCooldown = true;
       setTimeout(() => (zoomOnCooldown = false), 200);
       toggleZoom();
+    }
+    if (e.key === Keybinds.aux.interaction.keybind) {
+      console.log("interact");
+      Keybinds.aux.interaction.pressed = true; //!Keybinds.aux.interaction.pressed;
+      setTimeout(() => (Keybinds.aux.interaction.pressed = false), 10);
     }
     if (e.key === Keybinds.aux.attack.keybind) {
       if (attackCooldown) return;

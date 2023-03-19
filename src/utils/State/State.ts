@@ -16,6 +16,7 @@ import CollisionHandler from "../Handlers/Collisions/CollisionHandler";
 import KeybindHandler from "../Handlers/Keybinds/KeybindHandler";
 import { LevelParams } from "./LevelBuilder";
 import BuildForegroundSprites from "../../Objects/BuildForegroundSprites";
+import DialogueBox from "../../Objects/DialogueBox";
 
 const playerPicR = new Image();
 const playerPicL = new Image();
@@ -42,15 +43,10 @@ function State(
 ) {
   const mapData = createMapAndEntityMetaData(LevelData);
   const Collisions = CollisionHandler();
-  const Camera = CameraHandler(
-    { height: canvas.height, width: canvas.width },
-    {
-      zoomEnabled: LevelData.zoomEnabled,
-    }
-  );
+  const Camera = CameraHandler({ height: canvas.height, width: canvas.width });
   const { updateOffset, toggleZoom, updateLastClickPosition } = Camera;
   const { offset } = Camera.cameraState;
-
+  const Dialogue = DialogueBox();
   /*
     { initalOffset: { x: -210 / 2, y: -144 / 2 }, zoomEnalbed: true }
      this particular offset value will be used when loading a new map while the 
@@ -158,6 +154,16 @@ function State(
   const newLevelPosition = { x: b.x - a.x, y: b.y - a.y };
   Camera.overrideOffset(newLevelPosition);
 
-  return { Collisions, Control, Camera, MapTiles, ForegroundTiles, Entities };
+  //toggle zoom to adjust offset values after state has been setup for new level renders.
+  LevelData.zoomEnabled ? toggleZoom() : null;
+  return {
+    Collisions,
+    Control,
+    Camera,
+    MapTiles,
+    ForegroundTiles,
+    Entities,
+    Dialogue,
+  };
 }
 export default State;
