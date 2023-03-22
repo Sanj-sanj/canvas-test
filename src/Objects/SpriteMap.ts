@@ -25,7 +25,7 @@ function SpriteMap({
       32,
       32
     );
-    if (debug && source.metadata.depth.collidable) {
+    if (debug && source.metadata.collision.projectiles) {
       ctx.font = "12zpx sans-serif";
       ctx.strokeStyle = "black";
       ctx.lineWidth = 2;
@@ -64,10 +64,10 @@ function SpriteMap({
     pos: Vector,
     appendCollidable: (
       arg: Vector,
-      depthLayer: { walkable: boolean; collidable: boolean }
+      collision: { walking: boolean; projectiles: boolean }
     ) => void
   ) {
-    return appendCollidable({ x: pos.x, y: pos.y }, source.metadata.depth);
+    return appendCollidable({ x: pos.x, y: pos.y }, source.metadata.collision);
   }
 
   function updateOffset(offsetNew: Vector) {

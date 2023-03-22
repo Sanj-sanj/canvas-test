@@ -8,32 +8,21 @@ import {
   TeleportTileMarker,
 } from "../utils/MapData/MapAndEntityData";
 import SpriteCharacter, { CharacterTypeSprite } from "./SpriteCharacter";
+import getMonster from "../Game_World_Types/Monsters/MonstersList";
 
-function genStats() {
-  return { health: 100, damage: 5, speed: 2 };
-  // attack: { width: 150, height: 12 },
-}
 function BuildGameEntities(
-  entityChart: {
-    attack: { width: number; height: number };
-    collisions: CollisionState;
-    ctx: CanvasRenderingContext2D;
-    source: {
-      frames: { min: number; max: number };
-      height: number;
-      width: number;
-      img: HTMLImageElement;
-    };
-  },
+  ctx: CanvasRenderingContext2D,
+  collisions: CollisionState,
   MapData: MapData,
-  playerData: CharacterSpriteParams,
+  playerData: Pick<CharacterSpriteParams, "modifiers" | "source" | "stats">,
   newLevel?: TeleportData
 ) {
-  const results = {
+  const sprites = {
     entities: [] as EntityTypeSprite[],
     player: {} as CharacterTypeSprite,
   };
-  results.player = SpriteCharacter(playerData);
+
+  sprites.player = SpriteCharacter({ ...playerData, ctx }, collisions);
   MapData.entityString
     .trim()
     .split("\n")
@@ -52,20 +41,23 @@ function BuildGameEntities(
            this new value is used after building state to reset the 
            camera to this specific position. becaus this is the destination from a teleport.
           */
-          entityChart.collisions.setNewMapOffset({
+          collisions.setNewMapOffset({
             x: thispos.x - newLevel.meta.destinationOffset.x * 32,
             y: thispos.y - newLevel.meta.destinationOffset.y * 32,
           });
         }
         // MONSTER ENTITY LOGIC
         if (thisTile === "m") {
-          const stats = genStats();
-          results.entities.push(
-            SpriteEntity({
-              ...entityChart,
-              position: { x: thispos.x, y: thispos.y },
-              stats,
-            })
+          const monster = getMonster(thisTile);
+          sprites.entities.push(
+            SpriteEntity(
+              {
+                ...monster,
+                ctx,
+                position: { x: thispos.x, y: thispos.y },
+              },
+              collisions
+            )
           );
         }
         //TELEPORT TILE LOGIC
@@ -81,11 +73,10 @@ function BuildGameEntities(
               y: y * 32,
             },
           };
-          entityChart.collisions.appendTeleport(teleportD);
+          collisions.appendTeleport(teleportD);
         }
       });
     });
-  // }
-  return results;
+  return sprites;
 }
 export default BuildGameEntities;

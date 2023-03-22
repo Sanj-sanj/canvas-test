@@ -1,3 +1,4 @@
+import { MonsterTiles } from "../../Game_World_Types/Monsters/MonstersList";
 import { Vector } from "../../Objects/SpriteTypes";
 import { LevelParams } from "../State/LevelBuilder";
 
@@ -16,7 +17,6 @@ export type TeleportTileMarker =
   | "8"
   | "9";
 type BlankTile = ".";
-type MonsterTiles = "m";
 export type EntityTile = BlankTile | MonsterTiles | TeleportTileMarker;
 
 export type TeleportData = {

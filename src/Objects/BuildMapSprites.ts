@@ -19,7 +19,7 @@ function BuildMapSprite(
   { ctx, mapData, spriteSheet, sheetData, offset, debug }: BuildMapParams,
   appendCollisionData: (
     boxData: Vector,
-    depthLayer: { walkable: boolean; collidable: boolean }
+    depthLayer: { walking: boolean; projectiles: boolean }
   ) => void
 ): MapTypeSprite[] {
   return mapData
@@ -27,7 +27,11 @@ function BuildMapSprite(
     .split("\n")
     .reduce((acc, curr, y) => {
       const SpritesArray = curr.split("").map((tile, x) => {
-        const { tileName, spritePath, depthLayer } = Legend[tile as MapTile];
+        const {
+          tileName,
+          spritePath,
+          collision: depthLayer,
+        } = Legend[tile as MapTile];
         const thisPos = {
           x: x * sheetData.spriteSize + offset.x,
           y: y * sheetData.spriteSize + offset.y,
@@ -49,7 +53,7 @@ function BuildMapSprite(
             metadata: {
               actors: [],
               spritePath: spriteImgToUse as Vector,
-              depth: depthLayer,
+              collision: depthLayer,
             },
           },
           debug,

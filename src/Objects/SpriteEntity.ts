@@ -1,13 +1,11 @@
+import { CollisionState } from "../utils/Handlers/Collisions/CollisionTypes";
 import { MovementKey } from "../utils/Handlers/Keybinds/KeybindingsTypes";
 import { EntitySpriteParams, EntityTypeSprite, Vector } from "./SpriteTypes";
 
-function SpriteEntity({
-  collisions,
-  position,
-  source,
-  ctx,
-  stats,
-}: EntitySpriteParams): EntityTypeSprite {
+function SpriteEntity(
+  { position, source, ctx, stats, modifiers }: EntitySpriteParams,
+  collisions: CollisionState
+): EntityTypeSprite {
   let ticks = 0;
   const maxHp = stats.health;
   let spriteFrameIntervalID: null | number = null;
@@ -120,7 +118,7 @@ function SpriteEntity({
     }
     // ACTUAL SPRITE
     ctx.drawImage(
-      source.img,
+      source.img.down,
       (source.width / source.frames.max) * ticks,
       0,
       source.width / source.frames.max, // maximum number of frames in total of the provided sprite

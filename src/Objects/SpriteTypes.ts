@@ -1,12 +1,28 @@
-import { CollisionState } from "../utils/Handlers/Collisions/CollisionTypes";
 import { MovementKey } from "../utils/Handlers/Keybinds/KeybindingsTypes";
 
-type CharacterSpriteParams = {
-  collisions: CollisionState;
-  stats: {
-    health: number;
-    strength: number;
+/**
+ * Character stats and attack types
+ */
+export type Sprite_Source = {
+  img: {
+    right?: HTMLImageElement;
+    left?: HTMLImageElement;
+    down: HTMLImageElement;
+    up?: HTMLImageElement;
   };
+  width: number;
+  height: number;
+  frames: { min: number; max: number };
+};
+export type Stats = {
+  health: number;
+  strength: number;
+  magic: number;
+  dexterity: number;
+  speed: number;
+  durability: number;
+};
+export interface Stat_Modifiers {
   attack: {
     primary: {
       width: number;
@@ -19,38 +35,30 @@ type CharacterSpriteParams = {
       damage: number;
     };
   };
-  source: {
-    img: {
-      right: HTMLImageElement;
-      left: HTMLImageElement;
-      down: HTMLImageElement;
-      up: HTMLImageElement;
-    };
-    width: number;
-    height: number;
-    frames: { min: number; max: number };
+  defense: {
+    physical_durability: number;
+    magic_durability: number;
   };
+}
+
+type CharacterSpriteParams = {
+  stats: Stats;
+  modifiers: Stat_Modifiers;
+  source: Sprite_Source;
   ctx: CanvasRenderingContext2D;
 };
 
 type EntitySpriteParams = {
-  collisions: CollisionState;
-  position: { x: number; y: number };
-  stats: {
-    health: number;
-    damage: number;
-    speed: number;
-  };
-  attack: {
-    width: number;
-    height: number;
-  };
-  source: {
-    img: HTMLImageElement;
-    width: number;
-    height: number;
-    frames: { min: number; max: number };
-  };
+  position: Vector;
+  stats: Stats;
+  modifiers: Stat_Modifiers;
+  source: Sprite_Source;
+  // source: {
+  //   img: HTMLImageElement;
+  //   width: number;
+  //   height: number;
+  //   frames: { min: number; max: number };
+  // };
   ctx: CanvasRenderingContext2D;
 };
 
@@ -72,7 +80,7 @@ type EnvironmentSpriteSheetParams = {
     width: number;
     height: number;
     metadata: {
-      depth: { walkable: boolean; collidable: boolean };
+      collision: { walking: boolean; projectile: boolean };
       spritePath: Vector;
       actors: [];
     };
@@ -86,7 +94,7 @@ export type MapTypeSprite = {
     position: Vector,
     appendCollidable: (
       arg: Vector,
-      depthLayer: { walkable: boolean; collidable: boolean }
+      collision: { walking: boolean; projectile: boolean }
     ) => void
   ) => void;
   log: (offset?: Vector) => void;

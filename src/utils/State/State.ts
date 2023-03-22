@@ -55,38 +55,34 @@ function State(
      */
 
   const Entities = BuildGameEntities(
-    {
-      collisions: Collisions,
-      ctx: ctx,
-      attack: {
-        width: 150,
-        height: 12,
-      },
-      source: {
-        frames: { min: 0, max: 5 },
-        height: 32,
-        width: 160,
-        img: monsterPic,
-      },
-    },
+    ctx,
+    Collisions,
     mapData,
     {
-      collisions: Collisions,
-      ctx: ctx,
       stats: {
         health: 100,
         strength: 25,
+        dexterity: 10,
+        durability: 12,
+        magic: 26,
+        speed: 4,
       },
-      attack: {
-        primary: {
-          width: 32,
-          height: 32,
-          damage: 25,
+      modifiers: {
+        attack: {
+          primary: {
+            width: 32,
+            height: 32,
+            damage: 25,
+          },
+          secondary: {
+            width: 16,
+            height: 16,
+            damage: 10,
+          },
         },
-        secondary: {
-          width: 16,
-          height: 16,
-          damage: 10,
+        defense: {
+          magic_durability: 20,
+          physical_durability: 20,
         },
       },
       source: {

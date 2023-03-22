@@ -7,7 +7,7 @@ export type CollisionState = {
   setNewMapOffset: (newPos: Vector) => void;
   appendCollidable: (
     { x, y }: Vector,
-    depthLayer: { walkable: boolean; collidable: boolean }
+    collisions: { walking: boolean; projectiles: boolean }
   ) => void;
   appendTeleport: (...teleport: Teleports) => void;
   checkForCollisionMovement: (

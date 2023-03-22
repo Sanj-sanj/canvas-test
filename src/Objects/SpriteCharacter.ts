@@ -1,3 +1,4 @@
+import { CollisionState } from "../utils/Handlers/Collisions/CollisionTypes";
 import { MovementKey } from "../utils/Handlers/Keybinds/KeybindingsTypes";
 
 import {
@@ -19,13 +20,10 @@ export type CharacterTypeSprite = {
   attack: (monster?: EntityTypeSprite) => boolean;
 };
 
-function SpriteCharacter({
-  collisions,
-  source,
-  ctx,
-  stats,
-  attack,
-}: CharacterSpriteParams): CharacterTypeSprite {
+function SpriteCharacter(
+  { source, ctx, stats, modifiers }: CharacterSpriteParams,
+  collisions: CollisionState
+): CharacterTypeSprite {
   let idTimeout: number | null = null;
   let ticks = 1;
   let direction: MovementKey = "down";
@@ -61,23 +59,24 @@ function SpriteCharacter({
   function changeDirection(key: MovementKey | undefined) {
     if (!key) return;
     direction = key;
-    switch (key) {
-      case "right":
-        spriteCorrelatedToDirection = source.img.right;
-        break;
-      case "left":
-        spriteCorrelatedToDirection = source.img.left;
-        break;
-      case "down":
-        spriteCorrelatedToDirection = source.img.down;
-        break;
-      case "up":
-        spriteCorrelatedToDirection = source.img.up;
-        break;
-
-      default:
-        break;
-    }
+    const { up, down, left, right } = source.img;
+    if (up && left && right)
+      switch (key) {
+        case "right":
+          spriteCorrelatedToDirection = right;
+          break;
+        case "left":
+          spriteCorrelatedToDirection = left;
+          break;
+        case "down":
+          spriteCorrelatedToDirection = down;
+          break;
+        case "up":
+          spriteCorrelatedToDirection = up;
+          break;
+        default:
+          break;
+      }
   }
 
   function secondaryAttack(monster: EntityTypeSprite, hasHitMon: boolean) {
@@ -98,7 +97,7 @@ function SpriteCharacter({
       // }
       // monster.moveSprite({ x: kbX, y: kbY },);
       const hp = monster.alterHp(
-        Math.floor(stats.strength * 0.25 + attack.secondary.damage),
+        Math.floor(stats.strength * 0.25 + modifiers.attack.secondary.damage),
         "-"
       );
       if (typeof hp === "number" && hp <= 0) {
@@ -112,29 +111,29 @@ function SpriteCharacter({
     const knockbackValue = 3;
     let x = truePosition.x,
       y = truePosition.y,
-      attW = attack.primary.width,
-      attH = attack.primary.height;
+      attW = modifiers.attack.primary.width,
+      attH = modifiers.attack.primary.height;
     const knockBackOffset = { x: 0, y: 0 };
     if (direction === "right") {
-      x += attack.primary.width - 5;
+      x += modifiers.attack.primary.width - 5;
       knockBackOffset.x += knockbackValue;
     }
     if (direction === "left") {
-      x -= attack.primary.width - 5;
+      x -= modifiers.attack.primary.width - 5;
       knockBackOffset.x -= knockbackValue;
     }
     if (direction === "up") {
       const temp = attW;
       attW = attH;
       attH = temp;
-      y -= attack.primary.height - 5;
+      y -= modifiers.attack.primary.height - 5;
       knockBackOffset.y -= knockbackValue;
     }
     if (direction === "down") {
       const temp = attH;
       attH = attW;
       attW = temp;
-      y += attack.primary.height - 5;
+      y += modifiers.attack.primary.height - 5;
       knockBackOffset.y += knockbackValue;
     }
     ctx.fillStyle = "red";
@@ -150,7 +149,7 @@ function SpriteCharacter({
     ) {
       monster.moveSprite(knockBackOffset, direction);
       const hp = monster.alterHp(
-        Math.floor(stats.strength * 0.235 + attack.primary.damage),
+        Math.floor(stats.strength * 0.235 + modifiers.attack.primary.damage),
         "-"
       );
       // monster.log();
