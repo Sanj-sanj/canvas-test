@@ -1,5 +1,5 @@
 import SpriteMap from "./SpriteMap";
-import { MapTypeSprite, Vector } from "./SpriteTypes";
+import { BuildMapCollisions, MapTypeSprite, Vector } from "./SpriteTypes";
 import { Legend, MapTile } from "../utils/MapData/MapDefinitions";
 
 type BuildMapParams = {
@@ -13,25 +13,24 @@ type BuildMapParams = {
   };
   offset: { x: number; y: number };
   debug: boolean;
+  appendCollisionData: BuildMapCollisions;
 };
 
-function BuildMapSprite(
-  { ctx, mapData, spriteSheet, sheetData, offset, debug }: BuildMapParams,
-  appendCollisionData: (
-    boxData: Vector,
-    depthLayer: { walking: boolean; projectiles: boolean }
-  ) => void
-): MapTypeSprite[] {
+function BuildMapSprite({
+  ctx,
+  mapData,
+  spriteSheet,
+  sheetData,
+  offset,
+  debug,
+  appendCollisionData,
+}: BuildMapParams): MapTypeSprite[] {
   return mapData
     .trim()
     .split("\n")
     .reduce((acc, curr, y) => {
       const SpritesArray = curr.split("").map((tile, x) => {
-        const {
-          tileName,
-          spritePath,
-          collision: depthLayer,
-        } = Legend[tile as MapTile];
+        const { tileName, spritePath, collisionData } = Legend[tile as MapTile];
         const thisPos = {
           x: x * sheetData.spriteSize + offset.x,
           y: y * sheetData.spriteSize + offset.y,
@@ -42,6 +41,7 @@ function BuildMapSprite(
           const mod = Math.floor(Math.random() * 5);
           spriteImgToUse = spritePath[mod === 0 ? 1 : 0] as Vector;
         }
+
         const thisSprite = SpriteMap({
           ctx,
           position: thisPos,
@@ -53,13 +53,13 @@ function BuildMapSprite(
             metadata: {
               actors: [],
               spritePath: spriteImgToUse as Vector,
-              collision: depthLayer,
+              collisionData,
             },
           },
           debug,
         });
+        appendCollisionData(thisPos, collisionData);
 
-        thisSprite.buildCollisionData(thisPos, appendCollisionData);
         return thisSprite;
       });
       return [...acc, ...SpritesArray];

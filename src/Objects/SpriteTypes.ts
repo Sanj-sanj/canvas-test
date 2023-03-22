@@ -1,4 +1,5 @@
 import { MovementKey } from "../utils/Handlers/Keybinds/KeybindingsTypes";
+import { TileCollisionTypes } from "../utils/MapData/MapDefinitions";
 
 /**
  * Character stats and attack types
@@ -53,12 +54,6 @@ type EntitySpriteParams = {
   stats: Stats;
   modifiers: Stat_Modifiers;
   source: Sprite_Source;
-  // source: {
-  //   img: HTMLImageElement;
-  //   width: number;
-  //   height: number;
-  //   frames: { min: number; max: number };
-  // };
   ctx: CanvasRenderingContext2D;
 };
 
@@ -80,7 +75,7 @@ type EnvironmentSpriteSheetParams = {
     width: number;
     height: number;
     metadata: {
-      collision: { walking: boolean; projectile: boolean };
+      collisionData: TileCollisionTypes;
       spritePath: Vector;
       actors: [];
     };
@@ -92,15 +87,16 @@ type EnvironmentSpriteSheetParams = {
 export type MapTypeSprite = {
   buildCollisionData: (
     position: Vector,
-    appendCollidable: (
-      arg: Vector,
-      collision: { walking: boolean; projectile: boolean }
-    ) => void
+    appendCollidable: (arg: Vector, collisionData: TileCollisionTypes) => void
   ) => void;
   log: (offset?: Vector) => void;
   draw: () => void;
   updateOffset: (newOffset: Vector) => void;
 };
+export type BuildMapCollisions = (
+  arg: Vector,
+  collisionData: TileCollisionTypes
+) => void;
 
 type ProjectileTypeSprite = {
   setValues: (

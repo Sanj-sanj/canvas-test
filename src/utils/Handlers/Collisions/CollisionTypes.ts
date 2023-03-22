@@ -1,5 +1,6 @@
 import { Rect, Vector } from "../../../Objects/SpriteTypes";
 import { TeleportData, Teleports } from "../../MapData/MapAndEntityData";
+import { TileCollisionTypes } from "../../MapData/MapDefinitions";
 import { MovementKey } from "../Keybinds/KeybindingsTypes";
 
 export type CollisionState = {
@@ -7,7 +8,7 @@ export type CollisionState = {
   setNewMapOffset: (newPos: Vector) => void;
   appendCollidable: (
     { x, y }: Vector,
-    collisions: { walking: boolean; projectiles: boolean }
+    collisionData: TileCollisionTypes
   ) => void;
   appendTeleport: (...teleport: Teleports) => void;
   checkForCollisionMovement: (

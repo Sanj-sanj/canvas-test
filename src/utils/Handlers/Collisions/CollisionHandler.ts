@@ -2,6 +2,7 @@ import { Rect, Vector } from "../../../Objects/SpriteTypes";
 import { CollisionState } from "./CollisionTypes";
 import { MovementKey } from "../Keybinds/KeybindingsTypes";
 import { TeleportData, Teleports } from "../../MapData/MapAndEntityData";
+import { TileCollisionTypes } from "../../MapData/MapDefinitions";
 
 function CollisionHandler(): CollisionState {
   /* 
@@ -31,15 +32,15 @@ function CollisionHandler(): CollisionState {
 
   function appendCollidable(
     { x, y }: Vector,
-    depthLayer: { walkable: boolean; collidable: boolean }
+    { stopsProjectiles, stopsWalking }: TileCollisionTypes
   ) {
-    if (depthLayer.collidable === true) {
+    if (stopsProjectiles === true) {
       collisions.collidable.push({ x, y });
     }
-    if (depthLayer.walkable === false) {
+    if (stopsWalking === true) {
       collisions.unwalkable.push({ x, y });
     }
-    if (depthLayer.walkable === true) {
+    if (stopsWalking === false) {
       collisions.walkable.push({ x, y });
     }
   }

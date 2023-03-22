@@ -15,7 +15,7 @@ import CameraHandler from "../Handlers/Camera/CameraHandler";
 import CollisionHandler from "../Handlers/Collisions/CollisionHandler";
 import KeybindHandler from "../Handlers/Keybinds/KeybindHandler";
 import { LevelParams } from "./LevelBuilder";
-import BuildForegroundSprites from "../../Objects/BuildForegroundSprites";
+import BuildLayer2Sprites from "../../Objects/BuildLayer2Sprites";
 import DialogueBox from "../../Objects/DialogueBox";
 
 const playerPicR = new Image();
@@ -109,37 +109,33 @@ function State(
     },
     Collisions,
   });
-  const MapTiles = BuildMapSprite(
-    {
-      ctx,
-      mapData: mapData.mapString,
-      offset: offset(),
-      spriteSheet: sheet,
-      sheetData: {
-        sheetHeight: 160,
-        sheetWidth: 224,
-        spriteSize: 32,
-      },
-      debug: false,
+  const Layer1MapTiles = BuildMapSprite({
+    ctx,
+    mapData: mapData.mapString,
+    offset: offset(),
+    spriteSheet: sheet,
+    sheetData: {
+      sheetHeight: 160,
+      sheetWidth: 224,
+      spriteSize: 32,
     },
-    Collisions.appendCollidable
-  );
+    debug: false,
+    appendCollisionData: Collisions.appendCollidable,
+  });
 
-  const ForegroundTiles = BuildForegroundSprites(
-    {
-      ctx,
-      entityData: mapData.foregroundString,
-      spriteSheet: foregroundSheet,
-      offset: offset(),
-      sheetData: {
-        sheetHeight: 128,
-        sheetWidth: 128,
-        spriteSize: 32,
-      },
-      debug: false,
+  const Layer2MapTiles = BuildLayer2Sprites({
+    ctx,
+    entityData: mapData.foregroundString,
+    spriteSheet: foregroundSheet,
+    offset: offset(),
+    sheetData: {
+      sheetHeight: 128,
+      sheetWidth: 128,
+      spriteSize: 32,
     },
-    Collisions.appendCollidable
-  );
+    debug: false,
+    appendCollisionData: Collisions.appendCollidable,
+  });
   /*
   Once the game level loads the player is centerd offset of canvas drawing start of the topleft which is x:0,y:0
   the following will take the screen center, get the newly loaded map's offset provided by the game Entity's layer map
@@ -156,8 +152,8 @@ function State(
     Collisions,
     Control,
     Camera,
-    MapTiles,
-    ForegroundTiles,
+    Layer1MapTiles,
+    Layer2MapTiles,
     Entities,
     Dialogue,
   };

@@ -1,5 +1,5 @@
 import SpriteMap from "./SpriteMap";
-import { MapTypeSprite, Vector } from "./SpriteTypes";
+import { BuildMapCollisions, MapTypeSprite, Vector } from "./SpriteTypes";
 import {
   ForegroundTile,
   ForegroundTileLegend,
@@ -16,30 +16,34 @@ type BuildForegroundParams = {
   };
   offset: { x: number; y: number };
   debug: boolean;
+  appendCollisionData: BuildMapCollisions;
 };
 
-function BuildForegroundSprites(
-  {
-    ctx,
-    entityData,
-    spriteSheet,
-    sheetData,
-    offset,
-    debug,
-  }: BuildForegroundParams,
-  appendCollisionData: (
-    boxData: Vector,
-    collisions: { walking: boolean; projectiles: boolean }
-  ) => void
-): MapTypeSprite[] {
-  const Sprites: MapTypeSprite[] = [];
+function BuildLayer2Sprites({
+  ctx,
+  entityData,
+  spriteSheet,
+  sheetData,
+  offset,
+  debug,
+  appendCollisionData,
+}: BuildForegroundParams): {
+  ground: MapTypeSprite[];
+  sky: MapTypeSprite[];
+  underground: MapTypeSprite[];
+} {
+  const Sprites: {
+    ground: MapTypeSprite[];
+    sky: MapTypeSprite[];
+    underground: MapTypeSprite[];
+  } = { ground: [], sky: [], underground: [] };
   entityData
     .trim()
     .split("\n")
     .reduce((acc, curr, y) => {
       [...curr].forEach((tile, x) => {
         if (tile === ".") return;
-        const { spritePath, collision, tileName } =
+        const { spritePath, collisionData, tileName, depth } =
           ForegroundTileLegend[tile as ForegroundTile];
         const thisPos = {
           x: x * sheetData.spriteSize + offset.x,
@@ -57,17 +61,18 @@ function BuildForegroundSprites(
             metadata: {
               actors: [],
               spritePath: spriteImgToUse as Vector,
-              collision,
+              collisionData,
             },
           },
           debug,
         });
-        thisSprite.buildCollisionData(thisPos, appendCollisionData);
-        Sprites.push(thisSprite);
+        appendCollisionData(thisPos, collisionData);
+
+        Sprites[depth].push(thisSprite);
       });
       return acc;
     }, []);
   return Sprites;
 }
 
-export default BuildForegroundSprites;
+export default BuildLayer2Sprites;

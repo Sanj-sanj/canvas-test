@@ -25,8 +25,8 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
     Camera,
     Control,
     Collisions,
-    MapTiles,
-    ForegroundTiles,
+    Layer1MapTiles,
+    Layer2MapTiles,
     Entities,
     Dialogue,
   } = State(canvas, ctx, animate, levelData, newLevel);
@@ -38,8 +38,11 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
     monsters: [...Entities.entities] as EntityTypeSprite[],
     projectiles: [] as ProjectileTypeSprite[],
     removedSprites: [] as (EntityTypeSprite | null)[],
-    background: [...MapTiles] as MapTypeSprite[],
-    foreground: [...ForegroundTiles] as MapTypeSprite[],
+    background: [
+      ...Layer1MapTiles,
+      ...Layer2MapTiles.ground,
+    ] as MapTypeSprite[],
+    foreground: [...Layer2MapTiles.sky] as MapTypeSprite[],
   };
   // eslint-disable-next-line
   let { monsters, removedSprites, projectiles, background, foreground } =

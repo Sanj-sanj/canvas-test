@@ -1,4 +1,5 @@
 import {
+  BuildMapCollisions,
   EnvironmentSpriteSheetParams,
   MapTypeSprite,
   Vector,
@@ -25,7 +26,7 @@ function SpriteMap({
       32,
       32
     );
-    if (debug && source.metadata.collision.projectiles) {
+    if (debug && source.metadata.collisionData.stopsProjectiles) {
       ctx.font = "12zpx sans-serif";
       ctx.strokeStyle = "black";
       ctx.lineWidth = 2;
@@ -62,12 +63,9 @@ function SpriteMap({
   }
   function buildCollisionData(
     pos: Vector,
-    appendCollidable: (
-      arg: Vector,
-      collision: { walking: boolean; projectiles: boolean }
-    ) => void
+    appendCollidable: BuildMapCollisions
   ) {
-    return appendCollidable({ x: pos.x, y: pos.y }, source.metadata.collision);
+    appendCollidable(pos, source.metadata.collisionData);
   }
 
   function updateOffset(offsetNew: Vector) {

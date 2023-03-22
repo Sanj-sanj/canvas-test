@@ -1,47 +1,76 @@
 type Vec = { x: number; y: number };
 
+export type TileCollisionTypes = {
+  stopsWalking: boolean;
+  stopsProjectiles: boolean;
+};
+
+export type LegendEntry<T extends string> = {
+  [k in T]: {
+    tileName: string;
+    spritePath: Vec[];
+    collisionData: TileCollisionTypes;
+    actors: [];
+  };
+};
+export type LegendEntryForeground<T extends string> = {
+  [k in T]: {
+    tileName: string;
+    spritePath: Vec[];
+    collisionData: TileCollisionTypes;
+    actors: [];
+    depth: "underground" | "ground" | "sky";
+  };
+};
+
 /**
  * Foreground Tile related data.
  */
 type BlankTile = ".";
 export type ForegroundTile = "-" | "=" | "T" | "@" | "^" | BlankTile;
 
-export const ForegroundTileLegend: LegendEntry<ForegroundTile> = {
+export const ForegroundTileLegend: LegendEntryForeground<ForegroundTile> = {
   "-": {
     actors: [],
     tileName: "building edge",
-    collision: { collidable: false, walkable: true },
+    collisionData: { stopsProjectiles: false, stopsWalking: false },
     spritePath: [{ x: 0, y: 0 }],
+    depth: "sky",
   },
   "=": {
     tileName: "stone wall overhang",
-    collision: { collidable: false, walkable: true },
+    collisionData: { stopsProjectiles: false, stopsWalking: false },
     spritePath: [{ x: 1, y: 0 }],
+    depth: "sky",
     actors: [],
   },
   T: {
     actors: [],
     tileName: "wood sign post",
-    collision: { collidable: true, walkable: false },
+    collisionData: { stopsProjectiles: true, stopsWalking: true },
     spritePath: [{ x: 2, y: 1 }],
+    depth: "ground",
   },
   "@": {
     actors: [],
     tileName: "bush",
-    collision: { collidable: true, walkable: false },
+    collisionData: { stopsProjectiles: true, stopsWalking: true },
     spritePath: [{ x: 1, y: 2 }],
+    depth: "ground",
   },
   "^": {
     actors: [],
-    tileName: "sign board",
-    collision: { collidable: true, walkable: true },
+    tileName: "wall mounted sign",
+    collisionData: { stopsProjectiles: true, stopsWalking: true },
     spritePath: [{ x: 3, y: 1 }],
+    depth: "ground",
   },
   ".": {
     actors: [],
     tileName: "void",
-    collision: { collidable: false, walkable: true },
+    collisionData: { stopsProjectiles: false, stopsWalking: false },
     spritePath: [{ x: 0, y: 3 }],
+    depth: "ground",
   },
 };
 /*
@@ -75,21 +104,12 @@ export type MapTile =
   | "R"
   | "A"
   | "Q";
-export type LegendEntry<T extends string> = {
-  [k in T]: {
-    tileName: string;
-    collision: { walkable: boolean; collidable: boolean };
-    spritePath: Vec[];
-    actors: [];
-  };
-};
-
 export const Legend: LegendEntry<MapTile> = {
   "!": {
     tileName: "void",
     spritePath: [{ x: 0, y: 2 }],
     actors: [],
-    collision: { walkable: false, collidable: false },
+    collisionData: { stopsWalking: true, stopsProjectiles: false },
   },
   ".": {
     tileName: "grass",
@@ -98,31 +118,31 @@ export const Legend: LegendEntry<MapTile> = {
       { x: 1, y: 0 },
     ],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   "~": {
     tileName: "shallow water",
     spritePath: [{ x: 0, y: 3 }],
     actors: [],
-    collision: { walkable: false, collidable: false },
+    collisionData: { stopsWalking: true, stopsProjectiles: false },
   },
   "%": {
     tileName: "deep water",
     spritePath: [{ x: 1, y: 3 }],
     actors: [],
-    collision: { walkable: false, collidable: false },
+    collisionData: { stopsWalking: true, stopsProjectiles: false },
   },
   "@": {
     tileName: "sand",
     spritePath: [{ x: 2, y: 3 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   $: {
     tileName: "grassy dirt road",
     spritePath: [{ x: 3, y: 0 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   "*": {
     tileName: "dirt road",
@@ -131,19 +151,19 @@ export const Legend: LegendEntry<MapTile> = {
       { x: 3, y: 0 },
     ],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   "#": {
     tileName: "cobble road",
     spritePath: [{ x: 6, y: 0 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   c: {
     tileName: "cobble road with grass",
     spritePath: [{ x: 6, y: 1 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   "/": {
     tileName: "mud",
@@ -152,102 +172,102 @@ export const Legend: LegendEntry<MapTile> = {
       { x: 4, y: 0 },
     ],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   "^": {
     tileName: "stairs up",
     spritePath: [{ x: 4, y: 2 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   "=": {
     tileName: "horizontal stone wall",
     spritePath: [{ x: 3, y: 2 }],
     actors: [],
-    collision: { walkable: false, collidable: true },
+    collisionData: { stopsWalking: true, stopsProjectiles: true },
   },
   ":": {
     tileName: "vertical stone wall",
     spritePath: [{ x: 1, y: 2 }],
     actors: [],
-    collision: { walkable: false, collidable: true },
+    collisionData: { stopsWalking: true, stopsProjectiles: true },
   },
   W: {
     tileName: "brick wall",
     spritePath: [{ x: 0, y: 1 }],
     actors: [],
-    collision: { walkable: false, collidable: true },
+    collisionData: { stopsWalking: true, stopsProjectiles: true },
   },
   "-": {
     tileName: "cave entrance",
     spritePath: [{ x: 2, y: 2 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   V: {
     tileName: "stairs down",
     spritePath: [{ x: 4, y: 1 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   X: {
     tileName: "tile floor",
     spritePath: [{ x: 5, y: 1 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   _: {
     tileName: "building wall horizontal",
     spritePath: [{ x: 1, y: 1 }],
     actors: [],
-    collision: { walkable: false, collidable: true },
+    collisionData: { stopsWalking: true, stopsProjectiles: true },
   },
   "|": {
     tileName: "building wall vertical",
     spritePath: [{ x: 3, y: 1 }],
     actors: [],
-    collision: { walkable: false, collidable: true },
+    collisionData: { stopsWalking: true, stopsProjectiles: true },
   },
   P: {
     tileName: "ground plants",
     spritePath: [{ x: 0, y: 1 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   b: {
     tileName: "small horizontal bride ",
     spritePath: [{ x: 5, y: 2 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   r: {
     tileName: "small vertical bride ",
     spritePath: [{ x: 6, y: 2 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   B: {
     tileName: "large horizontal bridge bottom",
     spritePath: [{ x: 3, y: 3 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   R: {
     tileName: "large horizontal bridge top",
     spritePath: [{ x: 4, y: 3 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   A: {
     tileName: "large vertical bridge  right",
     spritePath: [{ x: 5, y: 3 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
   Q: {
     tileName: "large vertical bridge left",
     spritePath: [{ x: 6, y: 3 }],
     actors: [],
-    collision: { walkable: true, collidable: false },
+    collisionData: { stopsWalking: false, stopsProjectiles: false },
   },
 };
