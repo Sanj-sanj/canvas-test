@@ -42,20 +42,22 @@ export type MapData = {
   foregroundString: string;
   teleportData: Teleports;
   zoomEnabled: boolean;
+  dialogues?: string[][];
 };
 
 function createMapAndEntityMetaData({
   mapName,
   zoomEnabled,
 }: LevelParams): MapData {
-  const { mapString, entityString, foregroundString } = selectMap(mapName);
-  const maps: { [key in MapNames]: MapData } = {
+  const maps: {
+    [key in MapNames]: Pick<
+      MapData,
+      "mapName" | "teleportData" | "validTeleportTiles" | "zoomEnabled"
+    >;
+  } = {
     startingPoint: {
       validTeleportTiles: ["1", "0", "2"],
       mapName: "startingPoint",
-      mapString,
-      entityString,
-      foregroundString,
       teleportData: [
         {
           initial: "0",
@@ -102,9 +104,6 @@ function createMapAndEntityMetaData({
     smallTown: {
       validTeleportTiles: ["0", "1"],
       mapName: "smallTown",
-      mapString,
-      entityString,
-      foregroundString,
       teleportData: [
         {
           initial: "0",
@@ -138,9 +137,6 @@ function createMapAndEntityMetaData({
     startingPointBasement: {
       validTeleportTiles: ["0"],
       mapName: "startingPointBasement",
-      mapString,
-      entityString,
-      foregroundString,
       teleportData: [
         {
           initial: "0",
@@ -160,7 +156,10 @@ function createMapAndEntityMetaData({
     },
   };
   const selection = maps[mapName];
-  return selection;
+  const { mapString, entityString, foregroundString, dialogues } =
+    selectMap(mapName);
+
+  return { ...selection, mapString, entityString, foregroundString, dialogues };
 }
 
 export default createMapAndEntityMetaData;

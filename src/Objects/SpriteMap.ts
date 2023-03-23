@@ -1,5 +1,4 @@
 import {
-  BuildMapCollisions,
   EnvironmentSpriteSheetParams,
   MapTypeSprite,
   Vector,
@@ -12,7 +11,6 @@ function SpriteMap({
   debug,
 }: EnvironmentSpriteSheetParams): MapTypeSprite {
   const offset = { x: 0, y: 0 };
-
   function draw() {
     //  "mapSpriteSheet"
     ctx.drawImage(
@@ -61,12 +59,6 @@ function SpriteMap({
   function log(offset?: Vector) {
     console.log({ position, source, offset });
   }
-  function buildCollisionData(
-    pos: Vector,
-    appendCollidable: BuildMapCollisions
-  ) {
-    appendCollidable(pos, source.metadata.collisionData);
-  }
 
   function updateOffset(offsetNew: Vector) {
     offset.x = offsetNew.x;
@@ -75,7 +67,6 @@ function SpriteMap({
   return {
     log,
     draw,
-    buildCollisionData,
     updateOffset,
   };
 }

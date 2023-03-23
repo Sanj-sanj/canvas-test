@@ -54,6 +54,16 @@ function State(
      player sprite on the screen.
      */
 
+  const Control = KeybindHandler({
+    animate,
+    keypressActions: {
+      toggleZoom: toggleZoom,
+      updateLastClickPosition: updateLastClickPosition,
+      updateOffset: updateOffset,
+    },
+    Collisions,
+  });
+
   const Entities = BuildGameEntities(
     ctx,
     Collisions,
@@ -99,16 +109,7 @@ function State(
     },
     newLevel
   );
-
-  const Control = KeybindHandler({
-    animate,
-    keypressActions: {
-      toggleZoom: toggleZoom,
-      updateLastClickPosition: updateLastClickPosition,
-      updateOffset: updateOffset,
-    },
-    Collisions,
-  });
+  //background layer
   const Layer1MapTiles = BuildMapSprite({
     ctx,
     mapData: mapData.mapString,
@@ -122,10 +123,11 @@ function State(
     debug: false,
     appendCollisionData: Collisions.appendCollidable,
   });
-
+  //transparent sprites layer (multiple levels of depth for render order purposes)
   const Layer2MapTiles = BuildLayer2Sprites({
     ctx,
     entityData: mapData.foregroundString,
+    dialogue: mapData.dialogues,
     spriteSheet: foregroundSheet,
     offset: offset(),
     sheetData: {
@@ -134,7 +136,7 @@ function State(
       spriteSize: 32,
     },
     debug: false,
-    appendCollisionData: Collisions.appendCollidable,
+    Collisions,
   });
   /*
   Once the game level loads the player is centerd offset of canvas drawing start of the topleft which is x:0,y:0

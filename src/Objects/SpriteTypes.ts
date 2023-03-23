@@ -55,6 +55,9 @@ type EntitySpriteParams = {
   modifiers: Stat_Modifiers;
   source: Sprite_Source;
   ctx: CanvasRenderingContext2D;
+  interactivity?: {
+    dialogue: string[];
+  };
 };
 
 export type EntityTypeSprite = {
@@ -85,10 +88,10 @@ type EnvironmentSpriteSheetParams = {
 };
 
 export type MapTypeSprite = {
-  buildCollisionData: (
-    position: Vector,
-    appendCollidable: (arg: Vector, collisionData: TileCollisionTypes) => void
-  ) => void;
+  // buildCollisionData: (
+  //   position: Vector,
+  //   appendCollidable: (arg: Vector, collisionData: TileCollisionTypes) => void
+  // ) => void;
   log: (offset?: Vector) => void;
   draw: () => void;
   updateOffset: (newOffset: Vector) => void;

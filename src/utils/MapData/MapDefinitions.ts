@@ -20,6 +20,9 @@ export type LegendEntryForeground<T extends string> = {
     collisionData: TileCollisionTypes;
     actors: [];
     depth: "underground" | "ground" | "sky";
+    interactivity?: {
+      dialogue: boolean;
+    };
   };
 };
 
@@ -50,6 +53,9 @@ export const ForegroundTileLegend: LegendEntryForeground<ForegroundTile> = {
     collisionData: { stopsProjectiles: true, stopsWalking: true },
     spritePath: [{ x: 2, y: 1 }],
     depth: "ground",
+    interactivity: {
+      dialogue: true,
+    },
   },
   "@": {
     actors: [],
@@ -74,8 +80,8 @@ export const ForegroundTileLegend: LegendEntryForeground<ForegroundTile> = {
   },
 };
 /*
-DepthLayer's walkable property is for defining where and where not a Entity/Character Sprite that is moveable can move to.
-collidable property is for defining where a Projectile Sprite cannot move to. (Collisions detection for projectiles) 
+collisionData's stopsWalking property is for defining where and where not a Entity/Character Sprite that is moveable can move to.
+stopsProjectiles property is for defining where a Projectile Sprite cannot move to. (Collisions detection for projectiles) 
 */
 export type MapTile =
   | "."

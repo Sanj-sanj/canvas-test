@@ -20,24 +20,26 @@ function DialogueBox() {
     return compressedStrings;
   }
 
-  function buildMessage(messages: string[]) {
+  function buildMessage(messages: string[] | undefined) {
+    if (!messages) return;
     messageQueue = messages.reduce((acc, msg) => {
       if (msg.length >= 372) {
         return [...acc, ...compressMsg(msg)];
       }
       return [...acc, msg];
     }, [] as string[]);
-
-    if (container) {
-      isRevealed = true;
-      container.classList.add("revealed");
-      container.classList.remove("hidden");
-    }
   }
   function writeMessage() {
     if (container) {
       const currMessage = messageQueue[messageIndex];
       container.textContent = currMessage;
+    }
+  }
+  function revealDisplay() {
+    if (container) {
+      isRevealed = true;
+      container.classList.add("revealed");
+      container.classList.remove("hidden");
     }
   }
   function hideDisplay() {
@@ -61,6 +63,12 @@ function DialogueBox() {
   function isDialogueOpen() {
     return isRevealed;
   }
-  return { buildMessage, writeMessage, increment, isDialogueOpen };
+  return {
+    buildMessage,
+    writeMessage,
+    increment,
+    isDialogueOpen,
+    revealDisplay,
+  };
 }
 export default DialogueBox;

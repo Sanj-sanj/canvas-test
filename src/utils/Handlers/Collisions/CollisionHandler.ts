@@ -1,5 +1,5 @@
 import { Rect, Vector } from "../../../Objects/SpriteTypes";
-import { CollisionState } from "./CollisionTypes";
+import { CollisionState, DialogueTile } from "./CollisionTypes";
 import { MovementKey } from "../Keybinds/KeybindingsTypes";
 import { TeleportData, Teleports } from "../../MapData/MapAndEntityData";
 import { TileCollisionTypes } from "../../MapData/MapDefinitions";
@@ -9,18 +9,21 @@ function CollisionHandler(): CollisionState {
   This function will contain all collision state related functions.
   collisions: Vector array of environment related tiles 
   */
+
   const collisions: {
     unwalkable: Vector[];
     collidable: Vector[];
     walkable: Vector[];
     teleport: TeleportData[];
     playerInital: Vector;
+    dialogues: DialogueTile[];
   } = {
     unwalkable: [],
     collidable: [],
     walkable: [],
     teleport: [],
     playerInital: { x: 322, y: 288 },
+    dialogues: [],
   };
 
   function setNewMapOffset(newOffset: Vector) {
@@ -28,6 +31,16 @@ function CollisionHandler(): CollisionState {
     When loading a new level, the value created here will represent the player's position
      */
     collisions.playerInital = newOffset;
+  }
+
+  function appendDialogue({
+    text,
+    position,
+  }: {
+    text: string[];
+    position: Vector;
+  }) {
+    collisions.dialogues.push({ text, position });
   }
 
   function appendCollidable(
@@ -94,6 +107,17 @@ function CollisionHandler(): CollisionState {
       );
     });
   }
+  function checkForCollisionDialogue(rect: Rect, offset: Vector) {
+    return collisions.dialogues.find(({ position: { x, y } }) => {
+      return (
+        rect.x + rect.width >= x + offset.x &&
+        rect.x <= x + offset.x + 34 &&
+        rect.y <= y + offset.y + 34 &&
+        rect.y + rect.height - 16 >= y + offset.y
+      );
+    });
+  }
+
   function checkForCollisionSprite(rect0: Rect, rect1: Rect) {
     return (
       rect0.x + rect0.width >= rect1.x &&
@@ -117,9 +141,11 @@ function CollisionHandler(): CollisionState {
   return {
     appendCollidable,
     appendTeleport,
+    appendDialogue,
     setNewMapOffset,
     log,
     checkForCollisionTeleport,
+    checkForCollisionDialogue,
     checkForCollisionMovement,
     checkForCollisionSprite,
     checkForCollisionProjectile,

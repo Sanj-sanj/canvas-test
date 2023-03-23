@@ -4,12 +4,17 @@ import { EntitySpriteParams, Stats } from "../../Objects/SpriteTypes";
 const blueMon = new Image();
 blueMon.src = blueMonImage;
 
-type EntitySpritePartial = Pick<EntitySpriteParams, "modifiers" | "source">;
+type EntitySpritePartial = Pick<
+  EntitySpriteParams,
+  "modifiers" | "source" | "interactivity"
+>;
 
-export type MonsterTiles = "m";
+export const MonsterTileList = ["m", "M"];
+
+export type MonsterTiles = "m" | "M";
 type MonsterChart<T extends string> = {
-  [k in T]: {
-    tile: "m";
+  [key in T]: {
+    tile: key;
     entitySpritePartial: EntitySpritePartial;
   };
 };
@@ -45,12 +50,41 @@ const MonsterLegend: MonsterChart<MonsterTiles> = {
       },
     },
   },
+  M: {
+    tile: "M",
+    entitySpritePartial: {
+      modifiers: {
+        attack: {
+          primary: { damage: 1, height: 12, width: 150 },
+          secondary: { damage: 1, height: 12, width: 12 },
+        },
+        defense: {
+          magic_durability: 4,
+          physical_durability: 1,
+        },
+      },
+      source: {
+        img: { down: blueMon },
+        frames: { min: 1, max: 5 },
+        height: 32,
+        width: 168,
+      },
+      interactivity: {
+        dialogue: [
+          "wow! You found me! I'm the elusive and rare npc with dialogue!",
+          "Is that just not amazing?!",
+          "I do literally nothing else but provide words lmao",
+        ],
+      },
+    },
+  },
 };
 
 function getMonster(tile: MonsterTiles) {
   const monster = MonsterLegend[tile];
-  const params = monster.entitySpritePartial as EntitySpriteParams;
+  const params = monster.entitySpritePartial as Partial<EntitySpriteParams>;
   params.stats = genStats();
+
   return params;
 }
 export default getMonster;

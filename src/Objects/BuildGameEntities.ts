@@ -1,6 +1,10 @@
 import SpriteEntity from "./SpriteEntity";
 import { CollisionState } from "../utils/Handlers/Collisions/CollisionTypes";
-import { CharacterSpriteParams, EntityTypeSprite } from "./SpriteTypes";
+import {
+  CharacterSpriteParams,
+  EntitySpriteParams,
+  EntityTypeSprite,
+} from "./SpriteTypes";
 import {
   EntityTile,
   MapData,
@@ -8,7 +12,10 @@ import {
   TeleportTileMarker,
 } from "../utils/MapData/MapAndEntityData";
 import SpriteCharacter, { CharacterTypeSprite } from "./SpriteCharacter";
-import getMonster from "../Game_World_Types/Monsters/MonstersList";
+import getMonster, {
+  MonsterTileList,
+  MonsterTiles,
+} from "../Game_World_Types/Monsters/MonstersList";
 
 function BuildGameEntities(
   ctx: CanvasRenderingContext2D,
@@ -47,19 +54,27 @@ function BuildGameEntities(
           });
         }
         // MONSTER ENTITY LOGIC
-        if (thisTile === "m") {
-          const monster = getMonster(thisTile);
-          sprites.entities.push(
-            SpriteEntity(
-              {
-                ...monster,
-                ctx,
-                position: { x: thispos.x, y: thispos.y },
-              },
-              collisions
-            )
-          );
+
+        const isMonTile = (tile: EntityTile): tile is MonsterTiles =>
+          MonsterTileList.includes(tile);
+
+        if (isMonTile(thisTile)) {
+          const partialMonster = getMonster(thisTile);
+          if (partialMonster) {
+            const monster = {
+              ...partialMonster,
+              ctx,
+              position: thispos,
+            } as EntitySpriteParams;
+            sprites.entities.push(SpriteEntity(monster, collisions));
+            if (partialMonster.interactivity)
+              collisions.appendDialogue({
+                text: partialMonster.interactivity?.dialogue,
+                position: thispos,
+              });
+          }
         }
+
         //TELEPORT TILE LOGIC
         if (
           !Number.isNaN(+thisTile) &&

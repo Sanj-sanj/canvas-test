@@ -4,6 +4,7 @@ import {
   ForegroundTile,
   ForegroundTileLegend,
 } from "../utils/MapData/MapDefinitions";
+import { CollisionState } from "../utils/Handlers/Collisions/CollisionTypes";
 
 type BuildForegroundParams = {
   entityData: string;
@@ -16,7 +17,8 @@ type BuildForegroundParams = {
   };
   offset: { x: number; y: number };
   debug: boolean;
-  appendCollisionData: BuildMapCollisions;
+  Collisions: CollisionState;
+  dialogue?: string[][];
 };
 
 function BuildLayer2Sprites({
@@ -26,7 +28,8 @@ function BuildLayer2Sprites({
   sheetData,
   offset,
   debug,
-  appendCollisionData,
+  dialogue,
+  Collisions,
 }: BuildForegroundParams): {
   ground: MapTypeSprite[];
   sky: MapTypeSprite[];
@@ -37,13 +40,14 @@ function BuildLayer2Sprites({
     sky: MapTypeSprite[];
     underground: MapTypeSprite[];
   } = { ground: [], sky: [], underground: [] };
+  let dialogueInd = 0;
   entityData
     .trim()
     .split("\n")
     .reduce((acc, curr, y) => {
       [...curr].forEach((tile, x) => {
         if (tile === ".") return;
-        const { spritePath, collisionData, tileName, depth } =
+        const { spritePath, collisionData, tileName, depth, interactivity } =
           ForegroundTileLegend[tile as ForegroundTile];
         const thisPos = {
           x: x * sheetData.spriteSize + offset.x,
@@ -66,7 +70,16 @@ function BuildLayer2Sprites({
           },
           debug,
         });
-        appendCollisionData(thisPos, collisionData);
+        if (interactivity) {
+          if (dialogue && dialogueInd < dialogue.length) {
+            Collisions.appendDialogue({
+              position: thisPos,
+              text: dialogue[dialogueInd],
+            });
+            dialogueInd++;
+          }
+        }
+        Collisions.appendCollidable(thisPos, collisionData);
 
         Sprites[depth].push(thisSprite);
       });
