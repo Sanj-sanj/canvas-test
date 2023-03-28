@@ -70,6 +70,9 @@ export const ForegroundTileLegend: LegendEntryForeground<ForegroundTile> = {
     collisionData: { stopsProjectiles: true, stopsWalking: true },
     spritePath: [{ x: 3, y: 1 }],
     depth: "ground",
+    interactivity: {
+      dialogue: true,
+    },
   },
   ".": {
     actors: [],

@@ -3,7 +3,11 @@ import { Vector } from "../../Objects/SpriteTypes";
 import { LevelParams } from "../State/LevelBuilder";
 
 import selectMap from "./Maps";
-export type MapNames = "startingPoint" | "smallTown" | "startingPointBasement";
+export type MapNames =
+  | "startingPoint"
+  | "startPointNorthPath"
+  | "smallTown"
+  | "startingPointBasement";
 
 export type TeleportTileMarker =
   | "0"
@@ -56,17 +60,17 @@ function createMapAndEntityMetaData({
     >;
   } = {
     startingPoint: {
-      validTeleportTiles: ["1", "0", "2"],
+      validTeleportTiles: ["0", "1", "2", "3"],
       mapName: "startingPoint",
       teleportData: [
         {
           initial: "0",
           meta: {
             destination: "0",
-            destinationOffset: { x: 0, y: 1 },
+            destinationOffset: { x: 1, y: 0 },
           },
           comingFrom: "startingPoint",
-          destinationName: "smallTown",
+          destinationName: "startPointNorthPath",
           collision: {
             x: 0,
             y: 0,
@@ -79,7 +83,7 @@ function createMapAndEntityMetaData({
             destinationOffset: { x: 1, y: 0 },
           },
           comingFrom: "startingPoint",
-          destinationName: "smallTown",
+          destinationName: "startPointNorthPath",
           collision: {
             x: 0,
             y: 0,
@@ -98,39 +102,52 @@ function createMapAndEntityMetaData({
             y: 0,
           },
         },
+        {
+          initial: "3",
+          meta: {
+            destination: "3",
+            destinationOffset: { x: 0, y: 0 },
+          },
+          comingFrom: "startingPoint",
+          destinationName: "startPointNorthPath",
+          collision: {
+            x: 0,
+            y: 0,
+          },
+        },
       ],
       zoomEnabled,
     },
     smallTown: {
-      validTeleportTiles: ["0", "1"],
+      validTeleportTiles: ["0"],
       mapName: "smallTown",
       teleportData: [
         {
           initial: "0",
           meta: {
-            destination: "0",
-            destinationOffset: { x: 0, y: -1 },
+            destination: "2",
+            destinationOffset: { x: -1, y: 0 },
           },
           comingFrom: "smallTown",
-          destinationName: "startingPoint",
+          destinationName: "startPointNorthPath",
           collision: {
             x: 0,
             y: 0,
           },
         },
-        {
-          initial: "1",
-          meta: {
-            destination: "1",
-            destinationOffset: { x: 0, y: -1 },
-          },
-          comingFrom: "smallTown",
-          destinationName: "startingPoint",
-          collision: {
-            x: 0,
-            y: 0,
-          },
-        },
+        // {
+        //   initial: "1",
+        //   meta: {
+        //     destination: "1",
+        //     destinationOffset: { x: 0, y: -1 },
+        //   },
+        //   comingFrom: "smallTown",
+        //   destinationName: "startingPoint",
+        //   collision: {
+        //     x: 0,
+        //     y: 0,
+        //   },
+        // },
       ],
       zoomEnabled,
     },
@@ -146,6 +163,52 @@ function createMapAndEntityMetaData({
           },
           comingFrom: "startingPointBasement",
           destinationName: "startingPoint",
+          collision: {
+            x: 0,
+            y: 0,
+          },
+        },
+      ],
+      zoomEnabled,
+    },
+    startPointNorthPath: {
+      validTeleportTiles: ["0", "1", "2"],
+      mapName: "startPointNorthPath",
+      teleportData: [
+        {
+          initial: "0",
+          meta: {
+            destination: "0",
+            destinationOffset: { x: 0, y: -1 },
+          },
+          comingFrom: "startPointNorthPath",
+          destinationName: "startingPoint",
+          collision: {
+            x: 0,
+            y: 0,
+          },
+        },
+        {
+          initial: "1",
+          meta: {
+            destination: "1",
+            destinationOffset: { x: 0, y: -1 },
+          },
+          comingFrom: "startPointNorthPath",
+          destinationName: "startingPoint",
+          collision: {
+            x: 0,
+            y: 0,
+          },
+        },
+        {
+          initial: "2",
+          meta: {
+            destination: "0",
+            destinationOffset: { x: 0, y: 1 },
+          },
+          comingFrom: "smallTown",
+          destinationName: "smallTown",
           collision: {
             x: 0,
             y: 0,
