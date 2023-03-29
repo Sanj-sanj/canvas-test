@@ -135,19 +135,6 @@ function createMapAndEntityMetaData({
             y: 0,
           },
         },
-        // {
-        //   initial: "1",
-        //   meta: {
-        //     destination: "1",
-        //     destinationOffset: { x: 0, y: -1 },
-        //   },
-        //   comingFrom: "smallTown",
-        //   destinationName: "startingPoint",
-        //   collision: {
-        //     x: 0,
-        //     y: 0,
-        //   },
-        // },
       ],
       zoomEnabled,
     },
