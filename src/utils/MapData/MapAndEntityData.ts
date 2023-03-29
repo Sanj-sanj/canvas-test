@@ -207,7 +207,7 @@ function createMapAndEntityMetaData({
             destination: "0",
             destinationOffset: { x: 0, y: 1 },
           },
-          comingFrom: "smallTown",
+          comingFrom: "startPointNorthPath",
           destinationName: "smallTown",
           collision: {
             x: 0,
