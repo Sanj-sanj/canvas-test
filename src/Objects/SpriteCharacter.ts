@@ -21,14 +21,15 @@ export type CharacterTypeSprite = {
 };
 
 function SpriteCharacter(
-  { source, ctx, stats, modifiers }: CharacterSpriteParams,
+  { source, stats, modifiers, initialFacingDirection }: CharacterSpriteParams,
+  ctx: CanvasRenderingContext2D,
   collisions: CollisionState
 ): CharacterTypeSprite {
   let idTimeout: number | null = null;
   let ticks = 1;
   let direction: MovementKey = "down";
   let truePosition = { x: 0, y: 0 };
-  let spriteCorrelatedToDirection = source.img.down;
+  let spriteCorrelatedToDirection = source.img[initialFacingDirection];
 
   function draw(relativePosition: Vector, isMoving: boolean) {
     // relativePdosition exists to handle respositioning player sprite on Zoom action.

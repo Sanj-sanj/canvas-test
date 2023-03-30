@@ -11,7 +11,7 @@ import {
   TeleportData,
   TeleportTileMarker,
 } from "../utils/MapData/MapAndEntityData";
-import SpriteCharacter, { CharacterTypeSprite } from "./SpriteCharacter";
+import SpriteCharacter from "./SpriteCharacter";
 import getMonster, {
   MonsterTileList,
   MonsterTiles,
@@ -21,15 +21,17 @@ function BuildGameEntities(
   ctx: CanvasRenderingContext2D,
   collisions: CollisionState,
   MapData: MapData,
-  playerData: Pick<CharacterSpriteParams, "modifiers" | "source" | "stats">,
+  playerData: Pick<
+    CharacterSpriteParams,
+    "modifiers" | "source" | "stats" | "initialFacingDirection"
+  >,
   newLevel?: TeleportData
 ) {
   const sprites = {
     entities: [] as EntityTypeSprite[],
-    player: {} as CharacterTypeSprite,
+    player: SpriteCharacter(playerData, ctx, collisions),
   };
 
-  sprites.player = SpriteCharacter({ ...playerData, ctx }, collisions);
   MapData.entityString
     .trim()
     .split("\n")
@@ -53,8 +55,8 @@ function BuildGameEntities(
             y: thispos.y - newLevel.meta.destinationOffset.y * 32,
           });
         }
-        // MONSTER ENTITY LOGIC
 
+        // MONSTER ENTITY LOGIC
         const isMonTile = (tile: EntityTile): tile is MonsterTiles =>
           MonsterTileList.includes(tile);
 

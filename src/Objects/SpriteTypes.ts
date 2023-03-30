@@ -6,10 +6,10 @@ import { TileCollisionTypes } from "../utils/MapData/MapDefinitions";
  */
 export type Sprite_Source = {
   img: {
-    right?: HTMLImageElement;
-    left?: HTMLImageElement;
+    right: HTMLImageElement;
+    left: HTMLImageElement;
     down: HTMLImageElement;
-    up?: HTMLImageElement;
+    up: HTMLImageElement;
   };
   width: number;
   height: number;
@@ -46,7 +46,7 @@ type CharacterSpriteParams = {
   stats: Stats;
   modifiers: Stat_Modifiers;
   source: Sprite_Source;
-  ctx: CanvasRenderingContext2D;
+  initialFacingDirection: MovementKey;
 };
 
 type EntitySpriteParams = {

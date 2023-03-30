@@ -17,6 +17,7 @@ import KeybindHandler from "../Handlers/Keybinds/KeybindHandler";
 import { LevelParams } from "./LevelBuilder";
 import BuildLayer2Sprites from "../../Objects/BuildLayer2Sprites";
 import DialogueBox from "../../Objects/DialogueBox";
+import { PlayerParams } from "../../Objects/GameData/PlayerData";
 
 const playerPicR = new Image();
 const playerPicL = new Image();
@@ -69,32 +70,7 @@ function State(
     Collisions,
     mapData,
     {
-      stats: {
-        health: 100,
-        strength: 25,
-        dexterity: 10,
-        durability: 12,
-        magic: 26,
-        speed: 4,
-      },
-      modifiers: {
-        attack: {
-          primary: {
-            width: 32,
-            height: 32,
-            damage: 25,
-          },
-          secondary: {
-            width: 16,
-            height: 16,
-            damage: 10,
-          },
-        },
-        defense: {
-          magic_durability: 20,
-          physical_durability: 20,
-        },
-      },
+      ...PlayerParams,
       source: {
         frames: { min: 0, max: 3 },
         height: 48,

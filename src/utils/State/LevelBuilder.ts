@@ -8,6 +8,7 @@ import spriteSheet from "../../Assets/sprites.png";
 
 import State from "./State";
 import { MapNames, TeleportData } from "../MapData/MapAndEntityData";
+import { CharacterTypeSprite } from "../../Objects/SpriteCharacter";
 
 const canvas = document.querySelector("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -19,7 +20,11 @@ export type LevelParams = {
   zoomEnabled: boolean;
 };
 
-function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
+function LevelBuilder(
+  level: LevelParams,
+  newLevel?: TeleportData,
+  CurrentPlayer?: CharacterTypeSprite
+) {
   const levelData = level;
   const {
     Camera,
@@ -30,7 +35,8 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
     Entities,
     Dialogue,
   } = State(canvas, ctx, animate, levelData, newLevel);
-  const Player = Entities.player;
+
+  const Player = CurrentPlayer ? CurrentPlayer : Entities.player;
   const { cameraState, updateRenderingProjectiles } = Camera;
 
   Control.initControls();
@@ -54,7 +60,8 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
         mapName: level.destinationName,
         zoomEnabled: cameraState.zoomEnabled(),
       },
-      level
+      level,
+      Player
     );
     Control.unbindControls();
     newlvl.animate();
@@ -181,6 +188,7 @@ function LevelBuilder(level: LevelParams, newLevel?: TeleportData) {
 
     if (Control.checkIfPlayerMoving()) {
       Control.keypressEventEmitter(tempPCoords, 6);
+      // updatePlayerInitalDirection(Control.getMovingDirection());
       Player.changeDirection(Control.getMovingDirection());
       const nextLevel = Collisions.checkForCollisionTeleport(
         Player.getRect(),
